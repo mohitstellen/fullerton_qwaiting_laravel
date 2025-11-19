@@ -58,8 +58,12 @@ jobs:
         script: |
           cd /home/fullertonthevist/public_html
 
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:clear
-          php artisan view:cache
+          # Git setup
+          git config --global user.email "mohitstelleninfotech@gmail.com"
+          git config --global user.name "mohitstellen"
+          git config pull.rebase false
+
+          git pull origin main
+
+          php artisan optimise:clear
       
