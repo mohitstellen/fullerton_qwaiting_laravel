@@ -40,6 +40,13 @@ jobs:
     - name: 📦 Install Dependencies
       run: composer install --prefer-dist --no-progress
 
+
+    - name: 🔍 Check SSH Secrets (Safe)
+      run: |
+        if [ -z "${{ secrets.SSH_HOST }}" ]; then echo "SSH_HOST is EMPTY"; else echo "SSH_HOST is SET"; fi
+        if [ -z "${{ secrets.SSH_USER }}" ]; then echo "SSH_USER is EMPTY"; else echo "SSH_USER is SET"; fi
+        if [ -z "${{ secrets.SSH_PASSWORD }}" ]; then echo "SSH_PASSWORD is EMPTY"; else echo "SSH_PASSWORD is SET"; fi
+        if [ -z "${{ secrets.SSH_PORT }}" ]; then echo "SSH_PORT is EMPTY"; else echo "SSH_PORT is SET"; fi
     - name: 🚀 Deploy via SSH
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: appleboy/ssh-action@v0.1.10
