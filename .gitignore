@@ -45,5 +45,4 @@ yarn-error.log
 Homestead.json
 Homestead.yaml
 .phpactor.json
-/config/tenancy.php
 .env
