@@ -1,0 +1,76 @@
+name: Deploy Laravel via SSH
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🧾 Checkout code
+      uses: actions/checkout@v3
+
+    - name: ⚙️ Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, bcmath, mysql
+        tools: composer
+
+    - name: 📦 Cache Composer packages
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-composer-
+
+    - name: 🛠️ Prepare Laravel storage paths
+      run: |
+        mkdir -p storage/framework/views
+        mkdir -p storage/framework/cache
+        mkdir -p storage/logs
+
+    - name: 📦 Install Dependencies
+      run: composer install --prefer-dist --no-progress
+
+    - name: 🚀 Deploy via SSH
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        port: ${{ secrets.FTP_PORT }}
+        script: |
+         
+
+          # Git setup
+          git config --global user.email ""
+          git config --global user.name ""
+          git config pull.rebase false
+          rm -f bootstrap/cache/packages.php bootstrap/cache/services.php
+
+          git pull origin main
+
+          # Ensure storage paths exist
+          mkdir -p storage/framework/views
+          mkdir -p storage/framework/cache
+          mkdir -p storage/logs
+
+          # Laravel deployment
+          composer install --no-dev --optimize-autoloader
+          php artisan down
+          php artisan migrate --force
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:clear
+          php artisan view:cache
+          php artisan storage:link
+          php artisan up
