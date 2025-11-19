@@ -655,6 +655,7 @@ $langArr = [
         "Edit Role" => "Edit Role",
         "No records found." => "No records found.",
         "Add Service" => "Add Service",
+        "Add Appointment" => "Add Appointment",
         "Edit Service" => "Edit Service",
         "service Name (Other Language)" => "Service Name (Other Language)",
         "Sort" => "Sort",
