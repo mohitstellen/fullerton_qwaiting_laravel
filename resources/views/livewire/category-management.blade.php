@@ -45,7 +45,7 @@
         @can('Service Add')
         <div>
             <a href="{{ route('tenant.category.create',['level'=>$tab]) }}"
-                 class="primary-btn py-2 px-3 font-medium text-white transition-colors rounded-md bg-brand-500 hover:bg-brand-600 flex gap-x-2"><i class="ri-add-circle-line"></i>  {{__('text.Add Appointment')}}</a>
+                 class="primary-btn py-2 px-3 font-medium text-white transition-colors rounded-md bg-brand-500 hover:bg-brand-600 flex gap-x-2"><i class="ri-add-circle-line"></i>  {{__('text.Add Appointment Type')}}</a>
 
         </div>
         @endcan
