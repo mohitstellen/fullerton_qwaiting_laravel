@@ -33,7 +33,7 @@
                         <a href="javascript:void(0)"
                             :class="activeTab === 'users' ? 'inline-block px-4 py-2 text-white bg-blue-600 rounded-lg active-tab active' : 'inline-block px-4 py-2 rounded-lg hover:text-gray-600 hover:bg-gray-100 bg-white tex-blue-600 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'"
 
-                            @click="activeTab = 'users'">text{{ __('text.Active Users') }}</a>
+                            @click="activeTab = 'users'">{{ __('text.Active Users') }}</a>
                     </li>
                     @endif
                 </ul>
