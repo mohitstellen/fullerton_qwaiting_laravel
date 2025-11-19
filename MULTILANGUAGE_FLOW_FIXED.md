@@ -127,3 +127,5 @@ The bot will:
 - OpenAI translation only called when needed
 - Language detection cached in conversation context
 - Minimal additional API calls
+
+test

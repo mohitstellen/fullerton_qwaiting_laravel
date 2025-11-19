@@ -1,0 +1,63 @@
+name: Deploy to cPanel via SSH
+
+on:
+  push:
+    branches: [ main ]          # change if you want another branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare exclusions
+        run: |
+          cat > .deployignore <<'EOF'
+          .git
+          node_modules
+          vendor
+          tests
+          .github
+          .env
+          EOF
+
+      - name: Copy files to server (SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "."
+          target: ${{ secrets.REMOTE_PATH }}
+          strip_components: 1
+          exclude_args: |
+            --exclude-from=.deployignore
+
+      - name: Run remote deploy commands (composer, artisan, perms)
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            cd ${{ secrets.REMOTE_PATH }}
+
+            # ensure php/composer are available
+            composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+            php artisan key:generate --force || true
+            php artisan migrate --force || true
+            php artisan config:cache || true
+            php artisan route:cache || true
+
+            # permissions
+            chown -R ${{ secrets.SSH_USER }}: ${{ secrets.REMOTE_PATH }}/storage
+            chown -R ${{ secrets.SSH_USER }}: ${{ secrets.REMOTE_PATH }}/bootstrap/cache
+            chmod -R 775 ${{ secrets.REMOTE_PATH }}/storage
+            chmod -R 775 ${{ secrets.REMOTE_PATH }}/bootstrap/cache
