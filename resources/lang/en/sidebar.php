@@ -11,6 +11,7 @@ $langArr = [
   "Generate Ticket" => "Generate Ticket",
   "Display Screen" => " Display Screen",
   "Public Links" => "Public Links",
+  "Companies" => "Companies",
   "Booking Management" => "Booking Management",
   "Online Booking" => "Online Booking",
   "Booking List" => "Booking List",
@@ -56,6 +57,7 @@ $langArr = [
   "Automation" => "Automation",
   "analytics" => "Analytics",
    "Allowed Country" => "Allowed Country",
+   "Appointment Type" => "Appointment Type",
 ];
 
 $result = array_map(function ($value) {

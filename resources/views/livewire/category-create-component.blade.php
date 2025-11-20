@@ -1,7 +1,7 @@
 <div class="p-4">
 
 <h2 class="text-xl font-semibold dark:text-white/90 mb-4">
-            {{ $isEdit ? __('text.Edit Service') : __('text.Add Service') }}
+            {{ $isEdit ? __('text.Edit Appointment Type') : __('text.Add Appointment Type') }}
 </h2>
     <div class="p-4 md:p-5 rounded-lg shadow border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="border-gray-100 dark:border-gray-800">
@@ -399,37 +399,58 @@
             @endif
             </div>
 
-            <div class="w-full px-2.5 xl:w-1/2">
-                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                    {{ __('text.Color') }}
-                </label>
+        <div class="w-full px-2.5 xl:w-1/2">
+            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                {{ __('text.Color') }}
+            </label>
+            <div class="flex items-center gap-3">
                 <input type="color" wire:model="service_color"
-                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-1 py-1 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                @error('service_color')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
+                    class="h-9 w-16 rounded border border-gray-300 bg-transparent dark:border-gray-700 dark:bg-gray-900" />
+                <input type="text" wire:model="service_color"
+                    class="dark:bg-dark-900 h-9 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                    placeholder="#000000" />
             </div>
+            @error('service_color')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
 
-            <div class="w-full px-2.5 xl:w-1/2">
+        <div class="w-full px-2.5 xl:w-1/2">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">
                 {{ __('text.Label Background Color') }}
             </label>
-            <input
-                type="color"
-                wire:model="label_background_color"
-                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-1 py-1 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-            />
+            <div class="mt-1 flex items-center gap-3">
+                <input
+                    type="color"
+                    wire:model="label_background_color"
+                    class="h-9 w-16 rounded border border-gray-300 bg-transparent dark:border-gray-700 dark:bg-gray-900"
+                />
+                <input
+                    type="text"
+                    wire:model="label_background_color"
+                    class="dark:bg-dark-900 h-9 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                    placeholder="#000000"
+                />
+            </div>
         </div>
 
         <div class="w-full px-2.5 xl:w-1/2">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">
                  {{ __('text.Label Font Color') }}
             </label>
-            <input
-                type="color"
-                wire:model="label_font_color"
-                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-1 py-1 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-            />
+            <div class="mt-1 flex items-center gap-3">
+                <input
+                    type="color"
+                    wire:model="label_font_color"
+                    class="h-9 w-16 rounded border border-gray-300 bg-transparent dark:border-gray-700 dark:bg-gray-900"
+                />
+                <input
+                    type="text"
+                    wire:model="label_font_color"
+                    class="dark:bg-dark-900 h-9 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                    placeholder="#FFFFFF"
+                />
+            </div>
         </div>
 
         <div class="w-full px-2.5 xl:w-1/2">
@@ -450,11 +471,19 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">
                 {{ __('text.Background Color') }}
             </label>
-            <input
-                type="color"
-                wire:model="bg_color"
-                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-1 py-1 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-            />
+            <div class="mt-1 flex items-center gap-3">
+                <input
+                    type="color"
+                    wire:model="bg_color"
+                    class="h-9 w-16 rounded border border-gray-300 bg-transparent dark:border-gray-700 dark:bg-gray-900"
+                />
+                <input
+                    type="text"
+                    wire:model="bg_color"
+                    class="dark:bg-dark-900 h-9 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                    placeholder="#4F46E5"
+                />
+            </div>
         </div>
 
 

@@ -164,6 +164,9 @@ use App\Livewire\PublicLocationSelection;
 
 use App\Livewire\TicketGenerationSelection;
 use App\Livewire\VirtualQueueTypeSelection;
+use App\Livewire\Company\CompanyList;
+use App\Livewire\Company\AddCompany;
+use App\Livewire\Company\EditCompany;
 use App\Livewire\AIAgentCall;
 use App\Livewire\HumanAgentWaiting;
 use App\Livewire\VirtualQueueSettings;
@@ -333,6 +336,11 @@ Route::middleware([
         Route::get('/payment-settings', PaymentSettings::class)->name('payment-settings');
         Route::get('/notification-settings', NotificationSetting::class)->name('notification-settings');
         Route::get('/integrations', Integrations::class)->name('integrations');
+
+        // companies module
+        Route::get('/companies', CompanyList::class)->name('companies.index');
+        Route::get('/companies/create', AddCompany::class)->name('companies.create');
+        Route::get('/companies/{companyRecord}/edit', EditCompany::class)->name('companies.edit');
 
         Route::get('/break-reason', BreakReason::class)->name('break-reason');
         Route::get('/break-reasons/create', BreakReasonForm::class)->name('break-reasons.create');

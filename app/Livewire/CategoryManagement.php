@@ -21,7 +21,7 @@ use Illuminate\Http\Request;
 class CategoryManagement extends Component
 {
     use WithPagination;
-    #[Title('Service List')]
+    #[Title('Appointment Types')]
 
     public $locationId, $teamId, $tab = '1';
     // public $categories = [];

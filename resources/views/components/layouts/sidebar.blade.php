@@ -138,7 +138,7 @@
                             </svg>
 
                             <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                                {{ __('sidebar.Services') }}
+                                {{ __('sidebar.Appointment Type') }}
                             </span>
                         </a>
 
@@ -168,6 +168,24 @@
 
                     </li>
                     @endcan
+
+                    <li>
+                        <a data-tooltip="Companies" href="{{ route('tenant.companies.index') }}" class="menu-item group"
+                            :class=" (selected === 'Companies') || (page === 'companies') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
+                            <svg :class="(selected === 'Companies') || (page === 'companies') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                                width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" class="menu-item-icon-inactive">
+                                <path
+                                    fill-rule="evenodd"
+                                    clip-rule="evenodd"
+                                    d="M5.25 4C4.00736 4 3 5.00736 3 6.25V17.75C3 18.9926 4.00736 20 5.25 20H10.5V18.5H5.25C4.83579 18.5 4.5 18.1642 4.5 17.75V6.25C4.5 5.83579 4.83579 5.5 5.25 5.5H11.25C11.6642 5.5 12 5.83579 12 6.25V8H18.75C19.1642 8 19.5 8.33579 19.5 8.75V10H21V8.75C21 7.50736 19.9926 6.5 18.75 6.5H13.5V6.25C13.5 5.00736 12.4926 4 11.25 4H5.25ZM15 11.25C13.7574 11.25 12.75 12.2574 12.75 13.5V18.75C12.75 19.9926 13.7574 21 15 21H18.75C19.9926 21 21 19.9926 21 18.75V13.5C21 12.2574 19.9926 11.25 18.75 11.25H15ZM14.25 13.5C14.25 13.0858 14.5858 12.75 15 12.75H18.75C19.1642 12.75 19.5 13.0858 19.5 13.5V18.75C19.5 19.1642 19.1642 19.5 18.75 19.5H15C14.5858 19.5 14.25 19.1642 14.25 18.75V13.5Z"
+                                    fill="" />
+                            </svg>
+                            <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                {{ __('sidebar.Companies') }}
+                            </span>
+                        </a>
+                    </li>
 
                     {{-- <li>
                         <a data-tooltip="break-reason" href="{{ route('tenant.break-reason') }}" class="menu-item group"

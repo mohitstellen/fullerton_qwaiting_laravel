@@ -18,7 +18,7 @@ class CategoryCreateComponent extends Component
 
     use WithFileUploads;
 
-    #[Title('Service Create')]
+    #[Title('Appointment Type')]
 
     public $locationId, $teamId, $tab = '1';
     public $name,$other_name,$acronym,$visitor_in_queue,$locations,$img,$sort,$amount,$is_paid;

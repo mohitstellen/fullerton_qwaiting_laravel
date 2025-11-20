@@ -938,9 +938,9 @@ $langArr = [
         "Enable Active Users List" => "Enable Active Users List",
         "Active Users" => "Active Users",
         "Home" => "Home",
-
-
-
+        "Appointment Types" => "Appointment Types",
+        "Edit Appointment Type" => "Edit Appointment Type",
+        "Add Appointment Type" => "Add Appointment Type",
 ];
 
 

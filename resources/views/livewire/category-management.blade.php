@@ -1,3 +1,4 @@
+
 <div class="p-4">
     <div class="flex pb-3 gap-3 border-gray-500">
         <ul class="flex text-sm font-semibold text-center text-gray-500 tabs-nav">
@@ -20,7 +21,7 @@
     <div class="mb-4 flex justify-between mb-4">
         <div>
             <h2 class="text-xl font-semibold dark:text-white/90">
-                {{__('text.services')}}
+                {{__('text.Appointment Types')}}
             </h2>
         </div>
 
