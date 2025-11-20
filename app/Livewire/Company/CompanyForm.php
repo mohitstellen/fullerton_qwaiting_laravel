@@ -10,6 +10,7 @@ class CompanyForm extends Component
 {
     public function render()
     {
+        //test
         return view('livewire.company-form');
     }
 }
