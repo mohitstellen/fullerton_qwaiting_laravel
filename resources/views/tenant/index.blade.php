@@ -1874,7 +1874,7 @@
         <form>
           <div class="relative">
             <span
-              class="absolute -translate-y-1/2 pointer-events-none left-4 top-1/2"
+              class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/4"
             >
               <svg
                 class="fill-gray-500 dark:fill-gray-400"
@@ -3615,7 +3615,7 @@
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
       <form action="https://formbold.com/s/unique_form_id" method="POST">
         <div class="relative">
-          <button class="absolute -translate-y-1/2 left-4 top-1/2">
+          <button class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/4">
             <svg
               class="fill-gray-500 dark:fill-gray-400"
               width="20"

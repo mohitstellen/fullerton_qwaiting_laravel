@@ -8,7 +8,7 @@
     <div class="mb-4 flex gap-3 justify-between ">
 
             <div  class="relative w-full lg:w-[300px]">
-                <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2">
+                <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/4">
                     <svg class="fill-gray-500 dark:fill-gray-400" width="20" height="20" viewBox="0 0 20 20" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd"

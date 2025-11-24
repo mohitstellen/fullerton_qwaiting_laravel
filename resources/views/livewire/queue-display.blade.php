@@ -210,9 +210,9 @@ foreach($videoTemplates as $videoTemplate)
 
     </div>
     @push('scripts')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js" ></script>
+    <script src="{{ asset('js/cdn/owl.carousel.min.js') }}"></script>
     <script src="{{ asset('/js/display.js?v='.time()) }}"></script>
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=Gc5DXRcK"></script>
+    <script src="{{ asset('/js/cdn/responsivevoice.js?key=Gc5DXRcK') }}"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
 
         <script>

@@ -2231,8 +2231,8 @@
 
 </div>
 <audio id="audio" preload="none">
-    <source src="voice/Ding-noise/Ding-noise.mp3" type="audio/mpeg" />
-    <source src="voice/Ding-noise/Ding-noise.ogv" type="audio/ogg" />
+    <source src=" {{ asset('voice/Ding-noise/Ding-noise.mp3') }}" type="audio/mpeg" />
+    <source src=" {{ asset('voice/Ding-noise/Ding-noise.ogv') }}" type="audio/ogg" />
 </audio>
 
 </div>

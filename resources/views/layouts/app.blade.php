@@ -9,7 +9,8 @@
     <title>{{ $title ?? 'Qwaiting'}}</title>
     <link rel="icon" href="{{ url('images/favicon.ico') }}" />
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <script src="{{ asset('js/cdn/tailwind3.js') }}"></script>
+
+    <script src="{{ asset('js/cdn/tailwind4.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/custom.css?v='.time()) }}">
     <link rel="stylesheet" href="{{ asset('css/login.css?v='.time()) }}">
     <link rel="stylesheet" href="{{ asset('css/style-safari.css?v='.time()) }}">
