@@ -12,7 +12,8 @@
     <title>{{ $title ?? 'Qwaiting'}}</title>
 
     <link rel="icon" href="{{ url('images/favicon.ico') }}" />
-     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ asset('js/cdn/tailwind3.js') }}"></script>
+    <script src="{{ asset('js/cdn/tailwind4.js') }}"></script>
 
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 

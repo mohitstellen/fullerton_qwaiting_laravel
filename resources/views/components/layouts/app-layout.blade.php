@@ -12,10 +12,9 @@
 
     <title>{{ $title ?? 'Call Screen'}}</title>
 
-    {{-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> --}}
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <script src="{{ asset('js/cdn/tailwind.js') }}"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ asset('js/cdn/tailwind3.js') }}"></script>
+    <script src="{{ asset('js/cdn/tailwind4.js') }}"></script>
 
     @if(session('app_locale') === 'ar')
         <link rel="stylesheet" href="{{ asset('css/style-rtl.css?v='.time()) }}">

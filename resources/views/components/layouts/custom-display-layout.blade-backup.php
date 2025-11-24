@@ -10,7 +10,9 @@
     <title>{{ $title ?? 'Qwaiting'}}</title>
 
     <link rel="icon" href="{{ url('images/favicon.ico') }}" />
-     <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="{{ asset('js/cdn/tailwind3.js') }}"></script>
+    <script src="{{ asset('js/cdn/tailwind4.js') }}"></script>
 
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 
@@ -20,11 +22,11 @@
 
     <link rel="stylesheet" href="{{ asset('css/queue.css') }}">
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/cdn/sweetalert2.min.js') }}"></script>
 
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.3.2/main.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/cdn/flatpickr.min.css') }}">
+    <link href="{{ asset('css/cdn/fullcalendar.min.css') }}" rel="stylesheet">
 
 
     @stack('styles')

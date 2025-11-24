@@ -8,10 +8,8 @@
 
     <title>{{ $title ?? 'Qwaiting'}}</title>
     <link rel="icon" href="{{ url('images/favicon.ico') }}" />
-    <!-- <script src="https://cdn.tailwindcss.com"></script>  -->
-    
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="{{ asset('js/cdn/tailwind3.js') }}"></script>
     <link rel="stylesheet" href="{{ asset('css/custom.css?v='.time()) }}">
     <link rel="stylesheet" href="{{ asset('css/login.css?v='.time()) }}">
     <link rel="stylesheet" href="{{ asset('css/style-safari.css?v='.time()) }}">

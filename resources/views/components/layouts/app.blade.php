@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-{{-- <html lang="en"> --}}
 <html lang="{{ session('app_locale', app()->getLocale()) }}"
-      dir="{{ session('app_locale') === 'ar' ? 'rtl' : 'ltr' }}">
+    dir="{{ session('app_locale') === 'ar' ? 'rtl' : 'ltr' }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,32 +9,30 @@
 
     <title>{{ $title ?? 'Qwaiting'}}</title>
     <link rel="icon" href="{{ url('images/favicon.ico') }}" />
-     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="{{ asset('js/cdn/tailwind3.js') }}"></script>
+    <script src="{{ asset('js/cdn/tailwind4.js') }}"></script>
 
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="{{ asset('css/cdn/select2.min.css') }}" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
     <link rel="stylesheet" href="{{ asset('css/custom.css?v='.time()) }}">
     <link rel="stylesheet" href="{{ asset('css/style-safari.css?v='.time()) }}">
+
     @if(session('app_locale') === 'ar')
-            <link rel="stylesheet" href="{{ asset('css/style-rtl.css?v='.time()) }}">
-        @endif
+    <link rel="stylesheet" href="{{ asset('css/style-rtl.css?v='.time()) }}">
+    @endif
 
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+    <link rel="stylesheet" href="{{ asset('css/cdn/all.min.css') }}"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    {{-- <script src="{{ url('js/desktop.js') }}"></script> --}}
-
+    <script src="{{ asset('js/cdn/chart.js') }}"></script>
+    <script src="{{ asset('js/cdn/sweetalert2.min.js') }}"></script>
 
     @stack('styles')
     @livewireStyles
 
     <style>
-   html.light {
+    html.light {
         --primary-color: {{ $theme->theme_color ?? '#4CAF50' }};
         --button-color: {{ $theme->button_color ?? '#007bff' }};
         --font-color: {{ $theme->font_color ?? '#000' }};
@@ -51,7 +49,7 @@
     html.light select option,
     html.light label,
     html.light .text-gray-500,
-    body.light div{
+    body.light div {
         color: var(--font-color);
     }
 
@@ -65,26 +63,26 @@
     html.light .bg-brand-500:hover {
         background-color: color-mix(in srgb, var(--button-color) 90%, black 10%);
     }
-
 </style>
-<script>
-    // Set theme immediately to avoid "flash" of wrong mode
-    (function() {
-      const stored = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (stored === 'dark' || (!stored && prefersDark)) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    })();
-  </script>
-  <script>
-    // Configure Tailwind to use 'class' mode only (no prefers-color-scheme)
-    tailwind.config = {
-      darkMode: 'class',
-    }
-  </script>
+
+    <script>
+        // Set theme immediately to avoid "flash" of wrong mode
+        (function() {
+            const stored = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (stored === 'dark' || (!stored && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
+    <script>
+        // Configure Tailwind to use 'class' mode only (no prefers-color-scheme)
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
 </head>
 
 <body
@@ -92,7 +90,7 @@
     x-init="
          darkMode = JSON.parse(localStorage.getItem('darkMode'));
          $watch('darkMode', value => localStorage.setItem('darkMode', JSON.stringify(value)))"
-    :class="{'dark:bg-gray-900 dark:text-gray-200': darkMode === false}" >
+    :class="{'dark:bg-gray-900 dark:text-gray-200': darkMode === false}">
     <!-- ===== Preloader Start ===== -->
     <div x-show="loaded"
         x-init="window.addEventListener('DOMContentLoaded', () => {setTimeout(() => loaded = false, 500)})"
@@ -136,27 +134,21 @@
     </div>
 
     @livewireScripts
-    <script src="https://cdn.jsdelivr.net/gh/livewire/sortable@v1.x.x/dist/livewire-sortable.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/cdn/livewire-sortable.js') }}"></script>
+    <script src="{{ asset('js/cdn/jquery.min.js') }}"></script>
+    <script src="{{ asset('js/cdn/select2.min.js') }}"></script>
+    <script src="{{ asset('js/cdn/sweetalert2.min.js') }}"></script>
     <script src="{{ asset('/js/livewire.js?v='.time()) }}" type="module"></script>
     <script src="{{asset('/js/app/desktop-notification.js?v='.time())}}"></script>
     <script src="{{asset('/js/app/waiting-notification.js?v='.time())}}"></script>
-    <!-- <script>
-        // Automatically apply dark mode if system prefers it
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark');
-        }
-    </script> -->
-    <script>
 
-    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark')
-    }
-</script>
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
     <script>
         //password toggle method
         function togglePassword(inputId, eyeOpenId, eyeClosedId) {
@@ -318,64 +310,64 @@
     </script>
 
     <script>
-       const htmlEl = document.documentElement;
-    const bodyEl = document.body;
-    const themeToggleBtn = document.getElementById('theme-toggle');
+        const htmlEl = document.documentElement;
+        const bodyEl = document.body;
+        const themeToggleBtn = document.getElementById('theme-toggle');
 
-    // Function to apply theme on both html and body
-    function applyTheme(theme) {
-        if (theme === 'dark') {
-            htmlEl.classList.add('dark');
-            htmlEl.classList.remove('light');
-            bodyEl.classList.add('dark');
-            bodyEl.classList.remove('light');
-        } else {
-            htmlEl.classList.add('light');
-            htmlEl.classList.remove('dark');
-            bodyEl.classList.add('light');
-            bodyEl.classList.remove('dark');
+        // Function to apply theme on both html and body
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                htmlEl.classList.add('dark');
+                htmlEl.classList.remove('light');
+                bodyEl.classList.add('dark');
+                bodyEl.classList.remove('light');
+            } else {
+                htmlEl.classList.add('light');
+                htmlEl.classList.remove('dark');
+                bodyEl.classList.add('light');
+                bodyEl.classList.remove('dark');
+            }
         }
-    }
 
-    // Load theme from localStorage or default to light
-    let savedTheme = localStorage.getItem('theme') || 'light';
-    applyTheme(savedTheme);
-
-    // Toggle theme on button click
-    themeToggleBtn.addEventListener('click', () => {
-        savedTheme = (savedTheme === 'light') ? 'dark' : 'light';
-        localStorage.setItem('theme', savedTheme);
+        // Load theme from localStorage or default to light
+        let savedTheme = localStorage.getItem('theme') || 'light';
         applyTheme(savedTheme);
-    });
-</script>
 
-<script>
-    const themeToggleBtns = document.getElementById('theme-toggle');
-    const darkIcon = document.getElementById('theme-toggle-dark-icon');
-    const lightIcon = document.getElementById('theme-toggle-light-icon');
+        // Toggle theme on button click
+        themeToggleBtn.addEventListener('click', () => {
+            savedTheme = (savedTheme === 'light') ? 'dark' : 'light';
+            localStorage.setItem('theme', savedTheme);
+            applyTheme(savedTheme);
+        });
+    </script>
 
-    // Initialize icons based on localStorage
-    if (localStorage.getItem('color-theme') === 'dark') {
-      document.documentElement.classList.add('dark');
-      lightIcon.classList.remove('hidden'); // show sun
-    } else {
-      document.documentElement.classList.remove('dark');
-      darkIcon.classList.remove('hidden'); // show moon
-      localStorage.setItem('color-theme', 'light'); // default
-    }
+    <script>
+        const themeToggleBtns = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
 
-    themeToggleBtns.addEventListener('click', () => {
-      document.documentElement.classList.toggle('dark');
-      darkIcon.classList.toggle('hidden');
-      lightIcon.classList.toggle('hidden');
+        // Initialize icons based on localStorage
+        if (localStorage.getItem('color-theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+            lightIcon.classList.remove('hidden'); // show sun
+        } else {
+            document.documentElement.classList.remove('dark');
+            darkIcon.classList.remove('hidden'); // show moon
+            localStorage.setItem('color-theme', 'light'); // default
+        }
 
-      if (document.documentElement.classList.contains('dark')) {
-        localStorage.setItem('color-theme', 'dark');
-      } else {
-        localStorage.setItem('color-theme', 'light');
-      }
-    });
-  </script>
+        themeToggleBtns.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            darkIcon.classList.toggle('hidden');
+            lightIcon.classList.toggle('hidden');
+
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                localStorage.setItem('color-theme', 'light');
+            }
+        });
+    </script>
 
     @stack('scripts')
 </body>

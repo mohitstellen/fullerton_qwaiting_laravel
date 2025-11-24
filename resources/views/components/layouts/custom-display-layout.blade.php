@@ -11,7 +11,8 @@
 
     <link rel="icon" href="{{ url('images/favicon.ico') }}" />
 
-     <script src="{{ asset('js/cdn/tailwind.js') }}"></script>
+    <script src="{{ asset('js/cdn/tailwind3.js') }}"></script>
+    <script src="{{ asset('js/cdn/tailwind4.js') }}"></script>
 
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 

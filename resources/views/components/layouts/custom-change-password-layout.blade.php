@@ -11,8 +11,9 @@
     <title>{{ $title ?? 'Qwaiting'}}</title>
 
     <link rel="icon" href="{{ url('images/favicon.ico') }}" />
-    {{-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> --}}
-      <script src="{{ asset('js/cdn/tailwind.js') }}"></script>
+    <script src="{{ asset('js/cdn/tailwind3.js') }}"></script>
+    <script src="{{ asset('js/cdn/tailwind4.js') }}"></script>
+
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
       @if(session('app_locale') === 'ar')
         <link rel="stylesheet" href="{{ asset('css/style-rtl.css?v='.time()) }}">

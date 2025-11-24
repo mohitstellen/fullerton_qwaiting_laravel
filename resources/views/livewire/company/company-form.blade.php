@@ -5,7 +5,7 @@
                class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                wire:model.defer="company.company_name">
         @error('company.company_name')
-            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            <span class="text-red-500 text-sm">{{ $message }}</span>
         @enderror
     </div>
 
@@ -15,7 +15,7 @@
                   class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                   wire:model.defer="company.address"></textarea>
         @error('company.address')
-            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            <span class="text-red-500 text-sm">{{ $message }}</span>
         @enderror
     </div>
 
@@ -25,7 +25,7 @@
                   class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                   wire:model.defer="company.billing_address"></textarea>
         @error('company.billing_address')
-            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+            <span class="text-red-500 text-sm">{{ $message }}</span>
         @enderror
         <label class="mt-2 inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
             <input type="checkbox"
@@ -59,7 +59,7 @@
                    class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                    wire:model.defer="company.ehs_appointments_per_year">
             @error('company.ehs_appointments_per_year')
-                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                <span class="text-red-500 text-sm">{{ $message }}</span>
             @enderror
         </div>
     </div>
@@ -73,7 +73,7 @@
                        class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                        wire:model.defer="company.contact_person1_name">
                 @error('company.contact_person1_name')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </div>
             <div>
@@ -82,7 +82,7 @@
                        class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                        wire:model.defer="company.contact_person1_phone">
                 @error('company.contact_person1_phone')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </div>
             <div>
@@ -91,7 +91,7 @@
                        class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                        wire:model.defer="company.contact_person1_email">
                 @error('company.contact_person1_email')
-                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </div>
         </div>

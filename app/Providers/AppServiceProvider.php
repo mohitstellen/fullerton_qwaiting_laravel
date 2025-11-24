@@ -157,8 +157,10 @@ class AppServiceProvider extends ServiceProvider
         URL::forceScheme('https');
     }
 
-
-        ini_set('max_execution_time', 300);
+        // Only set max_execution_time for web requests, not CLI commands
+        if (!app()->runningInConsole()) {
+            ini_set('max_execution_time', 300);
+        }
         ini_set('memory_limit', '512M');
         ini_set('session.gc_maxlifetime', 14400);
 

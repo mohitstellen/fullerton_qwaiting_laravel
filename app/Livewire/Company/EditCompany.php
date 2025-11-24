@@ -58,6 +58,6 @@ class EditCompany extends Component
 
     public function render()
     {
-        return view('livewire.edit-company');
+        return view('livewire.company.edit-company');
     }
 }

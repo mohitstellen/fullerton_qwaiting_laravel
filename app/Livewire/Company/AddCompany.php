@@ -60,6 +60,6 @@ class AddCompany extends Component
 
     public function render()
     {
-        return view('livewire.add-company');
+        return view('livewire.company.add-company');
     }
 }

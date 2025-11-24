@@ -17,6 +17,6 @@ class CompanyList extends Component
     {
         $companies = Company::orderBy('company_name')->get();
 
-        return view('livewire.company-list', compact('companies'));
+        return view('livewire.company.company-list', compact('companies'));
     }
 }

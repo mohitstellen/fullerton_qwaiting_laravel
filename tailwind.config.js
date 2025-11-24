@@ -10,7 +10,6 @@ export default {
         "./public/***/*.css",
       ],
     theme: {
-      darkMode: false,
         fontFamily: {
             outfit: ["Outfit", "sans-serif"],
           },
