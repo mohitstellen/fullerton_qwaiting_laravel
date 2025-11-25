@@ -84,7 +84,7 @@
                                 @endif
                                 @if($tab > 1)
                                 <th class="px-5 py-3 sm:px-6">
-                                            {{__('text.appointment type')}}
+                                            {{ $tab == 2 ? __('text.appointment type') : __('text.parent') }}
                                 </th>
                                 @endif
                                 {{-- <th class="px-5 py-3 sm:px-6">

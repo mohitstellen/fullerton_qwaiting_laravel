@@ -657,6 +657,7 @@ $langArr = [
         "Add Service" => "Add Service",
         "Add Appointment Type" => "Add Appointment Type",
         "Packages" => "Packages",
+        "Edit Package" => "Edit Package",
         "Edit Service" => "Edit Service",
         "service Name (Other Language)" => "Service Name (Other Language)",
         "Sort" => "Sort",
@@ -954,7 +955,8 @@ $langArr = [
         "Yes" => "Yes",
         "No" => "No",
         "appointment type" => "Appointment Type",
-        "Available for Public Booking" => "Available for Public Booking"
+        "Available for Public Booking" => "Available for Public Booking",
+        "select" => "Select",
 
 ];
 

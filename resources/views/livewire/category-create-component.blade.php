@@ -1,7 +1,11 @@
 <div class="p-4">
 
     <h2 class="text-xl font-semibold dark:text-white/90 mb-4">
-        {{ $isEdit ? __('text.Edit Appointment Type') : __('text.Add Appointment Type') }}
+        @if($tab == 2)
+            {{ $isEdit ? __('text.Edit Package') : __('text.Add Package') }}
+        @else
+            {{ $isEdit ? __('text.Edit Appointment Type') : __('text.Add Appointment Type') }}
+        @endif
     </h2>
     <div class="p-4 md:p-5 rounded-lg shadow border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="border-gray-100 dark:border-gray-800">
@@ -13,7 +17,7 @@
                             @if($tab > 1 && !empty($parentCategory))
                             <div class="w-full px-2.5 xl:w-1/2">
                                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                    {{__('text.Parent Service')}}*
+                                    {{ $tab == 2 ? __('text.appointment type') : __('text.Parent Service') }}*
                                 </label>
                                 <div x-data="{ isOptionSelected: false }" class="relative z-20 bg-transparent">
                                     <select
@@ -21,7 +25,7 @@
                                         class="dark:bg-dark-900 z-20 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                                         :class="isOptionSelected && 'text-gray-500 dark:text-gray-400'"
                                         @change="isOptionSelected = true">
-                                        <option value="">{{__('text.select Service')}}</option>
+                                        <option value="">{{__('text.select')}}</option>
                                         @foreach($parentCategory as $category)
                                         <option value="{{ $category->id }}" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
                                             {{ $category->name ?? 'None'}}
