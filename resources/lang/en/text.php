@@ -656,6 +656,7 @@ $langArr = [
         "No records found." => "No records found.",
         "Add Service" => "Add Service",
         "Add Appointment Type" => "Add Appointment Type",
+        "Packages" => "Packages",
         "Edit Service" => "Edit Service",
         "service Name (Other Language)" => "Service Name (Other Language)",
         "Sort" => "Sort",
@@ -666,6 +667,12 @@ $langArr = [
         "Redirect Url" => "Redirect Url",
         "Enable/Disable Service Note." => "Enable/Disable Service Note.",
         "Service Time (in mins)" => "Service Time (in mins)",
+        "Lead Time" => "Lead Time",
+        "Lead Time Unit" => "Lead Time Unit",
+        "Minutes" => "Minutes",
+        "Hours" => "Hours",
+        "Days" => "Days",
+        "Enable eVoucher" => "Enable eVoucher",
         "Service Note" => "Service Note",
         "Parent Service" => "Parent Service",
         "Update" => "Update",
@@ -941,6 +948,14 @@ $langArr = [
         "Appointment Types" => "Appointment Types",
         "Edit Appointment Type" => "Edit Appointment Type",
         "Add Appointment Type" => "Add Appointment Type",
+        "Add Package" => "Add Package",
+        "first parent" => "First Parent",
+        "parent" => "Parent",
+        "Yes" => "Yes",
+        "No" => "No",
+        "appointment type" => "Appointment Type",
+        "Available for Public Booking" => "Available for Public Booking"
+
 ];
 
 

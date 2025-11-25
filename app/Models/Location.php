@@ -28,10 +28,13 @@ class Location extends Model
         'branch_image',
         'location_image',
         'status',
+        'map_link',
+        'available_for_public_booking',
     ];
 
     protected $casts = [
         'status' => 'boolean',
+        'available_for_public_booking' => 'boolean',
     ];
 
     // public function team()

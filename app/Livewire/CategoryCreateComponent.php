@@ -21,10 +21,10 @@ class CategoryCreateComponent extends Component
     #[Title('Appointment Type')]
 
     public $locationId, $teamId, $tab = '1';
-    public $name,$other_name,$acronym,$visitor_in_queue,$locations,$img,$sort,$amount,$is_paid;
-    public $display_on ="Display on Transfer & Ticket Screen";
+    public $name, $other_name, $acronym, $visitor_in_queue, $locations, $img, $sort, $amount, $is_paid;
+    public $display_on = "Display on Transfer & Ticket Screen";
     public $for_screen = "Display on Walk-In & Appointment Screen";
-    public $booking_category_show_for ="Backend & Online Appointment Screen";
+    public $booking_category_show_for = "Backend & Online Appointment Screen";
     public $isEdit = false;
     public $allLocations = [];
     public $category = [];
@@ -32,7 +32,7 @@ class CategoryCreateComponent extends Component
     public $paymentSet;
     public $parentCategory = [];
     public $redirectUrl;
-    public $isService =false;
+    public $isService = false;
     public $serviceTime;
     public $note;
     public $description;
@@ -43,15 +43,19 @@ class CategoryCreateComponent extends Component
     public $label_font_color;
     public $label_text;
     public $bg_color;
+    public $leadTimeValue;
+    public $leadTimeUnit = 'days';
+    public $enableEVoucher = '0';
 
-    public function mount($level = null,$categoryId = null){
+    public function mount($level = null, $categoryId = null)
+    {
 
         $user = Auth::user();
-        if (!$user->hasAnyPermission(['Service Add','Service Edit']) ) {
+        if (!$user->hasAnyPermission(['Service Add', 'Service Edit'])) {
             abort(403);
         }
 
-        if($level == null){
+        if ($level == null) {
             return redirect()->back();
         }
 
@@ -59,65 +63,64 @@ class CategoryCreateComponent extends Component
         $this->locationId = Session::get('selectedLocation');
 
         $levels =  Level::where('team_id', $this->teamId)
-        ->where('location_id', $this->locationId)
-        // ->where('level', $level)
-        ->get();
+            ->where('location_id', $this->locationId)
+            // ->where('level', $level)
+            ->get();
 
         $this->paymentSet = PaymentSetting::where('team_id', $this->teamId)
-        ->where('location_id', $this->locationId)
-        ->select('id','enable_payment','category_level')
-        ->first();
+            ->where('location_id', $this->locationId)
+            ->select('id', 'enable_payment', 'category_level')
+            ->first();
 
         //   if(empty($this->paymentSet)){
         //   return redirect('ticket-screen-settings');
         // }
 
-         $this->tab = $level;
+        $this->tab = $level;
         $this->visitor_in_queue = 1;
         $this->sort = 0;
+        $this->leadTimeValue = null;
+        $this->leadTimeUnit = 'days';
+        $this->enableEVoucher = '0';
 
         if ($categoryId) {
             $this->category = Category::findOrFail($categoryId);
             $this->isEdit = true;
             $this->loadCategoryData();
-
         }
 
-        if($level == 2)
-        {
+        if ($level == 2) {
 
-            $this->parentCategory = Category::where('team_id',$this->teamId)
-            ->whereJsonContains('category_locations',"$this->locationId")
-            ->where('level_id',1)
-            ->where(function ($query) {
-                $query->whereNull('parent_id')
-                      ->orWhere('parent_id', '');
-            })
-            ->select('id','name')
-            ->get();
-
-        }elseif($level == 3){
-            $this->parentCategory = Category::where('team_id',$this->teamId)
-            ->whereJsonContains('category_locations',"$this->locationId")
-            ->where('level_id',2)
-            ->whereNotNull('parent_id')
-            ->select('id','name')
-            ->get();
+            $this->parentCategory = Category::where('team_id', $this->teamId)
+                ->whereJsonContains('category_locations', "$this->locationId")
+                ->where('level_id', 1)
+                ->where(function ($query) {
+                    $query->whereNull('parent_id')
+                        ->orWhere('parent_id', '');
+                })
+                ->select('id', 'name')
+                ->get();
+        } elseif ($level == 3) {
+            $this->parentCategory = Category::where('team_id', $this->teamId)
+                ->whereJsonContains('category_locations', "$this->locationId")
+                ->where('level_id', 2)
+                ->whereNotNull('parent_id')
+                ->select('id', 'name')
+                ->get();
         }
 
-        if(Auth::user()->is_admin == 1){
+        if (Auth::user()->is_admin == 1) {
             $this->allLocations = Location::where('team_id', tenant('id'))
-            ->where('status',1)
-            ->select('location_name', 'id')
-            ->get();
-        }else{
+                ->where('status', 1)
+                ->select('location_name', 'id')
+                ->get();
+        } else {
             $this->allLocations = Location::where('team_id', tenant('id'))
-            ->where('id', Auth::user()?->locations)
-            ->where('status',1)
-            ->select('location_name', 'id')
-            ->get();
+                ->where('id', Auth::user()?->locations)
+                ->where('status', 1)
+                ->select('location_name', 'id')
+                ->get();
         }
-
     }
 
     private function loadCategoryData()
@@ -137,6 +140,9 @@ class CategoryCreateComponent extends Component
         $this->redirectUrl = $this->category->redirect_url ?? '';
         $this->isService = (bool)$this->category->is_service_template;
         $this->serviceTime = $this->category->service_time ?? '';
+        $this->leadTimeValue = $this->category->lead_time_value;
+        $this->leadTimeUnit = $this->category->lead_time_unit ?? 'days';
+        $this->enableEVoucher = $this->category->enable_e_voucher ? '1' : '0';
         $this->note = $this->category->note ?? '';
         $this->description = $this->category->description ?? '';
         $this->ticket_note = $this->category->ticket_note ?? '';
@@ -191,19 +197,22 @@ class CategoryCreateComponent extends Component
             'visitor_in_queue' => 'nullable|integer',
             'sort' => 'nullable|integer',
             'ticket_note' => 'nullable|string|max:500',
-             'note' => 'nullable|string|max:500',
+            'note' => 'nullable|string|max:500',
             'serviceTime' => 'nullable|integer',
+            'leadTimeValue' => $this->tab == 1 ? 'nullable|integer|min:0' : 'nullable',
+            'leadTimeUnit' => $this->tab == 1 ? 'nullable|in:minutes,hours,days' : 'nullable',
+            'enableEVoucher' => $this->tab == 2 ? 'nullable|in:0,1' : 'nullable',
             'label_text' => 'nullable|string|max:50',
             'locations' => 'required|array',
             'img' => $this->isEdit ? 'nullable|mimes:jpg,jpeg,png|max:2048' : 'nullable|mimes:jpg,jpeg,png|max:2048',
             'label_image' => $this->isEdit ? 'nullable|mimes:jpg,jpeg,png|max:2048' : 'nullable|mimes:jpg,jpeg,png|max:2048',
             'parent_id' => $this->tab > 1 ? 'required|integer' : 'nullable',
-        ],[
+        ], [
 
             'parent_id.required' => 'Parent Service is required',
         ]);
 
-       if ($this->paymentSet && $this->paymentSet->enable_payment == 1 && $this->paymentSet->category_level == $this->tab) {
+        if ($this->paymentSet && $this->paymentSet->enable_payment == 1 && $this->paymentSet->category_level == $this->tab) {
             $this->validate([
                 'is_paid' => 'required|in:0,1',
             ]);
@@ -216,22 +225,22 @@ class CategoryCreateComponent extends Component
         }
 
 
-    // Unique check for each location
-    foreach ($this->locations as $locationId) {
-        $exists = Category::where('name', $this->name)
-            ->where('team_id', $this->teamId)
-            ->when(!empty($this->parent_id), fn($q) => $q->where('parent_id', $this->parent_id))
-            ->whereJsonContains('category_locations', "$locationId")
-            ->when($this->isEdit, fn($q) => $q->where('id', '!=', $this->category->id))
-            ->exists();
+        // Unique check for each location
+        foreach ($this->locations as $locationId) {
+            $exists = Category::where('name', $this->name)
+                ->where('team_id', $this->teamId)
+                ->when(!empty($this->parent_id), fn($q) => $q->where('parent_id', $this->parent_id))
+                ->whereJsonContains('category_locations', "$locationId")
+                ->when($this->isEdit, fn($q) => $q->where('id', '!=', $this->category->id))
+                ->exists();
 
-        if ($exists) {
-            $this->addError('name', 'The category name already exists for one of the selected locations.');
-            return;
+            if ($exists) {
+                $this->addError('name', 'The category name already exists for one of the selected locations.');
+                return;
+            }
         }
-    }
 
-    // image handling
+        // image handling
         $imagePath = $this->isEdit ? $this->category->img : null;
         $labelImagePath = $this->isEdit ? $this->category->label_image : null;
 
@@ -248,61 +257,64 @@ class CategoryCreateComponent extends Component
 
 
 
-       // Prepare data
-    $data = [
-        'team_id' => $this->teamId,
-        'level_id' => $this->tab,
-        'name' => $this->name,
-        'parent_id' => $this->parent_id ?? null,
-        'other_name' => $this->other_name,
-        'acronym' => $this->acronym,
-        'display_on' => $this->display_on,
-        'sort' =>  empty($this->sort) ? 0 : $this->sort,
-        'for_screen' => $this->for_screen,
-        'booking_category_show_for' => $this->booking_category_show_for,
-        'visitor_in_queue' => !empty($this->visitor_in_queue) ?(int) $this->visitor_in_queue : 1,
-        'category_locations' => $this->locations,
-        'img' => $imagePath,
-        'redirect_url' => $this->redirectUrl,
-        'is_service_template' => $this->isService ? 1 : 0,
-        'service_time' => $this->serviceTime ?? '',
-        'note' => $this->note ?? '',
-        'description' => $this->description ?? '',
-        'ticket_note' => $this->ticket_note ?? '',
-        'label_image' => $labelImagePath,
-        'service_color' => $this->service_color ?? '#fff',
-        'label_background_color' => $this->label_background_color ?? '#ffffff',
-        'label_font_color' => $this->label_font_color ?? '#000000',
-        'label_text' => $this->label_text ?? '',
-        'bg_color' => $this->bg_color ?? '',
-    ];
+        // Prepare data
+        $data = [
+            'team_id' => $this->teamId,
+            'level_id' => $this->tab,
+            'name' => $this->name,
+            'parent_id' => $this->parent_id ?? null,
+            'other_name' => $this->other_name,
+            'acronym' => $this->acronym,
+            'display_on' => $this->display_on,
+            'sort' =>  empty($this->sort) ? 0 : $this->sort,
+            'for_screen' => $this->for_screen,
+            'booking_category_show_for' => $this->booking_category_show_for,
+            'visitor_in_queue' => !empty($this->visitor_in_queue) ? (int) $this->visitor_in_queue : 1,
+            'category_locations' => $this->locations,
+            'img' => $imagePath,
+            'redirect_url' => $this->redirectUrl,
+            'is_service_template' => $this->isService ? 1 : 0,
+            'service_time' => $this->serviceTime ?? '',
+            'lead_time_value' => $this->tab == 1 && $this->leadTimeValue !== '' ? (int) $this->leadTimeValue : null,
+            'lead_time_unit' => $this->tab == 1 && $this->leadTimeValue !== '' ? $this->leadTimeUnit : null,
+            'enable_e_voucher' => $this->tab == 2 ? (bool) ((int) $this->enableEVoucher) : 0,
+            'note' => $this->note ?? '',
+            'description' => $this->description ?? '',
+            'ticket_note' => $this->ticket_note ?? '',
+            'label_image' => $labelImagePath,
+            'service_color' => $this->service_color ?? '#fff',
+            'label_background_color' => $this->label_background_color ?? '#ffffff',
+            'label_font_color' => $this->label_font_color ?? '#000000',
+            'label_text' => $this->label_text ?? '',
+            'bg_color' => $this->bg_color ?? '',
+        ];
 
-    // Add paid details if applicable
-    if ($this->paymentSet && $this->paymentSet->enable_payment == 1) {
-        $data['is_paid'] = $this->is_paid ?? 0;
-        $data['amount'] = $this->amount ?? 0;
-    } else {
-        $data['is_paid'] = 0;
-        $data['amount'] = 0;
-    }
+        // Add paid details if applicable
+        if ($this->paymentSet && $this->paymentSet->enable_payment == 1) {
+            $data['is_paid'] = $this->is_paid ?? 0;
+            $data['amount'] = $this->amount ?? 0;
+        } else {
+            $data['is_paid'] = 0;
+            $data['amount'] = 0;
+        }
 
-    // Save or update
-    $categoryDetail = Category::updateOrCreate(
-        ['id' => $this->isEdit ? $this->category->id : null],
-        $data
-    );
+        // Save or update
+        $categoryDetail = Category::updateOrCreate(
+            ['id' => $this->isEdit ? $this->category->id : null],
+            $data
+        );
 
-       if($this->isEdit){
+        if ($this->isEdit) {
 
-           $this->dispatch('updated',  '/category-management?tab='. $this->tab);
-       }else{
-           $formfield = FormField::where('team_id',$this->teamId)->where('location_id',$this->locationId )->first();
+            $this->dispatch('updated',  '/category-management?tab=' . $this->tab);
+        } else {
+            $formfield = FormField::where('team_id', $this->teamId)->where('location_id', $this->locationId)->first();
 
-           if(!empty($formfield)){
-               $formfield->categories()->sync($categoryDetail);
-           }
-           $this->dispatch('created', '/category-management?tab='. $this->tab);
-       }
+            if (!empty($formfield)) {
+                $formfield->categories()->sync($categoryDetail);
+            }
+            $this->dispatch('created', '/category-management?tab=' . $this->tab);
+        }
         // session()->flash('success', $this->isEdit ? 'Category updated successfully' : 'Category created successfully');
         // return redirect()->route('category.index');
     }

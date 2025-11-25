@@ -21,7 +21,11 @@
     <div class="mb-4 flex justify-between mb-4">
         <div>
             <h2 class="text-xl font-semibold dark:text-white/90">
-                {{__('text.Appointment Types')}}
+                @if($tab == 2)
+                    {{ __('text.Packages') }}
+                @else
+                    {{ __('text.Appointment Types') }}
+                @endif
             </h2>
         </div>
 
@@ -46,7 +50,7 @@
         @can('Service Add')
         <div>
             <a href="{{ route('tenant.category.create',['level'=>$tab]) }}"
-                 class="primary-btn py-2 px-3 font-medium text-white transition-colors rounded-md bg-brand-500 hover:bg-brand-600 flex gap-x-2"><i class="ri-add-circle-line"></i>  {{__('text.Add Appointment Type')}}</a>
+                 class="primary-btn py-2 px-3 font-medium text-white transition-colors rounded-md bg-brand-500 hover:bg-brand-600 flex gap-x-2"><i class="ri-add-circle-line"></i>@if($tab == 1) {{__('text.Add Appointment Type')}} @elseif($tab == 2) {{__('text.Add Package')}} @endif</a>
 
         </div>
         @endcan
@@ -75,12 +79,12 @@
                                 </th>
                                 @if($tab==3)
                                 <th class="px-5 py-3 sm:px-6">
-                                            {{__('first parent')}}
+                                            {{__('text.first parent')}}
                                 </th>
                                 @endif
                                 @if($tab > 1)
                                 <th class="px-5 py-3 sm:px-6">
-                                            {{__('parent')}}
+                                            {{__('text.appointment type')}}
                                 </th>
                                 @endif
                                 {{-- <th class="px-5 py-3 sm:px-6">
@@ -89,15 +93,12 @@
                                 <th class="px-5 py-3 sm:px-6">
                                             {{__('text.visitor in queue')}}
                                 </th> --}}
-                                <th class="px-5 py-3 sm:px-6">
-                                            {{__('text.Acronym')}}
-                                </th>
+                              
                                 {{-- <th class="px-5 py-3 sm:px-6">
                                             {{__('text.display on')}}
                                 </th> --}}
-                                <th class="px-5 py-3 sm:px-6">
-                                            {{__('text.Service location')}}
-                                </th>
+                               
+                
                                 <th class="px-5 py-3 sm:px-6">
                                             {{__('text.created at')}}
                                 </th>
@@ -134,7 +135,7 @@
                                                    {{ $category->getparent?->getparent?->name ?? '' }}
                                         </td>
                                         @endif
-                                        @if($tab >1)
+                                        @if($tab > 1)
                                 <td class="px-5 py-4 sm:px-6">
                                            {{ $category->getparent?->name ?? '' }}
                                 </td>
@@ -145,21 +146,12 @@
                                 <td class="px-5 py-4 sm:px-6">
                                             {{ $category->visitor_in_queue ?? '' }}
                                 </td> --}}
-                                <td class="px-5 py-4 sm:px-6">
-                                            {{ $category->acronym ?? '' }}
-                                </td>
+                              
                                 {{-- <td class="px-5 py-4 sm:px-6">
                                             {{ $category->display_on ?? '' }}
                                 </td> --}}
-                                <td class="px-5 py-4 sm:px-6">
-                                            @php
-                                            $locations = $category->category_locations;
-                                            $data= $locations != '' ?
-                                            App\Models\Location::whereIn('id',$locations)->pluck('location_name')->toArray()
-                                            : [];
-                                            @endphp
-                                            {{ implode(',',$data) ?? '' }}
-                                </td>
+                                
+                           
                                 <td class="px-5 py-4 sm:px-6">
                                             {{ $category->created_at ?? '' }}
                                 </td>
@@ -217,8 +209,7 @@
                             <tr>
                             <td colspan="18" class="text-center py-6">
                                 <img src="{{ url('images/no-record.jpg') }}" alt="No Records Found"
-                                    class="mx-auto h-30 w-30" style="">
-                               
+                                    class="mx-auto h-30 w-30" style="">           
                             </td>
                         </tr>
                             @endif

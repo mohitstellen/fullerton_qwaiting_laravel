@@ -50,8 +50,8 @@ class CategoryManagement extends Component
         ->get()
         ->keyBy('level');
 
-        $this->level1 = $levels[1]->name ?? 'Level 1';
-        $this->level2 = $levels[2]->name ?? 'Level 2';
+        $this->level1 = $levels[1]->name ?? 'Appointment Types';
+        $this->level2 = $levels[2]->name ?? 'Packages';
         // $this->level3 = $levels[3]->name ?? 'Level 3';
 
         $this->tab = $request->query('tab') ?? 1;

@@ -13,6 +13,12 @@
             <input type="text" id="autocomplete" wire:model="address" class="w-full p-2 border rounded">
         </div>
 
+        <div class="mb-4">
+            <label class="block text-gray-700">Map Link</label>
+            <input type="text" wire:model="map_link" placeholder="https://maps.google.com/..." class="w-full p-2 border rounded">
+            @error('map_link') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+        </div>
+
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-gray-700">{{ __('setting.City') }}</label>
@@ -92,8 +98,16 @@
 
         <div class="grid grid-cols-2 gap-4 mt-4">
             <div>
-                <input type="checkbox" wire:model="status">
-                <label class="text-gray-700">{{ __('setting.Active') }}</label>
+                <label class="block text-gray-700">Available for Public Booking</label>
+                <select wire:model="available_for_public_booking" class="w-full p-2 border rounded">
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+                @error('available_for_public_booking') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+            </div>
+            <div class="flex items-center gap-2">
+                <input type="checkbox" wire:model="status" id="editStatus" class="h-4 w-4">
+                <label for="editStatus" class="text-gray-700">{{ __('setting.Active') }}</label>
             </div>
         </div>
 

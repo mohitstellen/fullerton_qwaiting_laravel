@@ -16,6 +16,8 @@ class AddLocation extends Component
     #[Title('Add Location')] 
 
     public $team_id, $location_name, $address, $city, $state, $country, $zip, $latitude, $longitude, $ip_address, $status,$location_image;
+    public $map_link;
+    public $available_for_public_booking = '0';
 
     public function mount()
     {
@@ -26,6 +28,7 @@ class AddLocation extends Component
         $this->team_id = tenant('id');
         $this->ip_address = $this->getUserIpAddr();
         $this->status = true;
+        $this->available_for_public_booking = '0';
        
     }
 
@@ -35,6 +38,8 @@ class AddLocation extends Component
             'location_name' => 'required|string',
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
+            'map_link' => 'nullable|string|max:500',
+            'available_for_public_booking' => 'nullable|in:0,1',
             'location_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -56,8 +61,10 @@ class AddLocation extends Component
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
             'ip_address' => $this->ip_address,
+            'map_link' => $this->map_link,
+            'available_for_public_booking' => (bool) ((int) $this->available_for_public_booking),
             'status' => (bool) $this->status,
-              'location_image' => $imagePath,
+            'location_image' => $imagePath,
         ]);
 
         session()->flash('message', 'Location saved successfully.');
