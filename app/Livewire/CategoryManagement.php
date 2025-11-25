@@ -52,7 +52,7 @@ class CategoryManagement extends Component
 
         $this->level1 = $levels[1]->name ?? 'Level 1';
         $this->level2 = $levels[2]->name ?? 'Level 2';
-        $this->level3 = $levels[3]->name ?? 'Level 3';
+        // $this->level3 = $levels[3]->name ?? 'Level 3';
 
         $this->tab = $request->query('tab') ?? 1;
     }
