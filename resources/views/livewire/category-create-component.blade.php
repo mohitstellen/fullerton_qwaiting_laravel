@@ -31,6 +31,7 @@
                                             {{ $category->name ?? 'None'}}
                                         </option>
                                         @endforeach
+                                        
 
                                     </select>
                                     <span class="absolute z-30 text-gray-500 -translate-y-1/2 right-4 top-1/2 dark:text-gray-400 rtl:right-auto rtl:left-3">
