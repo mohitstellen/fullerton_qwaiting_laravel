@@ -27,7 +27,7 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <script src="{{ asset('js/cdn/chart.js') }}"></script>
-    <script src="{{ asset('js/cdn/sweetalert2.min.js') }}"></script>
+    <script src="{{ asset('js/cdn/sweetalert2.js') }}"></script>
 
     @stack('styles')
     @livewireStyles

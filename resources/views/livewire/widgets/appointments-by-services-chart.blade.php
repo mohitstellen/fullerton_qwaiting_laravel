@@ -39,7 +39,7 @@
     }
 
     function initappointmentsByService(chartData) {
-        console.log(chartData);
+
         let ctxwalkInQueueVisits = document.getElementById('appointmentsByService').getContext('2d');
 
         if (appointmentsByService) {

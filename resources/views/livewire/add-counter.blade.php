@@ -1,6 +1,6 @@
 <div class="p-4">
 
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="{{ asset('js/cdn/select2.min.css') }}" rel="stylesheet" />
 
     <div class="flex justify-between">
         <h2 class="text-xl font-semibold dark:text-white/90 mb-4">{{ __('text.Add Counter') }}</h2>
@@ -43,9 +43,9 @@
         </div>
     </div>
 
-<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ asset('js/cdn/jquery.min.js') }}"></script>
+<script src="{{ asset('js/cdn/select2.min.js') }}"></script>
+    <script src="{{ asset('js/cdn/sweetalert2.js') }}"></script>
 <script>
         document.addEventListener("DOMContentLoaded", function() {
             $(document).ready(function() {

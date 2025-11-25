@@ -32,7 +32,8 @@
     </form>
 </div>
 
-<script src="https://cdn.ckeditor.com/4.20.1-lts/standard/ckeditor.js"></script>
+{{-- <script src="https://cdn.ckeditor.com/4.20.1-lts/standard/ckeditor.js"></script> --}}
+
 <script>
     document.addEventListener("livewire:init", function () {
         var editor = CKEDITOR.replace('editor');

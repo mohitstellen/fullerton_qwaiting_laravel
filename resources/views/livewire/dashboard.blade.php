@@ -573,13 +573,13 @@
                 let modelAttribute = element.getAttribute('wire:model.live');
                 let dateValue = element.value;
 
-                if (modelAttribute === 'data.start_date') {
-                    console.log('Start Date Changed:', dateValue);
-                } else if (modelAttribute === 'data.end_date') {
-                    console.log('End Date Changed:', dateValue);
-                } else {
-                    console.warn('Unknown wire:model.live attribute:', modelAttribute);
-                }
+                // if (modelAttribute === 'data.start_date') {
+                //     console.log('Start Date Changed:', dateValue);
+                // } else if (modelAttribute === 'data.end_date') {
+                //     console.log('End Date Changed:', dateValue);
+                // } else {
+                //     console.warn('Unknown wire:model.live attribute:', modelAttribute);
+                // }
             }
         });
     </script>
@@ -622,7 +622,6 @@
 
         Livewire.on('monthly-visits-updated', data => {
 
-            console.log('monthly:' + data['data']);
             const months = ["{{ __('text.Jan') }}", "{{ __('text.Feb') }}", "{{ __('text.Mar') }}", "{{ __('text.Apr') }}", "{{ __('text.May') }}", "{{ __('text.Jun') }}", "{{ __('text.Jul') }}", "{{ __('text.Aug') }}", "{{ __('text.Sep') }}", "{{ __('text.Oct') }}", "{{ __('text.Nov') }}", "{{ __('text.Dec') }}"];
 
             if (monthlyChart) {
@@ -673,8 +672,6 @@
 
             const labels = data['data'].map(item => item.counter_name);
             const values = data['data'].map(item => item.count);
-
-            console.log(labels, values);
 
             if (counterChart) {
                 counterChart.destroy();

@@ -42,11 +42,9 @@
     });
 
     function initChartFeedback(chartData) {
-       
-
+    
         var ctxFeedback = document.getElementById('overviewChartFeedback').getContext('2d');
 
-        console.log(chartData);
         let labels = chartData.labels || [];
         let arrivedCounts = chartData.data || [];
         let backgroundColor = chartData.backgroundColor || [];

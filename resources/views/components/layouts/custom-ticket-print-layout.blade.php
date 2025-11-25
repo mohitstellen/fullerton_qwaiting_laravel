@@ -67,10 +67,10 @@
     {{ $slot }}
 
     @livewireScripts
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="{{ asset('js/cdn/flowbite.min.js') }}"></script>
+    <script src="{{ asset('js/cdn/flatpickr.js') }}"></script>
+    <script src="{{ asset('js/cdn/pusher.min.js') }}"></script>
+    <script src="{{ asset('js/cdn/jquery.min.js') }}"></script>
     <script src="{{asset('/js/fullscreen.min.js?v=3.1.0.0')}}"></script>
 
     <script type="module" src="{{ asset('/js/app/echo-unauth.js?v='.time()) }}" type="module"></script>

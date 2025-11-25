@@ -160,8 +160,8 @@
     </div>
 </div>
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script src="{{ asset('js/cdn/chart.js') }}"></script>
+<script src="{{ asset('js/cdn/chartjs-plugin-datalabels.js') }}"></script>
 <script>
 Chart.register(ChartDataLabels);
 

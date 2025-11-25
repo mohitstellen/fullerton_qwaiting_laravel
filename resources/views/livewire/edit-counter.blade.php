@@ -1,6 +1,6 @@
 <div class="p-6">
 
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="{{ asset('js/cdn/select2.min.css') }}" rel="stylesheet" />
 
     <div class="flex justify-between mb-4">
         <h2 class="text-xl font-bold">Edit Counter</h2>
@@ -49,8 +49,8 @@
         </form>
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="{{ asset('js/cdn/jquery.min.js') }}"></script>
+<script src="{{ asset('js/cdn/select2.min.js') }}"></script>
 <script>
         document.addEventListener("DOMContentLoaded", function() {
             $(document).ready(function() {

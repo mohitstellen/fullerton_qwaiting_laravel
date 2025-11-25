@@ -500,8 +500,9 @@
 </div>
         </div>
     </div>
-<script src="https://cdn.ckeditor.com/4.20.1-lts/standard/ckeditor.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{{-- <script src="https://cdn.ckeditor.com/4.20.1-lts/standard/ckeditor.js"></script> --}}
+<script src="{{ asset('js/cdn/ckeditor.js') }}"></script>
+    <script src="{{ asset('js/cdn/sweetalert2.js') }}"></script>
 
     <script>
     document.addEventListener('livewire:init', function () {

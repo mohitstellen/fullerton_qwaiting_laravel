@@ -1,4 +1,4 @@
-import Echo from 'https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/+esm';
+import Echo from 'tenancy/js/cdn/laravel-echo.min.js';
 import Pusher from 'pusher-js';  // Import Pusher correctly
 
 // Assign Pusher to the window object

@@ -2849,7 +2849,7 @@ setTimeout(() => {
         }
     }
 </script>
-<script src="https://sdk.twilio.com/js/video/releases/2.31.0/twilio-video.min.js"></script>
+<script src="{{ asset('js/cdn/twilio-video.min.js') }}"></script>
 <script>
 
     let room;

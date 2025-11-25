@@ -43,12 +43,11 @@
 </div>
 
 @push('scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.9/flatpickr.min.js"
+<script src="{{ asset('js/cdn/flatpickr.min.js') }}"></script>
     integrity="sha512-+ruHlyki4CepPr07VklkX/KM5NXdD16K1xVwSva5VqOVbsotyCQVKEwdQ1tAeo3UkHCXfSMtKU/mZpKjYqkxZA=="
     crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.js"
-    integrity="sha256-rPPF6R+AH/Gilj2aC00ZAuB2EKmnEjXlEWx5MkAp7bw=" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/locales-all.min.js"
+<script src="{{ asset('js/cdn/fullcalendar.min.js') }}"></script>
+<script src="{{ asset('js/cdn/fullcalendar-locales-all.min.js') }}"></script>
     integrity="sha256-/ZgxvDj3QtyBZNLbfJaHdwbHF8R6OW82+5MT5yBsH9g=" crossorigin="anonymous"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {

@@ -24,9 +24,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.3.2/main.min.css" rel="stylesheet">
-      <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('js/cdn/flatpickr.min.css') }}">
+    <link href="{{ asset('js/cdn/fullcalendar.min.css') }}" rel="stylesheet">
+      <link href="{{ asset('js/cdn/select2.min.css') }}" rel="stylesheet" />
 
 
     @stack('styles')
@@ -67,14 +67,14 @@
     {{ $slot }}
 
     @livewireScripts
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="{{ asset('js/cdn/flowbite.min.js') }}"></script>
+    <script src="{{ asset('js/cdn/flatpickr.js') }}"></script>
+    <script src="{{ asset('js/cdn/pusher.min.js') }}"></script>
+    <script src="{{ asset('js/cdn/jquery.min.js') }}"></script>
     <script src="{{asset('/js/fullscreen.min.js?v=3.1.0.0')}}"></script>
      <!-- Select2 CSS & JS -->
 
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="{{ asset('js/cdn/select2.min.js') }}"></script>
     <script type="module" src="{{ asset('/js/app/echo-unauth.js?v='.time()) }}" type="module"></script>
     <script src="{{ asset('/js/livewire.js?v='.time()) }}" type="module"></script>
    <script src="{{asset('/js/app/desktop-notification.js?v='.time())}}"></script>
