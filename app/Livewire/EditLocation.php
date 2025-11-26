@@ -13,7 +13,7 @@ class EditLocation extends Component
 {
     use WithFileUploads;
 
-    #[Title('Edit Location')]
+    #[Title('Edit Clinic')]
 
     public $location_id, $team_id, $location_name, $address, $city, $state, $country, $zip, $latitude, $longitude, $ip_address, $status;
     public $map_link;

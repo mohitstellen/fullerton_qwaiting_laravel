@@ -813,11 +813,10 @@
                                 <li>
                                     <a href="{{ route('tenant.locations') }}"
                                         class="menu-dropdown-item group {{ request()->routeIs('tenant.locations') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Locations') }}
+                                        {{ __('sidebar.Clinics') }}
                                     </a>
                                 </li>
                                 @endcan
-
 
                                 <li>
                                     <a href="{{ route('tenant.language-settings') }}"

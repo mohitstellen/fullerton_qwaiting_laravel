@@ -55,7 +55,7 @@
         </div>
 
           <div class="mb-4">
-            <label class="block text-gray-700">Location Image</label>
+            <label class="block text-gray-700">Clinic Image</label>
             <input type="file" wire:model="location_image" class="w-full p-2 border rounded">
             @error('location_image') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
 
@@ -177,7 +177,7 @@
     Livewire.on('updated', () => {
         Swal.fire({
             title: 'Success!',
-            text: 'Location updated successfully.',
+            text: 'Clinic updated successfully.',
             icon: 'success',
             confirmButtonText: 'OK'
         }).then((result) => {

@@ -47,6 +47,7 @@ $langArr = [
   "Notification Settings" => "Notification Settings",
   "Manage Form Fields" => "Manage Form Fields",
   "Locations" => "Locations",
+  "Clinics" => "Clinics",
   "Language Settings" => "Language Settings",
   "Terms & Conditions" => "Terms & Conditions",
   "Display Settings" => "Display Settings",

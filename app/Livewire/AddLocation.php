@@ -13,7 +13,7 @@ use App\Models\Permission;
 
 class AddLocation extends Component
 {
-    #[Title('Add Location')] 
+    #[Title('Add Clinic')] 
 
     public $team_id, $location_name, $address, $city, $state, $country, $zip, $latitude, $longitude, $ip_address, $status,$location_image;
     public $map_link;
