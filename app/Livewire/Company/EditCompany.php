@@ -11,6 +11,17 @@ class EditCompany extends Component
 
     public array $company = [];
 
+    protected array $messages = [
+        'company.company_name.required' => 'The company name field is required.',
+        'company.address.required' => 'The address field is required.',
+        'company.billing_address.required' => 'The billing address field is required.',
+        'company.ehs_appointments_per_year.required' => 'The EHS appointments per year field is required.',
+        'company.ehs_appointments_per_year.min' => 'The EHS appointments per year must be at least 1.',
+        'company.contact_person1_name.required' => 'The primary contact name field is required.',
+        'company.contact_person1_phone.required' => 'The primary contact phone field is required.',
+        'company.contact_person1_email.required' => 'The primary contact email field is required.',
+    ];
+
     protected function rules(): array
     {
         return [

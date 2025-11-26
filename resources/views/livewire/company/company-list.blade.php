@@ -71,8 +71,7 @@
                                 Edit
                             </a>
                             <button type="button"
-                                    wire:click="delete({{ $company->id }})"
-                                    onclick="return confirm('Are you sure you want to delete this company?')"
+                                    wire:click="confirmDelete({{ $company->id }})"
                                     class="inline-flex items-center rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
                                 Delete
                             </button>
@@ -91,3 +90,24 @@
     </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('confirm-company-delete', ({ companyId }) => {
+            Swal.fire({
+                title: 'Delete company?',
+                text: 'This action cannot be undone.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete',
+                cancelButtonText: 'Cancel',
+                focusCancel: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Livewire.dispatch('delete-company-confirmed', { companyId });
+                }
+            });
+        });
+    });
+</script>
