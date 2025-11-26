@@ -123,7 +123,7 @@
                                                 <img src="{{$category->img ? url('storage/'. $category->img) : url('images/no-image.jpg') }}"
                                                     alt="cateogry-image" />
                                             </div>
-
+                                    
                                         </div>
                                     </div>
                                 </td>

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Company extends Model
 {
@@ -27,4 +28,9 @@ class Company extends Model
         'contact_person2_phone',
         'contact_person2_email',
     ];
+
+    public function companyPackages(): HasMany
+    {
+        return $this->hasMany(CompanyPackage::class);
+    }
 }

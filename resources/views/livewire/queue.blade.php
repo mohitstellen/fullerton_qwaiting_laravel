@@ -128,7 +128,7 @@
             }
         }
 
-        <?php if($teamId == 264){ ?>
+        <?php if ($teamId == 264) { ?>
      @media (min-width:992px){
     .queue_page_Psbacademy :not(.custom-text-size) {
         font-size: max(4px, 1.2vw);
@@ -160,15 +160,15 @@
         <?php } ?>
     </style>
 
-        @php
+    @php
     $descriptionFontSize = match($fontSize) {
-        'text-4xl' => 'text-3xl',
-        'text-3xl' => 'text-2xl',
-        'text-2xl' => 'text-xl',
-        'text-xl'  => 'text-lg',
-        default    => 'text-base',
+    'text-4xl' => 'text-3xl',
+    'text-3xl' => 'text-2xl',
+    'text-2xl' => 'text-xl',
+    'text-xl' => 'text-lg',
+    default => 'text-base',
     };
-@endphp
+    @endphp
 
     <div class="{{ $locationStep == false ? 'hidden' : '' }} ">
 
@@ -239,7 +239,7 @@
         @endif
 
         <!-- Language Selector -->
-        <div  style="right: 48px; top: 5px;" class="md:absolute m-3 px-4 md:px-0 md:my-0 md:w-30">
+        <div style="right: 48px; top: 5px;" class="md:absolute m-3 px-4 md:px-0 md:my-0 md:w-30">
             <livewire:language-selector />
         </div>
 
@@ -254,48 +254,48 @@
 
 
 
-                          @php
-                        $locale = session('app_locale') ?? 'en';
+        @php
+        $locale = session('app_locale') ?? 'en';
 
-                        $translatedTag1 = $translatedTag2= $translatedTag3= '';
-                          if ($locale !== 'en' && !empty($translations['level1_tagline'][$locale])) {
-                            $translatedTag1 = !empty($translations['level1_tagline'][$locale]) ? $translations['level1_tagline'][$locale] : $tag_line1;
-                        }
+        $translatedTag1 = $translatedTag2= $translatedTag3= '';
+        if ($locale !== 'en' && !empty($translations['level1_tagline'][$locale])) {
+        $translatedTag1 = !empty($translations['level1_tagline'][$locale]) ? $translations['level1_tagline'][$locale] : $tag_line1;
+        }
 
-                        if ($locale !== 'en' && !empty($translations['level2_tagline'][$locale])) {
-                            $translatedTag2 = !empty($translations['level2_tagline']) ? $translations['level2_tagline'][$locale] : $tag_line2;
-                        }
+        if ($locale !== 'en' && !empty($translations['level2_tagline'][$locale])) {
+        $translatedTag2 = !empty($translations['level2_tagline']) ? $translations['level2_tagline'][$locale] : $tag_line2;
+        }
 
-                        if ($locale !== 'en' && !empty($translations['level3_tagline'][$locale])) {
-                            $translatedTag3 = !empty($translations['level3_tagline'][$locale]) ? $translations['level3_tagline'][$locale] : $tag_line3;
-                        }
+        if ($locale !== 'en' && !empty($translations['level3_tagline'][$locale])) {
+        $translatedTag3 = !empty($translations['level3_tagline'][$locale]) ? $translations['level3_tagline'][$locale] : $tag_line3;
+        }
 
-                        $layout_set ='flex flex-wrap';
-                        if($layout_show == 'column'){
-                            $layout_set ='grid grid-cols-1 md:grid-cols-2 justify-center m-auto gap-3 md-flex-wrap';
-                        }else{
-                            $layout_set ='grid grid-cols-1 justify-center md:w-[700px] m-auto gap-3';
-                        }
+        $layout_set ='flex flex-wrap';
+        if($layout_show == 'column'){
+        $layout_set ='grid grid-cols-1 md:grid-cols-2 justify-center m-auto gap-3 md-flex-wrap';
+        }else{
+        $layout_set ='grid grid-cols-1 justify-center md:w-[700px] m-auto gap-3';
+        }
 
 
-                        @endphp
+        @endphp
         <div class="overflow-x-hidden main-container selector-main-sections text-center pb-10">
             {{-- First Category --}}
             <!-- <div class="cate_items md:grid grid-cols-2 gap-4 {{ $firstStep == false ? 'hidden' : '' }} "> -->
-                  @if(!empty($this->firstCategories) && $firstStep)
-                {{-- <h2 class="tag_line text-3xl">{{ $tag_line1 }}</h2> --}}
-                 <h2 class="tag_line text-3xl">{{ !empty($translatedTag1) ? $translatedTag1 : $tag_line1 }}</h2>
-                @endif
+            @if(!empty($this->firstCategories) && $firstStep)
+            {{-- <h2 class="tag_line text-3xl">{{ $tag_line1 }}</h2> --}}
+            <h2 class="tag_line text-3xl">{{ !empty($translatedTag1) ? $translatedTag1 : $tag_line1 }}</h2>
+            @endif
             <div class="cate_items {{$layout_set}} {{ $firstStep == false ? 'hidden' : '' }} ">
-                  @foreach ($this->firstCategories as $keyCat => $nameCate)
+                @foreach ($this->firstCategories as $keyCat => $nameCate)
                 @if($ticketDisabled)
                 <div class="{{ $fontSize }} {{ $borderWidth }} {{ $fontFamily }} border-solid border-slate-300 rounded-lg mt-4 cursor-not-allowed p-4 cate_item text-color column sm-full disabled pointer-events-none opacity-50" title="Ticket generation is disabled" wire:model.defer="{{ $selectedCategoryId }}" style="background-color:{{$nameCate->bg_color ?? $category_background}} !important; border-color: {{$nameCate->bg_color ?? $category_background}};">
                     @else
                     <div class="{{ $fontSize }} {{ $borderWidth }} {{ $fontFamily }} border-solid border-slate-300 rounded-lg mt-4 cursor-pointer p-4 cate_item column hover:bg-indigo-500 hover:border-indigo-500 hover:text-white text-color sm-full"
-                     wire:model.defer="{{ $selectedCategoryId }}"
-                    wire:loading.class="opacity-50 pointer-events-none"
-                     wire:target="showFirstChild"
-                    wire:click="showFirstChild({{ $nameCate->id }})" style="background-color:{{$nameCate->bg_color ?? $category_background}} !important; border-color: {{$nameCate->bg_color ?? $category_background}};">
+                        wire:model.defer="{{ $selectedCategoryId }}"
+                        wire:loading.class="opacity-50 pointer-events-none"
+                        wire:target="showFirstChild"
+                        wire:click="showFirstChild({{ $nameCate->id }})" style="background-color:{{$nameCate->bg_color ?? $category_background}} !important; border-color: {{$nameCate->bg_color ?? $category_background}};">
                         @endif
 
                         <div class="items-center md:justify-center h-full flex">
@@ -348,61 +348,61 @@
 
                     </div>
                     @endforeach
-            </div>
+                </div>
 
 
-            @if ($is_qr_code == App\Models\GenerateQrCode::STATUC_ACTIVE && $isMobile == false)
-            <div class="py-4 {{ $firstStep == false ? 'hidden' : '' }} ">
-                @if(!empty($qrcode_tagline))
-                <div class="flex justify-center items-center mt-2 mb-2">
-                    <div class="text-4xl lg:text-2xl  w-full p-2 line-height-1 text-center text-black">
-                        @if($locale !== 'en')
-                        {{ isset($translations['Qrcode Tagline 1'][$locale]) ? $translations['Qrcode Tagline 1'][$locale] : $qrcode_tagline }}
-                        @else
-                        {{ $qrcode_tagline }}
-                        @endif
+                @if ($is_qr_code == App\Models\GenerateQrCode::STATUC_ACTIVE && $isMobile == false)
+                <div class="py-4 {{ $firstStep == false ? 'hidden' : '' }} ">
+                    @if(!empty($qrcode_tagline))
+                    <div class="flex justify-center items-center mt-2 mb-2">
+                        <div class="text-4xl lg:text-2xl  w-full p-2 line-height-1 text-center text-black">
+                            @if($locale !== 'en')
+                            {{ isset($translations['Qrcode Tagline 1'][$locale]) ? $translations['Qrcode Tagline 1'][$locale] : $qrcode_tagline }}
+                            @else
+                            {{ $qrcode_tagline }}
+                            @endif
 
+                        </div>
                     </div>
-                </div>
-                @endif
-                @if(!empty($qrcode_tagline_second))
-                <div class="flex justify-center items-center mt-2 mb-2">
-                    <div class="text-xl  w-full p-2 line-height-1 text-center text-black">
-                        @if($locale !== 'en')
-                        {{ isset($translations['Qrcode Tagline 2'][$locale]) ? $translations['Qrcode Tagline 2'][$locale] : $qrcode_tagline_second }}
-                        @else
-                        {{ $qrcode_tagline_second }}
-                        @endif
+                    @endif
+                    @if(!empty($qrcode_tagline_second))
+                    <div class="flex justify-center items-center mt-2 mb-2">
+                        <div class="text-xl  w-full p-2 line-height-1 text-center text-black">
+                            @if($locale !== 'en')
+                            {{ isset($translations['Qrcode Tagline 2'][$locale]) ? $translations['Qrcode Tagline 2'][$locale] : $qrcode_tagline_second }}
+                            @else
+                            {{ $qrcode_tagline_second }}
+                            @endif
+                        </div>
                     </div>
+                    @endif
+                    @if(!empty($this->qrCodeDetails->url))
+                    <div class="flex justify-center items-center mt-4">
+                        <span class="border-2 font-sans border-solid border-slate-300 p-3 bg-white-900">
+                            {!! QrCode::size(15 * $this->qrCodeDetails->size ?? 9)->errorCorrection($this->qrCodeDetails->level_ecc ?? 'L')->generate($this->qrCodeDetails->url) !!}</span>
+                    </div>
+                    @endif
+
+
                 </div>
                 @endif
-                @if(!empty($this->qrCodeDetails->url))
-                <div class="flex justify-center items-center mt-4">
-                    <span class="border-2 font-sans border-solid border-slate-300 p-3 bg-white-900">
-                        {!! QrCode::size(15 * $this->qrCodeDetails->size ?? 9)->errorCorrection($this->qrCodeDetails->level_ecc ?? 'L')->generate($this->qrCodeDetails->url) !!}</span>
-                </div>
-                @endif
 
-
-            </div>
-            @endif
-
-             @if($teamId == 107)
+                @if($teamId == 107)
                 <div class="flex justify-center items-center mt-4 {{ $firstStep == false ? 'hidden' : '' }} ">
-                   <a href="https://members.petraonline.com/" target="_blank" class="text-black text-xl py-3 px-4 bg-white rounded-xl hover:bg-gray-400 hover:text-white">Self Service</a>
+                    <a href="https://members.petraonline.com/" target="_blank" class="text-black text-xl py-3 px-4 bg-white rounded-xl hover:bg-gray-400 hover:text-white">Self Service</a>
                 </div>
-            @endif
+                @endif
 
 
 
-            {{-- Second Category --}}
-            @if (!empty($this->firstChildren))
-               @if($secondStep)
+                {{-- Second Category --}}
+                @if (!empty($this->firstChildren))
+                @if($secondStep)
                 <h2 class="tag_line text-3xl">{{ !empty($translatedTag2) ? $translatedTag2 : $tag_line2 }}</h2>
                 {{-- <h2 class="tag_line text-3xl">{{ $translatedTag2 }}</h2> --}}
                 @endif
-            <div class="{{$layout_set}} {{ $secondStep == false ? 'hidden' : '' }}">
-                 @foreach ($this->firstChildren as $child)
+                <div class="{{$layout_set}} {{ $secondStep == false ? 'hidden' : '' }}">
+                    @foreach ($this->firstChildren as $child)
                     <div class="{{ $borderWidth }}  text-center border-solid border-slate-300 rounded-lg mt-4 cursor-pointer p-4 cate_item  column hover:bg-indigo-500 hover:border-indigo-500 hover:text-white leading-6 text-color column sm-full"
                         wire:loading.class="opacity-50 pointer-events-none"
                         wire:target="showSecondChild"
@@ -414,59 +414,59 @@
                             <img src="{{ url('storage/' . $child['img']) }}" class="w-10 md:w-10 lg:w-14 mr-4" />
                             @endif
                             <div class="sm-left-text">
-                            <span class="{{ $fontSize }} {{ $fontFamily }} custom-text-size">{{ session('app_locale') !== 'en' ? (!empty($translations[$child['name']][session('app_locale')]) ? $translations[$child['name']][session('app_locale')] : $child['name']) : $child['name'] }}
+                                <span class="{{ $fontSize }} {{ $fontFamily }} custom-text-size">{{ session('app_locale') !== 'en' ? (!empty($translations[$child['name']][session('app_locale')]) ? $translations[$child['name']][session('app_locale')] : $child['name']) : $child['name'] }}
 
-                                @php
-                                if(!empty($child['other_name']))
-                                {
-                                if(session('app_locale') !== 'en')
-                                {
-                                $otherName = ' - ' . $translations[$nameCate->name . '_other_name'][session('app_locale')];
-                                }
-                                else
-                                {
-                                $otherName = ' - ' . $child['other_name'];
-                                }
-                                }
-                                else
-                                {
-                                $otherName = '';
-                                }
-                                @endphp
+                                    @php
+                                    if(!empty($child['other_name']))
+                                    {
+                                    if(session('app_locale') !== 'en')
+                                    {
+                                    $otherName = ' - ' . $translations[$nameCate->name . '_other_name'][session('app_locale')];
+                                    }
+                                    else
+                                    {
+                                    $otherName = ' - ' . $child['other_name'];
+                                    }
+                                    }
+                                    else
+                                    {
+                                    $otherName = '';
+                                    }
+                                    @endphp
 
-                                <span> {{ $otherName }} </span>
-                                {{-- Description --}}
-                                @php
-                                $description = '';
-                                if (!empty($child['description'])) {
-                                if (session('app_locale') !== 'en') {
-                                $descriptionKey = $child['name'] . '_description';
-                                $description = ' - ' . ($translations[$descriptionKey][session('app_locale')] ?? $child['description']);
-                                } else {
-                                $description = ' - ' . $child['description'];
-                                }
-                                }
-                                @endphp
-                                <div>
-                                    <span class="{{ $descriptionFontSize }} {{ $fontFamily }}">{{ $description }}</span>
-                                </div>
+                                    <span> {{ $otherName }} </span>
+                                    {{-- Description --}}
+                                    @php
+                                    $description = '';
+                                    if (!empty($child['description'])) {
+                                    if (session('app_locale') !== 'en') {
+                                    $descriptionKey = $child['name'] . '_description';
+                                    $description = ' - ' . ($translations[$descriptionKey][session('app_locale')] ?? $child['description']);
+                                    } else {
+                                    $description = ' - ' . $child['description'];
+                                    }
+                                    }
+                                    @endphp
+                                    <div>
+                                        <span class="{{ $descriptionFontSize }} {{ $fontFamily }}">{{ $description }}</span>
+                                    </div>
                             </div>
                         </div>
 
                     </div>
                     @endforeach
-            </div>
-            @endif
-            {{-- Third Category --}}
-            @if (!empty($this->secondChildren))
-            @if($thirdStep)
-                {{-- <h2 class="tag_line text-3xl">{{ $tag_line3 }}</h2> --}}
-               <h2 class="tag_line text-3xl">{{ !empty($translatedTag3) ? $translatedTag3 : $tag_line3 }}</h2>
+                </div>
                 @endif
-            <div class="{{$layout_set}} {{ $thirdStep == false ? 'hidden' : '' }} ">
-                 @foreach ($this->secondChildren as $subchild)
+                {{-- Third Category --}}
+                @if (!empty($this->secondChildren))
+                @if($thirdStep)
+                {{-- <h2 class="tag_line text-3xl">{{ $tag_line3 }}</h2> --}}
+                <h2 class="tag_line text-3xl">{{ !empty($translatedTag3) ? $translatedTag3 : $tag_line3 }}</h2>
+                @endif
+                <div class="{{$layout_set}} {{ $thirdStep == false ? 'hidden' : '' }} ">
+                    @foreach ($this->secondChildren as $subchild)
                     <div class="{{ $fontSize }} {{ $borderWidth }} {{ $fontFamily }} text-center border-solid border-slate-300 rounded-lg mt-4 cursor-pointer p-4  cate_item  column hover:bg-indigo-500 hover:border-indigo-500 hover:text-white leading-6 text-color column sm-full"
-                         wire:loading.class="opacity-50 pointer-events-none"
+                        wire:loading.class="opacity-50 pointer-events-none"
                         wire:target="showQueueForm"
                         wire:model.defer="{{ $thirdChildId }}"
                         wire:click="showQueueForm({{  $subchild['id'] }})">
@@ -517,27 +517,27 @@
                     </div>
 
                     @endforeach
-            </div>
+                </div>
 
-            @endif
+                @endif
 
 
-               <div class="flex justify-center items-center {{ $fourthStep == false ? 'hidden' : '' }}">
+                <div class="flex justify-center items-center {{ $fourthStep == false ? 'hidden' : '' }}">
 
                     <!-- <form wire:submit.prevent="saveQueueForm" class="w-full max-w-md"> -->
                     <div class="w-full max-w-md">
-                      @php
-                            $padding = 'pl-3';
-                            if (session('app_locale') === 'ar') {
-                                $padding = 'pr-3';
-                            }
+                        @php
+                        $padding = 'pl-3';
+                        if (session('app_locale') === 'ar') {
+                        $padding = 'pr-3';
+                        }
 
                         @endphp
                         <div class="space-y-12 @if(session('app_locale') === 'ar') rtl @endif">
                             <div class="pb-8">
-                                  <p class="hidden Petraonline-text text-gray-600 text-lg mt-2 text-center dark:text-white white_text">
-                                        Please select why you're here today?
-                                    </p>
+                                <p class="hidden Petraonline-text text-gray-600 text-lg mt-2 text-center dark:text-white white_text">
+                                    Please select why you're here today?
+                                </p>
                                 <div class="mt-5 grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-6 p-5 rounded shadow border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
                                     @foreach ($dynamicForm as $form)
                                     @if (App\Models\CategoryFormField::checkFieldCategory($form['id'], $allCategories))
@@ -572,13 +572,13 @@
                                             <div class="flex gap-2 items-center sm:max-w-md border-gray-300 rounded-md border-solid border">
                                                 <!-- Country Code Dropdown -->
 
-                                              @if ($country_phone_mode == 1)
+                                                @if ($country_phone_mode == 1)
 
                                                 <input type="text" id="{{ $form['title'] . '_input' }}"
-                                                class="block w-1/5 rounded-md border-slate-400 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-2 pl-2 pr-2 text-gray-900"
-                                                wire:model.defer="phone_code"
-                                                value="+{{ $selectedCountryCode }}"
-                                                readonly>
+                                                    class="block w-1/5 rounded-md border-slate-400 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-2 pl-2 pr-2 text-gray-900"
+                                                    wire:model.defer="phone_code"
+                                                    value="+{{ $selectedCountryCode }}"
+                                                    readonly>
 
 
                                                 @else
@@ -586,7 +586,7 @@
                                                 <select id="{{ $form['title'] . '_select' }}"
                                                     class="block w-1/5 rounded-md border-slate-400 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-2 {{$padding}} pr-2 text-gray-900"
                                                     wire:model="phone_code">
-                                                    <option value=""  hidden>+Code</option>
+                                                    <option value="" hidden>+Code</option>
 
                                                     @if(!empty($allowed_Countries))
                                                     @foreach ($allowed_Countries as $code)
@@ -597,12 +597,12 @@
                                                 @endif
 
                                                 {{-- <select id="{{ $form['title'] . '_select' }}"
-                                                    class="block w-1/5 rounded-md border-slate-400 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-2 {{$padding}} pr-2 text-gray-900"
-                                                    wire:model.defer="phone_code">
-                                                    <option value=""  hidden>+Code</option>
-                                                    @foreach ($countryCode as $code)
-                                                    <option value="{{ $code }}"> +{{ $code }}</option>
-                                                    @endforeach
+                                                class="block w-1/5 rounded-md border-slate-400 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-2 {{$padding}} pr-2 text-gray-900"
+                                                wire:model.defer="phone_code">
+                                                <option value="" hidden>+Code</option>
+                                                @foreach ($countryCode as $code)
+                                                <option value="{{ $code }}"> +{{ $code }}</option>
+                                                @endforeach
                                                 </select> --}}
 
 
@@ -611,20 +611,19 @@
                                                     class="block w-4/5 flex-1 border-slate-400 bg-transparent py-1.5 {{$padding}} text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 h-12 rounded-lg"
                                                     placeholder="{{ session('app_locale') !== 'en' ? ($translations[$form['label'] . '_placeholders'][session('app_locale')] ?? $form['placeholder']) : $form['placeholder'] }}" {{-- max="{{ $form['maximum_number_allowed'] }}"
                                                     min="{{ $form['minimum_number_allowed'] }}" --}}
-                                                     wire:model.defer="dynamicProperties.{{ $form['title'] . '_' . $form['id'] }}"
-                                                     @if($teamId == 304)
+                                                    wire:model.defer="dynamicProperties.{{ $form['title'] . '_' . $form['id'] }}"
+                                                    @if($teamId==304)
                                                     wire:blur="fetchAgentName('{{ $form['title'] . '_' . $form['id'] }}')"
-                                                    @endif
-                                                    >
-                                                       @if($teamId == 304)
-                                                    <!-- Loader for fetchAgentName -->
-<span wire:loading wire:target="fetchAgentName('{{ $form['title'] . '_' . $form['id'] }}')">
-    <svg class="inline w-5 h-5 text-gray-500 animate-spin ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-    </svg>
-</span>
-@endif
+                                                    @endif>
+                                                @if($teamId == 304)
+                                                <!-- Loader for fetchAgentName -->
+                                                <span wire:loading wire:target="fetchAgentName('{{ $form['title'] . '_' . $form['id'] }}')">
+                                                    <svg class="inline w-5 h-5 text-gray-500 animate-spin ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                                                    </svg>
+                                                </span>
+                                                @endif
                                             </div>
                                             <!-- Error message styling for phone number -->
                                             @error('dynamicProperties.' . $form['title'] . '_' . $form['id'])
@@ -660,19 +659,19 @@
                                             <label for="{{ $form['label'] }}"
                                                 class="{{ $fontSize }} {{$fontFamily}} block mb-2 text-sm font-medium text-gray-900 ">{{ session('app_locale') !== 'en' ? ($translations[$form['label']][session('app_locale')] ?? $form['label']) : $form['label'] }}</label>
 
-                                               @if ($form['is_multiple_options'] == 1)
+                                            @if ($form['is_multiple_options'] == 1)
 
-                                    <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md" wire:ignore>
-                                        <select class="multiSelect2 w-full" multiple data-attr="dynamicProperties.{{ $form['title'] . '_' . $form['id'] }}">
+                                            <div class="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md" wire:ignore>
+                                                <select class="multiSelect2 w-full" multiple data-attr="dynamicProperties.{{ $form['title'] . '_' . $form['id'] }}">
                                                     @foreach ($form['options'] as $option)
-                                                        <option value="{{ $option }}">{{ $option }}</option>
+                                                    <option value="{{ $option }}">{{ $option }}</option>
                                                     @endforeach
                                                 </select>
-                                    </div>
+                                            </div>
 
-                                        @else
+                                            @else
                                             <!-- Single select dropdown -->
-                                             <div
+                                            <div
                                                 class="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                                                 <select id="{{ $form['title'] . '_' . $form['id'] }}"
                                                     wire:model.defer="dynamicProperties.{{ $form['title'] . '_' . $form['id'] }}"
@@ -685,7 +684,7 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                        @endif
+                                            @endif
 
                                             @error('dynamicProperties.' . $form['title'] . '_' . $form['id'])
                                             <div class="text-red-500 text-left">{{ $message }}</div>
@@ -777,8 +776,8 @@
                                     @endforeach
 
 
-                                      @if($enable_doc_file_field && $this->siteDetails?->queue_form_display == App\Models\SiteDetail::STATUS_YES)
-                                   <div class="col-span-full">
+                                    @if($enable_doc_file_field && $this->siteDetails?->queue_form_display == App\Models\SiteDetail::STATUS_YES)
+                                    <div class="col-span-full">
                                         <div class="mt-2">
                                             <label for="docFile"
                                                 class="{{ $fontSize }} {{$fontFamily}} block mb-2 text-sm font-medium text-gray-900">
@@ -798,7 +797,7 @@
                                             @enderror
 
                                             @if ($docFile)
-                                                <p class="text-green-600 mt-2">{{ $doc_file_label ?? 'Uploaded File' }}: {{ $docFile->getClientOriginalName() }}</p>
+                                            <p class="text-green-600 mt-2">{{ $doc_file_label ?? 'Uploaded File' }}: {{ $docFile->getClientOriginalName() }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -883,354 +882,350 @@
                         </div>
                     </div>
                 </div>
-            @if($this->paymentStep == 1)
-            <div class="paymentStep">
-                <div class="max-w-md mx-auto p-6 bg-white rounded-2xl shadow-md space-y-4 " wire:ignore>
-                    <h2 class="text-2xl font-semibold text-gray-800">{{ __('text.Payment') }}</h2>
+                @if($this->paymentStep == 1)
+                <div class="paymentStep">
+                    <div class="max-w-md mx-auto p-6 bg-white rounded-2xl shadow-md space-y-4 " wire:ignore>
+                        <h2 class="text-2xl font-semibold text-gray-800">{{ __('text.Payment') }}</h2>
 
-                    <input
-                        type="email"
-                        wire:model.defer="email"
-                        placeholder="Email"
-                        required
-                        class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input
+                            type="email"
+                            wire:model.defer="email"
+                            placeholder="Email"
+                            required
+                            class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
 
-                    <div>
-                        <label class="block text-sm text-gray-700 mb-1">{{ __('text.Card Details') }}</label>
-                        <div id="card-element" class="px-4 py-3 border rounded-md shadow-sm bg-white"></div>
+                        <div>
+                            <label class="block text-sm text-gray-700 mb-1">{{ __('text.Card Details') }}</label>
+                            <div id="card-element" class="px-4 py-3 border rounded-md shadow-sm bg-white"></div>
+                        </div>
+
                     </div>
+                    <button
+                        id="pay-btn"
+                        class="w-full max-w-md mx-auto bg-indigo-500 hover:bg-indigo-700 text-white font-bolds py-3 text-lg px-4 flex-1 rounded-lg queue-footer-button">
+                        <span class="button-text">{{ __('text.Pay') }}</span>
+                        <svg
+                            id="pay-loader"
+                            class="ml-2 h-5 w-5 text-white animate-spin hidden"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                        </svg>
+                    </button>
+                </div>
+                @endif
+
+                <div id="printQueue"></div>
+
+
+                <div class="flex justify-center footer-section queue-footer">
+
+                    {{-- Home Button --}}
+                    <button type="button" wire:click="goBackFn(2)"
+                        class="{{ $fontSize }} {{ $fontFamily }} bg-white text-slate-950 hover:border-green-700 hover:bg-green-700 hover:text-white font-bolds py-2 px-12 rounded-full border-2 border-gray-800 queue-footer-button {{ $totalLevelCount <= 1 ? 'hidden' : '' }} mr-2"
+                        wire:loading.class="opacity-50">
+                        @if (!empty($this->siteDetails->home_btn_text))
+                        {{ session('app_locale') !== 'en' ? $translations['Home Button Label'][session('app_locale')] ?? $this->siteDetails?->home_btn_text : $this->siteDetails?->home_btn_text }}
+                        @else
+                        {{ __('text.Home') }}
+                        @endif
+                    </button>
+
+                    <button type="button" wire:click="goBackFn({{ $totalLevelCount }})"
+                        class="{{ $fontSize }} {{$fontFamily}}  bg-white text-slate-950 hover:border-indigo-700 hover:bg-indigo-700 hover:text-white  font-bolds py-2 px-12 rounded-full border-2 border-gray-800 {{ $totalLevelCount <= 1 ? 'hidden' : '' }} queue-footer-button"
+                        wire:loading.class="opacity-50">
+                        @if(!empty($this->siteDetails->back_btn_text))
+                        {{ session('app_locale') !== 'en' ? ($translations['Back Button Label'][session('app_locale')] ?? $this->siteDetails?->back_btn_text) : $this->siteDetails?->back_btn_text }}
+                        @else
+                        {{ __('text.Back') }}
+                        @endif
+                    </button>
 
                 </div>
-                <button
-                    id="pay-btn"
-                    class="w-full max-w-md mx-auto bg-indigo-500 hover:bg-indigo-700 text-white font-bolds py-3 text-lg px-4 flex-1 rounded-lg queue-footer-button">
-                    <span class="button-text">{{ __('text.Pay') }}</span>
-                    <svg
-                        id="pay-loader"
-                        class="ml-2 h-5 w-5 text-white animate-spin hidden"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                    </svg>
-                </button>
-            </div>
-            @endif
-
-            <div id="printQueue"></div>
-
-
-            <div class="flex justify-center footer-section queue-footer">
-
-                  {{-- Home Button --}}
-            <button type="button" wire:click="goBackFn(2)"
-                class="{{ $fontSize }} {{ $fontFamily }} bg-white text-slate-950 hover:border-green-700 hover:bg-green-700 hover:text-white font-bolds py-2 px-12 rounded-full border-2 border-gray-800 queue-footer-button {{ $totalLevelCount <= 1 ? 'hidden' : '' }} mr-2"
-                wire:loading.class="opacity-50">
-                @if (!empty($this->siteDetails->home_btn_text))
-                    {{ session('app_locale') !== 'en' ? $translations['Home Button Label'][session('app_locale')] ?? $this->siteDetails?->home_btn_text : $this->siteDetails?->home_btn_text }}
-                @else
-                    {{ __('text.Home') }}
-                @endif
-            </button>
-
-                <button type="button" wire:click="goBackFn({{ $totalLevelCount }})"
-                    class="{{ $fontSize }} {{$fontFamily}}  bg-white text-slate-950 hover:border-indigo-700 hover:bg-indigo-700 hover:text-white  font-bolds py-2 px-12 rounded-full border-2 border-gray-800 {{ $totalLevelCount <= 1 ? 'hidden' : '' }} queue-footer-button"
-                    wire:loading.class="opacity-50">
-                    @if(!empty($this->siteDetails->back_btn_text))
-                    {{ session('app_locale') !== 'en' ? ($translations['Back Button Label'][session('app_locale')] ?? $this->siteDetails?->back_btn_text) : $this->siteDetails?->back_btn_text }}
-                    @else
-                    {{ __('text.Back') }}
-                    @endif
-                </button>
-
             </div>
         </div>
-    </div>
-    @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- <script src="{{ asset('/js/display.js?v='.time()) }}"></script> -->
-    <script>
-        function checkIt(evt) {
-            evt = evt || window.event;
-            var charCode = (typeof evt.which == "undefined") ? evt.keyCode : evt.which;
-            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
-                return false;
+        @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <!-- <script src="{{ asset('/js/display.js?v='.time()) }}"></script> -->
+        <script>
+            function checkIt(evt) {
+                evt = evt || window.event;
+                var charCode = (typeof evt.which == "undefined") ? evt.keyCode : evt.which;
+                if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                    return false;
+                }
+                return true;
             }
-            return true;
-        }
-    </script>
+        </script>
 
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            Livewire.on('header-show', () => {
-                location.reload(); // Refresh the page when OK is clicked
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                Livewire.on('header-show', () => {
+                    location.reload(); // Refresh the page when OK is clicked
+                });
+
             });
+        </script>
 
-        });
-    </script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
+                Livewire.on('checkAvailability', (data) => {
+                    Swal.fire({
+                        title: 'Service Unavailable',
+                        text: data.message || 'The service is currently not available. Please try again later.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
+                    });
+                });
+            });
+        </script>
 
-            Livewire.on('checkAvailability', (data) => {
-                Swal.fire({
-                    title: 'Service Unavailable',
-                    text: data.message || 'The service is currently not available. Please try again later.',
-                    icon: 'warning',
-                    confirmButtonText: 'OK'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        location.reload();
+        <script>
+            document.addEventListener('livewire:init', () => {
+
+                Livewire.on('getLocation', () => {
+
+                    if (navigator.geolocation) {
+
+                        navigator.geolocation.getCurrentPosition(
+                            function(position) {
+                                let latitude = position.coords.latitude;
+                                let longitude = position.coords.longitude;
+
+                                Livewire.dispatch('locationCodChange', {
+                                    latitude: latitude,
+                                    longitude: longitude
+                                });
+                            },
+                            function(error) {
+                                handleLocationError(error);
+                            }
+                        );
+                    } else {
+                        handleLocationError({
+                            code: 'GEOPOSITION_UNSUPPORTED'
+                        });
                     }
                 });
-            });
-        });
-    </script>
 
-    <script>
-        document.addEventListener('livewire:init', () => {
-
-            Livewire.on('getLocation', () => {
-
-                if (navigator.geolocation) {
-
-                    navigator.geolocation.getCurrentPosition(
-                        function(position) {
-                            let latitude = position.coords.latitude;
-                            let longitude = position.coords.longitude;
-
-                            Livewire.dispatch('locationCodChange', {
-                                latitude: latitude,
-                                longitude: longitude
+                function handleLocationError(error) {
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            console.error("User denied the request for Geolocation.");
+                            Livewire.dispatch('locationError', {
+                                'error': 'User denied the request for Geolocation.'
                             });
-                        },
-                        function(error) {
-                            handleLocationError(error);
-                        }
-                    );
-                } else {
-                    handleLocationError({
-                        code: 'GEOPOSITION_UNSUPPORTED'
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            console.error("Location information is unavailable.");
+                            Livewire.dispatch('locationError', {
+                                'error': 'Location information is unavailable.'
+                            });
+                            break;
+                        case error.TIMEOUT:
+                            console.error("The request to get user location timed out.");
+                            Livewire.dispatch('locationError', {
+                                'error': 'The request to get user location timed out.'
+                            });
+                            break;
+                        case error.UNKNOWN_ERROR:
+                            console.error("An unknown error occurred.");
+                            Livewire.dispatch('locationError', {
+                                'error': 'An unknown error occurred.'
+                            });
+                            break;
+                        case 'GEOPOSITION_UNSUPPORTED':
+                            console.error("Geolocation is not supported by this browser.");
+                            Livewire.dispatch('locationError', {
+                                'error': 'Geolocation is not supported by this browser.'
+                            });
+                            break;
+                    }
+                }
+
+                Livewire.on('deny-qr-scanning', () => {
+                    console.log("QR code scanning denied.");
+                    window.location.href = "{{ url('403-page') }}";
+                });
+
+                Livewire.on('swal:limit-exceed', (data) => {
+                    let response = data[0];
+                    Swal.fire({
+                        title: response.title,
+                        text: response.text,
+                        icon: response.icon,
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        showCancelButton: false
                     });
-                }
-            });
+                });
 
-            function handleLocationError(error) {
-                switch (error.code) {
-                    case error.PERMISSION_DENIED:
-                        console.error("User denied the request for Geolocation.");
-                        Livewire.dispatch('locationError', {
-                            'error': 'User denied the request for Geolocation.'
-                        });
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        console.error("Location information is unavailable.");
-                        Livewire.dispatch('locationError', {
-                            'error': 'Location information is unavailable.'
-                        });
-                        break;
-                    case error.TIMEOUT:
-                        console.error("The request to get user location timed out.");
-                        Livewire.dispatch('locationError', {
-                            'error': 'The request to get user location timed out.'
-                        });
-                        break;
-                    case error.UNKNOWN_ERROR:
-                        console.error("An unknown error occurred.");
-                        Livewire.dispatch('locationError', {
-                            'error': 'An unknown error occurred.'
-                        });
-                        break;
-                    case 'GEOPOSITION_UNSUPPORTED':
-                        console.error("Geolocation is not supported by this browser.");
-                        Livewire.dispatch('locationError', {
-                            'error': 'Geolocation is not supported by this browser.'
-                        });
-                        break;
-                }
-            }
+                Livewire.on('silent-print', (data) => {
+                    console.log("Silent print event fired:", data);
 
-            Livewire.on('deny-qr-scanning', () => {
-                console.log("QR code scanning denied.");
-                window.location.href = "{{ url('403-page') }}";
-            });
+                    if (!data || !data.html) {
+                        console.error("No HTML received from Livewire.");
+                        return;
+                    }
 
-                   Livewire.on('swal:limit-exceed', (data) => {
-                let response =data[0];
-            Swal.fire({
-                title: response.title,
-                text: response.text,
-                icon: response.icon,
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showConfirmButton: false,
-                showCancelButton: false
-            });
-        });
+                    var myHtml = '<html><head><meta charset=\"UTF-8\"><style>body {padding:0; margin: 0; font-family: Arial; text-align: center; } @media print { body { width: 80mm; margin: 0; } #PrintContent { width: 100%; max-width: 80mm; margin: 0 auto; } }</style></head><body><div id=\"PrintContent\" style=\"margin:0 auto;text-align:center;max-width: 80mm;\">' + data.html + '</div></body></html>';
 
-           Livewire.on('silent-print', (data) => {
-                        console.log("Silent print event fired:", data);
+                    const encoded = btoa(unescape(encodeURIComponent(myHtml)));
+                    console.log("Encoded HTML:", encoded.substring(0, 50)); // preview first 50 chars
 
-                        if (!data || !data.html) {
-                            console.error("No HTML received from Livewire.");
-                            return;
-                        }
-
-                        var myHtml = '<html><head><meta charset=\"UTF-8\"><style>body {padding:0; margin: 0; font-family: Arial; text-align: center; } @media print { body { width: 80mm; margin: 0; } #PrintContent { width: 100%; max-width: 80mm; margin: 0 auto; } }</style></head><body><div id=\"PrintContent\" style=\"margin:0 auto;text-align:center;max-width: 80mm;\">'+data.html+'</div></body></html>';
-
-                        const encoded = btoa(unescape(encodeURIComponent(myHtml)));
-                        console.log("Encoded HTML:", encoded.substring(0, 50)); // preview first 50 chars
-
-                        window.location.href = 'mysilentprint://html/' + encoded;
-            });
-        });
-    </script>
-    <script src="https://js.stripe.com/v3/"></script>
-    <script>
-        let stripe;
-        let card;
-
-        Livewire.on('cardElement', () => {
-            setTimeout(() => {
-                const cardContainer = document.getElementById('card-element');
-
-                if (!cardContainer) {
-                    console.error('Stripe card element not found.');
-                    return;
-                }
-
-                // Initialize Stripe
-                // stripe = Stripe("{{ config('services.stripe.key') }}");
-                 stripe = Stripe("{{ $paymentSettingKey }}");
-                const elements = stripe.elements();
-                card = elements.create('card');
-
-                // Mount card
-                card.mount('#card-element');
-
-                console.log('Card mounted.');
-
-                // ✅ Attach Pay button listener here
-                const payBtn = document.getElementById('pay-btn');
-                const loader = document.getElementById('pay-loader');
-                const buttonText = payBtn.querySelector('.button-text');
-                if (payBtn) {
-                    payBtn.addEventListener('click', async () => {
-
-
-                        if (!stripe || !card) {
-                            console.log('Card is not ready yet.');
-                            return;
-                        }
-
-
-                        // Disable button and show loader
-                        payBtn.disabled = true;
-                        buttonText.textContent = 'Processing...';
-                        loader.classList.remove('hidden');
-
-                        const {
-                            paymentMethod,
-                            error
-                        } = await stripe.createPaymentMethod('card', card);
-
-                        if (error) {
-                            console.log(error.message);
-                            // Livewire.dispatch('stripe-payment-method', {
-                            //     paymentMethodId: null
-                            // });
-                                Swal.fire({
-                                title: 'Invalid payment keys',
-                                text:  'Please check payment settings.',
-                                icon: 'warning',
-                                confirmButtonText: 'OK'
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    location.reload();
-                                }
-                            });
-                        } else {
-                            Livewire.dispatch('stripe-payment-method', {
-                                paymentMethodId: paymentMethod.id
-                            });
-                        }
-                    });
-                } else {
-                    console.warn('Pay button not found.');
-                }
-            }, 300); // Delay to ensure DOM is ready
-        });
-    </script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const cards = document.querySelectorAll(".location-card");
-            cards.forEach((card) => {
-                card.addEventListener("click", () => {
-                    cards.forEach((c) => c.classList.remove("card-active"));
-                    card.classList.add("card-active");
+                    window.location.href = 'mysilentprint://html/' + encoded;
                 });
             });
-        });
-    </script>
+        </script>
+        <script src="https://js.stripe.com/v3/"></script>
+        <script>
+            let stripe;
+            let card;
 
-    @endpush
+            Livewire.on('cardElement', () => {
+                setTimeout(() => {
+                    const cardContainer = document.getElementById('card-element');
 
-    @push('scripts')
-<script>
+                    if (!cardContainer) {
+                        console.error('Stripe card element not found.');
+                        return;
+                    }
 
-    document.addEventListener('livewire:init', () => {
-        let initSelect2 = () => {
-        let elements = $('.multiSelect2');
-        if (!elements.length) return;
+                    // Initialize Stripe
+                    // stripe = Stripe("{{ config('services.stripe.key') }}");
+                    stripe = Stripe("{{ $paymentSettingKey }}");
+                    const elements = stripe.elements();
+                    card = elements.create('card');
 
-        elements.each(function () {
-            let el = $(this);
-            let property = el.data('attr'); // example: dynamicProperties.MyField_12
+                    // Mount card
+                    card.mount('#card-element');
 
-            // prevent duplicate init
-            if (el.hasClass('select2-initialized')) return;
-            el.addClass('select2-initialized');
+                    console.log('Card mounted.');
 
-            el.select2({
-                placeholder: "{{ __('text.Select an option') }}",
-                allowClear: true
+                    // ✅ Attach Pay button listener here
+                    const payBtn = document.getElementById('pay-btn');
+                    const loader = document.getElementById('pay-loader');
+                    const buttonText = payBtn.querySelector('.button-text');
+                    if (payBtn) {
+                        payBtn.addEventListener('click', async () => {
+
+
+                            if (!stripe || !card) {
+                                console.log('Card is not ready yet.');
+                                return;
+                            }
+
+
+                            // Disable button and show loader
+                            payBtn.disabled = true;
+                            buttonText.textContent = 'Processing...';
+                            loader.classList.remove('hidden');
+
+                            const {
+                                paymentMethod,
+                                error
+                            } = await stripe.createPaymentMethod('card', card);
+
+                            if (error) {
+                                console.log(error.message);
+                                // Livewire.dispatch('stripe-payment-method', {
+                                //     paymentMethodId: null
+                                // });
+                                Swal.fire({
+                                    title: 'Invalid payment keys',
+                                    text: 'Please check payment settings.',
+                                    icon: 'warning',
+                                    confirmButtonText: 'OK'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        location.reload();
+                                    }
+                                });
+                            } else {
+                                Livewire.dispatch('stripe-payment-method', {
+                                    paymentMethodId: paymentMethod.id
+                                });
+                            }
+                        });
+                    } else {
+                        console.warn('Pay button not found.');
+                    }
+                }, 300); // Delay to ensure DOM is ready
             });
+        </script>
 
-            // update Livewire when changed
-            el.on('change', function () {
-                @this.set(property, $(this).val());
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const cards = document.querySelectorAll(".location-card");
+                cards.forEach((card) => {
+                    card.addEventListener("click", () => {
+                        cards.forEach((c) => c.classList.remove("card-active"));
+                        card.classList.add("card-active");
+                    });
+                });
             });
+        </script>
 
-            // set initial value from Livewire
-            let currentValue = @this.get(property);
-            if (currentValue) {
-                el.val(currentValue).trigger('change');
-            }
-        });
-    };
+        @endpush
 
-        // run on load
-        initSelect2();
+        @push('scripts')
+        <script>
+            document.addEventListener('livewire:init', () => {
+                let initSelect2 = () => {
+                    let elements = $('.multiSelect2');
+                    if (!elements.length) return;
 
-        // re-run whenever step changes
-        Livewire.on('step-changed', (data) => {
+                    elements.each(function() {
+                        let el = $(this);
+                        let property = el.data('attr'); // example: dynamicProperties.MyField_12
 
-                setTimeout(() => initSelect2(), 200);
+                        // prevent duplicate init
+                        if (el.hasClass('select2-initialized')) return;
+                        el.addClass('select2-initialized');
 
-        });
+                        el.select2({
+                            placeholder: "{{ __('text.Select an option') }}",
+                            allowClear: true
+                        });
 
-         Livewire.hook('morph.updated', () => {
-        // ensures select2 reinit if Livewire re-renders this step
-        initSelect2();
-    });
-    });
+                        // update Livewire when changed
+                        el.on('change', function() {
+                            @this.set(property, $(this).val());
+                        });
 
+                        // set initial value from Livewire
+                        let currentValue = @this.get(property);
+                        if (currentValue) {
+                            el.val(currentValue).trigger('change');
+                        }
+                    });
+                };
 
+                // run on load
+                initSelect2();
 
-</script>
-@endpush
-</div>
+                // re-run whenever step changes
+                Livewire.on('step-changed', (data) => {
+
+                    setTimeout(() => initSelect2(), 200);
+
+                });
+
+                Livewire.hook('morph.updated', () => {
+                    // ensures select2 reinit if Livewire re-renders this step
+                    initSelect2();
+                });
+            });
+        </script>
+        @endpush
+    </div>

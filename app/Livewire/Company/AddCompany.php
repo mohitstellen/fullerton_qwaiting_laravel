@@ -21,8 +21,6 @@ class AddCompany extends Component
         'company.ehs_appointments_per_year.required' => 'The EHS appointments per year field is required.',
         'company.ehs_appointments_per_year.min' => 'The EHS appointments per year must be at least 1.',
         'company.contact_person1_name.required' => 'The primary contact name field is required.',
-        'company.contact_person1_phone.required' => 'The primary contact phone field is required.',
-        'company.contact_person1_email.required' => 'The primary contact email field is required.',
     ];
 
     protected function rules(): array
@@ -33,8 +31,8 @@ class AddCompany extends Component
             'company.billing_address' => ['required', 'string'],
             'company.ehs_appointments_per_year' => ['required', 'integer', 'min:1'],
             'company.contact_person1_name' => ['required', 'string', 'max:255'],
-            'company.contact_person1_phone' => ['required', 'string', 'max:30'],
-            'company.contact_person1_email' => ['required', 'email', 'max:255'],
+            'company.contact_person1_phone' => ['nullable', 'string', 'max:30'],
+            'company.contact_person1_email' => ['nullable', 'email', 'max:255'],
         ];
     }
 

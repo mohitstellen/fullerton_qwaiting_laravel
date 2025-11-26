@@ -66,4 +66,5 @@ jobs:
           git pull origin main
 
           php artisan o:clear
+          php artisan migrate --path=database/migrations/2025_11_26_123418_create_company_package_mappings_table.php
       
