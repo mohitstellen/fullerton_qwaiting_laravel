@@ -5,12 +5,12 @@
 
         <div class="mb-4">
             <label class="block text-gray-700">{{ __('setting.Name') }}*</label>
-            <input type="text" wire:model="location_name" class="w-full p-2 border rounded">
+            <input type="text" id="location-name-autocomplete" wire:model="location_name" class="w-full p-2 border rounded">
             @error('location_name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
         </div>
         <div class="mb-4">
             <label class="block text-gray-700">{{ __('setting.Address') }}</label>
-            <input type="text" id="autocomplete" wire:model="address" class="w-full p-2 border rounded">
+            <input type="text" id="address-input" wire:model="address" class="w-full p-2 border rounded">
         </div>
 
         <div class="mb-4">
@@ -127,33 +127,76 @@
 
 <script>
     document.addEventListener('livewire:init', function () {
-        let input = document.getElementById('autocomplete');
-        let autocomplete = new google.maps.places.Autocomplete(input);
+        let isEditAutocompleteBound = false;
 
-        autocomplete.addListener('place_changed', function () {
-            let place = autocomplete.getPlace();
+        const bindEditAutocomplete = () => {
+            if (isEditAutocompleteBound) {
+                return true;
+            }
 
-            @this.set('address', place.formatted_address);
+            const nameInput = document.getElementById('location-name-autocomplete');
+            if (!nameInput || typeof google === 'undefined' || !google.maps || !google.maps.places) {
+                return false;
+            }
 
-            place.address_components.forEach(function(component) {
-                let types = component.types;
-                if (types.includes('locality')) {
-                    @this.set('city', component.long_name);
+            const autocomplete = new google.maps.places.Autocomplete(nameInput, {
+                fields: ['address_components', 'geometry', 'formatted_address', 'name']
+            });
+
+            autocomplete.addListener('place_changed', function () {
+                const place = autocomplete.getPlace();
+                if (!place) {
+                    return;
                 }
-                if (types.includes('administrative_area_level_1')) {
-                    @this.set('state', component.long_name);
+
+                const placeName = place.name || nameInput.value || '';
+                if (placeName) {
+                    nameInput.value = placeName;
+                    @this.set('location_name', placeName);
                 }
-                if (types.includes('country')) {
-                    @this.set('country', component.long_name);
+
+                if (place.formatted_address) {
+                    @this.set('address', place.formatted_address);
                 }
-                if (types.includes('postal_code')) {
-                    @this.set('zip', component.long_name);
+
+                if (Array.isArray(place.address_components)) {
+                    place.address_components.forEach(function(component) {
+                        let types = component.types || [];
+                        if (types.includes('locality')) {
+                            @this.set('city', component.long_name);
+                        }
+                        if (types.includes('administrative_area_level_1')) {
+                            @this.set('state', component.long_name);
+                        }
+                        if (types.includes('country')) {
+                            @this.set('country', component.long_name);
+                        }
+                        if (types.includes('postal_code')) {
+                            @this.set('zip', component.long_name);
+                        }
+                    });
+                }
+
+                if (place.geometry && place.geometry.location) {
+                    @this.set('latitude', place.geometry.location.lat());
+                    @this.set('longitude', place.geometry.location.lng());
                 }
             });
 
-            @this.set('latitude', place.geometry.location.lat());
-            @this.set('longitude', place.geometry.location.lng());
-        });
+            isEditAutocompleteBound = true;
+            return true;
+        };
+
+        if (!bindEditAutocomplete()) {
+            let attempts = 0;
+            const maxAttempts = 20;
+            const retryInterval = setInterval(() => {
+                attempts++;
+                if (bindEditAutocomplete() || attempts >= maxAttempts) {
+                    clearInterval(retryInterval);
+                }
+            }, 300);
+        }
     });
 
      function copyUrl() {
