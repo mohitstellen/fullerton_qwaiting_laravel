@@ -57,7 +57,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mt-4">
+         <div class="grid grid-cols-2 gap-4 mt-4">
             <label class="block text-gray-700">Clinic Image</label>
             <input type="file" wire:model="location_image" class="w-full p-2 border rounded">
             @error('location_image') <span class="text-error-500 text-sm">{{ $message }}</span> @enderror

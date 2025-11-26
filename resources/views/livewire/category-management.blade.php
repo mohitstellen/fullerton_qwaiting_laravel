@@ -209,7 +209,7 @@
                             <tr>
                             <td colspan="18" class="text-center py-6">
                                 <img src="{{ url('images/no-record.jpg') }}" alt="No Records Found"
-                                    class="mx-auto h-30 w-30" style="">           
+                                    class="mx-auto h-30 w-30" style="">
                             </td>
                         </tr>
                             @endif

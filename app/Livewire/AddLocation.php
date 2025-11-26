@@ -64,7 +64,7 @@ class AddLocation extends Component
             'map_link' => $this->map_link,
             'available_for_public_booking' => (bool) ((int) $this->available_for_public_booking),
             'status' => (bool) $this->status,
-            'location_image' => $imagePath,
+              'location_image' => $imagePath,
         ]);
 
         session()->flash('message', 'Location saved successfully.');
