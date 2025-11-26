@@ -239,7 +239,7 @@
         @endif
 
         <!-- Language Selector -->
-        <div  style="right: 48px; top: 5px;" class="md:absolute m-3 px-4 md:px-0 md:my-0 md:w-15">
+        <div  style="right: 48px; top: 5px;" class="md:absolute m-3 px-4 md:px-0 md:my-0 md:w-30">
             <livewire:language-selector />
         </div>
 
