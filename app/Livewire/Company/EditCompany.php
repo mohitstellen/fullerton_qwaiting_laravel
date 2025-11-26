@@ -346,7 +346,7 @@ class EditCompany extends Component
     protected function loadCompanyPackages(): void
     {
         $this->companyPackages = $this->companyModel->companyPackages()
-            ->with(['appointmentType:id,name', 'package:id,name'])
+            ->with(['appointmentType:id,name', 'package:id,name,amount'])
             ->orderByDesc('updated_at')
             ->get()
             ->map(function (CompanyPackage $mapping) {
@@ -356,6 +356,7 @@ class EditCompany extends Component
                     'appointment_type_name' => $mapping->appointmentType->name ?? 'N/A',
                     'package_id' => $mapping->package_id,
                     'package_name' => $mapping->package->name ?? 'N/A',
+                    'package_amount' => $mapping->package->amount ?? 0.00,
                     'modes_of_identification' => $mapping->modes_of_identification ?? [],
                     'clinic_ids' => $mapping->clinic_ids ?? [],
                     'remarks' => $mapping->remarks,

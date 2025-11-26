@@ -1,5 +1,5 @@
 <div class="p-4">
-    <div class="space-y-6 max-w-3xl mx-auto">
+    <div class="space-y-6">
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Edit Company</h2>
             <a href="{{ route('tenant.companies.index') }}"
@@ -40,76 +40,79 @@
                     </div>
                 @endif
 
-                <div class="space-y-3">
-                    @forelse ($companyPackages as $mapping)
-                        @php
-                            $clinicNames = collect($mapping['clinic_ids'])
-                                ->map(fn ($id) => $locationLookup[$id] ?? null)
-                                ->filter()
-                                ->values()
-                                ->all();
-                        @endphp
-                        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900" wire:key="company-package-{{ $mapping['id'] }}">
-                            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                                <div>
-                                    <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Appointment type</p>
-                                    <p class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ $mapping['appointment_type_name'] }}</p>
-                                </div>
-                                <div class="flex flex-wrap gap-2">
-                                    <button type="button"
-                                            wire:click="editMapping({{ $mapping['id'] }})"
-                                            class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800">
-                                        Edit
-                                    </button>
-                                    <button type="button"
-                                            wire:click="deleteMapping({{ $mapping['id'] }})"
-                                            class="inline-flex items-center rounded-lg border border-red-200 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-900/40 dark:text-red-300 dark:hover:bg-red-900/20">
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="mt-4 grid gap-4 text-sm text-gray-700 dark:text-gray-200 md:grid-cols-2">
-                                <div class="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/40">
-                                    <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Package</p>
-                                    <p class="mt-1 text-base font-semibold text-gray-900 dark:text-gray-100">{{ $mapping['package_name'] }}</p>
-                                </div>
-                                <div class="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/40">
-                                    <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Clinics</p>
-                                    @if (count($clinicNames))
-                                        <p class="mt-1 leading-relaxed text-gray-800 dark:text-gray-100">{{ implode(', ', $clinicNames) }}</p>
-                                    @else
-                                        <p class="mt-1 text-gray-400">Not specified</p>
-                                    @endif
-                                </div>
-
-                                <div class="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/40 md:col-span-2">
-                                    <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Modes of identification</p>
-                                    <div class="mt-2 flex flex-wrap gap-2">
-                                        @forelse ($mapping['modes_of_identification'] as $moi)
-                                            <span class="inline-flex items-center rounded-full bg-white px-3 py-0.5 text-xs font-medium text-gray-700 shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-700">{{ $moi }}</span>
-                                        @empty
-                                            <span class="text-gray-400">Not specified</span>
-                                        @endforelse
-                                    </div>
-                                </div>
-                                @if (! empty($mapping['remarks']))
-                                    <div class="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-800/40 md:col-span-2">
-                                        <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Remarks</p>
-                                        <p class="mt-1 text-gray-800 dark:text-gray-100">{{ $mapping['remarks'] }}</p>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <div class="mt-4 text-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">
-                                Updated {{ $mapping['updated_at'] ?? '—' }}
-                            </div>
-                        </div>
-                    @empty
-                        <div class="rounded-xl border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-300">
-                            No company packages have been added yet.
-                        </div>
-                    @endforelse
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    S.No
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    Company Name
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    Appointment Type
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    Package Name
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    Amount
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    Action
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
+                            @forelse ($companyPackages as $index => $mapping)
+                                <tr wire:key="company-package-{{ $mapping['id'] }}" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                        {{ $index + 1 }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                        {{ $companyModel->company_name }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                        {{ $mapping['appointment_type_name'] }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                        {{ $mapping['package_name'] }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                        {{ number_format($mapping['package_amount'] ?? 0, 2) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button type="button"
+                                                    wire:click="editMapping({{ $mapping['id'] }})"
+                                                    class="inline-flex items-center justify-center rounded-lg border border-gray-300 p-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+                                                    title="Edit">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </button>
+                                            <button type="button"
+                                                    wire:click="deleteMapping({{ $mapping['id'] }})"
+                                                    class="inline-flex items-center justify-center rounded-lg border border-red-200 p-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-900/40 dark:text-red-300 dark:hover:bg-red-900/20"
+                                                    title="Delete"
+                                                    onclick="return confirm('Are you sure you want to delete this package?')">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                        No company packages have been added yet.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
 
                 @if ($showForm)
