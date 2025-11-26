@@ -17,7 +17,7 @@
                             @if($tab > 1 && !empty($parentCategory))
                             <div class="w-full px-2.5 xl:w-1/2">
                                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                    {{ $tab == 2 ? __('text.appointment type') : __('text.Parent Service') }}*
+                                    {{ $tab == 2 ? __('text.appointment type') : __('text.Parent Appointment Type') }}*
                                 </label>
                                 <div x-data="{ isOptionSelected: false }" class="relative z-20 bg-transparent">
                                     <select
@@ -58,7 +58,7 @@
 
                             <div class="w-full px-2.5 xl:w-1/2">
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                    {{__('text.service Name (Other Language)')}}
+                                    {{ $tab == 2 ? __('text.Package Name (Other Language)') : __('text.Appointment Type Name (Other Language)') }}
                                 </label>
                                 <input
                                     type="text"
@@ -232,7 +232,7 @@
 
                         <div class="w-full px-2.5 xl:w-1/2">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                {{ __('text.Select service is paid or free')}}
+                                {{ $tab == 2 ? __('text.Select package is paid or free') : __('text.Select appointment type is paid or free') }}
                             </label>
                             <div x-data="{ isOptionSelected: false }" class="relative z-20 bg-transparent">
                                 <select
@@ -263,7 +263,7 @@
                         @if($is_paid == 1)
                         <div class="w-full px-2.5 xl:w-1/2">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                {{__('text.Service Amount')}}
+                        {{ $tab == 2 ? __('text.Package Amount') : __('text.Appointment Type Amount') }}
                             </label>
                             <input
                                 type="text"
@@ -350,12 +350,12 @@
                                 wire:model.live="isService">
                             <span class="slider round"></span>
                         </label>
-                        {{__('text.Enable/Disable Service Note.')}}
+                        {{ $tab == 2 ? __('text.Enable/Disable Package Note.') : __('text.Enable/Disable Appointment Type Note.') }}
                     </div>
 
                     <div class="w-full px-2.5 xl:w-1/2">
                         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{__('text.Service Time (in mins)')}}
+                        {{ $tab == 2 ? __('text.Package Time (in mins)') : __('text.Appointment Type Time (in mins)') }}
                         </label>
                         <input
                             type="number"
@@ -365,7 +365,7 @@
                     </div>
                     <div class="w-full px-2.5 xl:w-1/2">
                         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{__('text.Service Note')}}
+                        {{ $tab == 2 ? __('text.Package Note') : __('text.Appointment Type Note') }}
                         </label>
                         <textarea wire:model="note" row="5" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
 
