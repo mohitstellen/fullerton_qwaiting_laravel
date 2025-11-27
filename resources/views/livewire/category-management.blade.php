@@ -189,6 +189,12 @@
                                                     </button>
                                                 </a>
                                                 @endcan
+                                                @can('Service Add')
+                                                <button wire:click="duplicateCategory({{ $category->id }})"
+                                                    class="text-theme-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
+                                                    Duplicate
+                                                </button>
+                                                @endcan
                                                 @can('Service Delete')
                                                 <button wire:click="deleteCategory({{ $category->id }})"
                                                     class="text-theme-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">

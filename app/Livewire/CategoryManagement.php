@@ -112,7 +112,7 @@ public function updatingSearch()
         $this->dispatch('confirm-multiple-delete');
     }
 
-#[On('confirmed-multiple-delete')]
+    #[On('confirmed-multiple-delete')]
     public function bulkDelete()
     {
 
@@ -128,6 +128,12 @@ public function updatingSearch()
               ActivityLog::storeLog($this->teamId, $this->userAuth->id, null, null, ActivityLog::BULK_DELETE, $this->locationId, ActivityLog::CATEGORY, null, $this->userAuth);
             $this->dispatch('deleted');
         }
+    }
+
+    public function duplicateCategory($id)
+    {
+        // Redirect to create form with duplicate query parameter
+        return redirect()->route('tenant.category.create', ['level' => $this->tab])->with('duplicate_category_id', $id);
     }
 
     public function render()

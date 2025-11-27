@@ -12,6 +12,7 @@ use App\Models\FormField;
 use Livewire\WithFileUploads;
 use Auth;
 use Livewire\Attributes\Title;
+use Illuminate\Support\Facades\DB;
 
 class CategoryCreateComponent extends Component
 {
@@ -83,7 +84,15 @@ class CategoryCreateComponent extends Component
         $this->leadTimeUnit = 'days';
         $this->enableEVoucher = '0';
 
-        if ($categoryId) {
+        // Check if this is a duplicate request
+        $duplicateCategoryId = Session::get('duplicate_category_id');
+        if ($duplicateCategoryId) {
+            Session::forget('duplicate_category_id'); // Clear the session after use
+            $this->category = Category::findOrFail($duplicateCategoryId);
+            $this->isEdit = false; // This is a new category, not an edit
+            $this->loadCategoryData();
+           
+        } elseif ($categoryId) {
             $this->category = Category::findOrFail($categoryId);
             $this->isEdit = true;
             $this->loadCategoryData();
@@ -308,11 +317,42 @@ class CategoryCreateComponent extends Component
 
             $this->dispatch('updated',  '/category-management?tab=' . $this->tab);
         } else {
-            $formfield = FormField::where('team_id', $this->teamId)->where('location_id', $this->locationId)->first();
+            // If this is a duplicate, copy relationships from original category
+            if (isset($this->category) && !$this->isEdit) {
+                // Copy form_fields relationship
+                $formFieldIds = $this->category->form_fields()->pluck('id')->toArray();
+                if (!empty($formFieldIds)) {
+                    $categoryDetail->form_fields()->sync($formFieldIds);
+                }
 
-            if (!empty($formfield)) {
-                $formfield->categories()->sync($categoryDetail);
+                // Copy users relationship (category_user table)
+                $userIds = DB::table('category_user')
+                    ->where('category_id', $this->category->id)
+                    ->pluck('user_id')
+                    ->toArray();
+                
+                if (!empty($userIds)) {
+                    $syncData = [];
+                    foreach ($userIds as $userId) {
+                        $syncData[$userId] = [];
+                    }
+                    $categoryDetail->users()->sync($syncData);
+                }
+
+                // Copy screen_template relationship
+                $screenTemplateIds = $this->category->screenTemplate()->pluck('id')->toArray();
+                if (!empty($screenTemplateIds)) {
+                    $categoryDetail->screenTemplate()->sync($screenTemplateIds);
+                }
+            } else {
+                // Original behavior for new categories
+                $formfield = FormField::where('team_id', $this->teamId)->where('location_id', $this->locationId)->first();
+
+                if (!empty($formfield)) {
+                    $formfield->categories()->sync($categoryDetail);
+                }
             }
+            
             $this->dispatch('created', '/category-management?tab=' . $this->tab);
         }
         // session()->flash('success', $this->isEdit ? 'Category updated successfully' : 'Category created successfully');
