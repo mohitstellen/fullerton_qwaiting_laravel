@@ -154,28 +154,17 @@
                                                     Select an appointment type to load packages.
                                                 </div>
                                             @else
-                                                <div class="mt-1 max-h-64 overflow-y-auto rounded-lg border border-gray-300 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                                                    {{-- Select All checkbox --}}
-                                                    <label class="mb-3 inline-flex items-center space-x-2 border-b border-gray-200 pb-2 text-sm font-semibold text-gray-800 dark:border-gray-700 dark:text-gray-300">
-                                                        <input type="checkbox"
-                                                            wire:click="toggleSelectAllPackages"
-                                                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
-                                                            @if($this->areAllPackagesSelected()) checked @endif>
-                                                        <span>Select All</span>
-                                                    </label>
-                                                    
-                                                    {{-- Individual package checkboxes --}}
-                                                    <div class="mt-2 space-y-2">
+                                                <div class="mt-1" wire:ignore>
+                                                    <select id="company-packages-select"
+                                                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                                            data-placeholder="Select packages..."
+                                                            multiple>
                                                         @foreach ($packageOptions as $package)
-                                                            <label class="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-200">
-                                                                <input type="checkbox"
-                                                                    wire:model="mappingForm.package_ids"
-                                                                    value="{{ $package['id'] }}"
-                                                                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
-                                                                <span>{{ $package['name'] }}</span>
-                                                            </label>
+                                                            <option value="{{ $package['id'] }}">
+                                                                {{ $package['name'] }}
+                                                            </option>
                                                         @endforeach
-                                                    </div>
+                                                    </select>
                                                 </div>
                                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Select one or more packages.</p>
                                             @endif
@@ -258,6 +247,42 @@
 </div>
 
 @once
+    @push('styles')
+        <style>
+            /* Fix Select2 clear button overlapping with dropdown arrow */
+            .select2-container--default .select2-selection--multiple .select2-selection__clear {
+                position: absolute;
+                right: 30px;
+                top: 30%;
+                transform: translateY(-50%);
+                z-index: 10;
+                font-size: 18px;
+                font-weight: bold;
+                padding: 0 5px;
+            }
+            
+            /* Ensure proper spacing for the dropdown arrow */
+            .select2-container--default .select2-selection--multiple {
+                padding-right: 60px !important;
+                min-height: 38px;
+            }
+            
+            /* Position the arrow properly - hide it since Select2 multi-select doesn't need it */
+            .select2-container--default.select2-container--open .select2-selection--multiple .select2-selection__arrow {
+                display: none;
+            }
+            
+            /* Better spacing for selected items */
+            .select2-container--default .select2-selection--multiple .select2-selection__choice {
+                margin: 2px 5px 2px 0;
+            }
+            
+            /* Adjust the rendered choices container */
+            .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+                padding-right: 50px;
+            }
+        </style>
+    @endpush
     @push('scripts')
         <script>
             document.addEventListener('livewire:init', function() {
@@ -280,10 +305,12 @@
                     if (modal.length && modal.is(':visible') && !select2Initialized) {
                         const clinicsSelect = $('#company-clinics-select');
                         const moiSelect = $('#company-moi-select');
+                        const packagesSelect = $('#company-packages-select');
                         
                         // Check if any Select2 needs initialization
                         if ((clinicsSelect.length && !clinicsSelect.hasClass('select2-hidden-accessible')) ||
-                            (moiSelect.length && !moiSelect.hasClass('select2-hidden-accessible'))) {
+                            (moiSelect.length && !moiSelect.hasClass('select2-hidden-accessible')) ||
+                            (packagesSelect.length && !packagesSelect.hasClass('select2-hidden-accessible'))) {
                             initializeSelect2();
                             select2Initialized = true;
                         }
@@ -292,6 +319,7 @@
                         if (select2Initialized) {
                             destroySelect2('#company-clinics-select');
                             destroySelect2('#company-moi-select');
+                            destroySelect2('#company-packages-select');
                             select2Initialized = false;
                         }
                     }
@@ -317,6 +345,48 @@
                     $(document).on('click.select2-modal', '.select2-container, .select2-dropdown', function(e) {
                         e.stopPropagation();
                     });
+                    
+                    // Initialize Packages Select2 (multi-select with search)
+                    const packagesSelect = $('#company-packages-select');
+                    if (packagesSelect.length && !packagesSelect.hasClass('select2-hidden-accessible')) {
+                        const selectedPackages = @this.get('mappingForm.package_ids') || [];
+                        const selectedPackagesStrings = selectedPackages.map(v => String(v));
+                        
+                        console.log('Initializing Packages Select2 with selected:', selectedPackagesStrings);
+                        
+                        packagesSelect.select2({
+                            placeholder: 'Search and select packages',
+                            allowClear: true,
+                            width: '100%',
+                            dropdownParent: modal,
+                            closeOnSelect: false
+                        });
+                        
+                        // Prevent dropdown from closing when clicking inside
+                        packagesSelect.on('select2:open', function() {
+                            $('.select2-dropdown').off('mousedown').on('mousedown', function(e) {
+                                e.stopPropagation();
+                            });
+                        });
+                        
+                        // Set selected values BEFORE binding change event to avoid triggering Livewire
+                        if (selectedPackagesStrings.length > 0) {
+                            packagesSelect.val(selectedPackagesStrings);
+                        }
+                        
+                        // Bind change event AFTER setting initial values
+                        packagesSelect.on('change.select2', function(e) {
+                            let data = $(this).val() || [];
+                            @this.set('mappingForm.package_ids', data);
+                        });
+                        
+                        // Trigger Select2 to update the UI display
+                        if (selectedPackagesStrings.length > 0) {
+                            setTimeout(function() {
+                                packagesSelect.trigger('change.select2');
+                            }, 50);
+                        }
+                    }
                     
                     // Initialize Clinics Select2 (multi-select with search)
                     const clinicsSelect = $('#company-clinics-select');
@@ -450,6 +520,30 @@
                         }
                     }, 200);
                 });
+                
+                Livewire.on('company-packages:init-packages-select', (event) => {
+                    setTimeout(function() {
+                        const select = $('#company-packages-select');
+                        if (select.length) {
+                            const selected = (event.selected || []).map(v => String(v));
+                            if (select.hasClass('select2-hidden-accessible')) {
+                                // Select2 already initialized, just update values
+                                select.val(selected).trigger('change');
+                            } else {
+                                // Select2 not initialized yet, initialize it first
+                                initializeSelect2();
+                                setTimeout(function() {
+                                    if (select.hasClass('select2-hidden-accessible')) {
+                                        if (selected.length > 0) {
+                                            select.val(selected).trigger('change');
+                                        }
+                                    }
+                                }, 200);
+                            }
+                        }
+                    }, 200);
+                });
+                
                 
                 // Also listen for DOM morph updates (when modal is shown/hidden)
                 Livewire.hook('morph.updated', ({ el, component }) => {

@@ -370,6 +370,7 @@ class EditCompany extends Component
     {
         $this->dispatch('company-packages:init-clinic-select', selected: $this->mappingForm['clinic_ids'] ?? []);
         $this->dispatch('company-packages:init-moi-select', selected: $this->mappingForm['modes_of_identification'] ?? []);
+        $this->dispatch('company-packages:init-packages-select', selected: $this->mappingForm['package_ids'] ?? []);
     }
 
     protected function loadOptions(): void
