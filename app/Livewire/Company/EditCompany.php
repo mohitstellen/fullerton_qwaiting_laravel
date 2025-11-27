@@ -21,6 +21,8 @@ class EditCompany extends Component
 
     public array $appointmentTypes = [];
 
+    public array $appointmentTypesForValidity = [];
+
     public array $packageOptions = [];
 
     public array $locations = [];
@@ -311,6 +313,7 @@ class EditCompany extends Component
         session()->flash('companyPackagesMessage', 'Company package(s) saved successfully.');
 
         $this->loadCompanyPackages();
+        $this->loadAppointmentTypesForValidity();
         $this->closeForm();
     }
 
@@ -325,6 +328,7 @@ class EditCompany extends Component
         }
 
         $this->loadCompanyPackages();
+        $this->loadAppointmentTypesForValidity();
         session()->flash('companyPackagesMessage', 'Company package removed.');
     }
 
@@ -474,6 +478,9 @@ class EditCompany extends Component
             ])
             ->toArray();
 
+        // Load appointment types that are assigned in company packages
+        $this->loadAppointmentTypesForValidity();
+
         $locations = Location::query()
             ->where('team_id', $teamId)
             ->where('status', 1)
@@ -486,6 +493,27 @@ class EditCompany extends Component
         ])->toArray();
 
         $this->locationLookup = $locations->pluck('location_name', 'id')->toArray();
+    }
+
+    protected function loadAppointmentTypesForValidity(): void
+    {
+        // Get unique appointment_type_ids from company packages
+        $appointmentTypeIds = CompanyPackage::where('company_id', $this->companyModel->id)
+            ->distinct()
+            ->pluck('appointment_type_id')
+            ->filter()
+            ->toArray();
+
+        if (empty($appointmentTypeIds)) {
+            $this->appointmentTypesForValidity = [];
+            return;
+        }
+
+        // Filter appointment types to only include those in company packages
+        $this->appointmentTypesForValidity = array_values(array_filter(
+            $this->appointmentTypes,
+            fn ($type) => in_array($type['id'], $appointmentTypeIds)
+        ));
     }
 
     protected function loadPackageOptions(?int $appointmentTypeId): void
@@ -550,7 +578,7 @@ class EditCompany extends Component
         $appointmentType = CompanyAppointmentType::where('company_id', $this->companyModel->id)
             ->findOrFail($appointmentTypeId);
 
-        $selectedType = collect($this->appointmentTypes)->firstWhere('id', $appointmentType->appointment_type_id);
+        $selectedType = collect($this->appointmentTypesForValidity)->firstWhere('id', $appointmentType->appointment_type_id);
 
         $this->appointmentTypeForm = [
             'id' => $appointmentType->id,
@@ -578,7 +606,7 @@ class EditCompany extends Component
         
         // If search matches exactly with a selected type, keep it selected
         if (!empty($this->appointmentTypeForm['appointment_type_id'])) {
-            $selectedType = collect($this->appointmentTypes)->firstWhere('id', (int) $this->appointmentTypeForm['appointment_type_id']);
+            $selectedType = collect($this->appointmentTypesForValidity)->firstWhere('id', (int) $this->appointmentTypeForm['appointment_type_id']);
             if ($selectedType && strtolower($selectedType['name']) === strtolower($this->appointmentTypeSearch)) {
                 return;
             }
@@ -591,11 +619,11 @@ class EditCompany extends Component
     public function getFilteredAppointmentTypesProperty(): array
     {
         if (empty($this->appointmentTypeSearch)) {
-            return $this->appointmentTypes;
+            return $this->appointmentTypesForValidity;
         }
 
         $search = strtolower($this->appointmentTypeSearch);
-        return array_filter($this->appointmentTypes, function ($type) use ($search) {
+        return array_filter($this->appointmentTypesForValidity, function ($type) use ($search) {
             return str_contains(strtolower($type['name']), $search);
         });
     }
