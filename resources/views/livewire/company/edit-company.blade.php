@@ -21,6 +21,209 @@
             </form>
         </div>
 
+        {{-- Appointment Type Validity Section --}}
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+            <div class="space-y-4">
+                <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Appointment Type Validity</h3>
+                    </div>
+                    <button type="button"
+                            wire:click="createAppointmentType"
+                            class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
+                        Add
+                    </button>
+                </div>
+
+                @if (session()->has('appointmentTypesMessage'))
+                    <div class="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900 dark:border-blue-900/40 dark:bg-blue-900/20 dark:text-blue-100">
+                        {{ session('appointmentTypesMessage') }}
+                    </div>
+                @endif
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    S.No
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    Appointment Type
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    Valid From - To
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    Applicable For
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
+                            @forelse ($companyAppointmentTypes as $index => $appointmentType)
+                                <tr wire:key="appointment-type-{{ $appointmentType['id'] }}" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                        {{ $index + 1 }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                        {{ $appointmentType['appointment_type_name'] }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                        {{ $appointmentType['valid_from'] }} - {{ $appointmentType['valid_to'] }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                        {{ $appointmentType['applicable_for'] }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button type="button"
+                                                    wire:click="editAppointmentType({{ $appointmentType['id'] }})"
+                                                    class="inline-flex items-center justify-center rounded-lg border border-gray-300 p-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+                                                    title="Edit">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </button>
+                                            <button type="button"
+                                                    wire:click="deleteAppointmentType({{ $appointmentType['id'] }})"
+                                                    class="inline-flex items-center justify-center rounded-lg border border-red-200 p-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-900/40 dark:text-red-300 dark:hover:bg-red-900/20"
+                                                    title="Delete"
+                                                    onclick="return confirm('Are you sure you want to delete this appointment type validity?')">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                                        No appointment type validities have been added yet.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Appointment Type Form Modal --}}
+                @if ($showAppointmentTypeForm)
+                    <div class="fixed inset-0 flex items-center justify-center p-5 overflow-y-auto modal z-99999" style="background: rgba(0,0,0,0.25);">
+                        <div id="appointment-type-modal" class="p-5 modal-close-btn inset-0 m-auto w-full max-w-lg bg-white-400/50 bg-white rounded-xl relative dark:bg-gray-800 dark:border-gray-700 shadow-xl">
+                            <button wire:click="closeAppointmentTypeForm" class="absolute right-3 top-3 z-999 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white sm:right-6 sm:top-6 sm:h-11 sm:w-11">
+                                <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M6.04289 16.5413C5.65237 16.9318 5.65237 17.565 6.04289 17.9555C6.43342 18.346 7.06658 18.346 7.45711 17.9555L11.9987 13.4139L16.5408 17.956C16.9313 18.3466 17.5645 18.3466 17.955 17.956C18.3455 17.5655 18.3455 16.9323 17.955 16.5418L13.4129 11.9997L17.955 7.4576C18.3455 7.06707 18.3455 6.43391 17.955 6.04338C17.5645 5.65286 16.9313 5.65286 16.5408 6.04338L11.9987 10.5855L7.45711 6.0439C7.06658 5.65338 6.43342 5.65338 6.04289 6.0439C5.65237 6.43442 5.65237 7.06759 6.04289 7.45811L10.5845 11.9997L6.04289 16.5413Z" />
+                                </svg>
+                            </button>
+
+                            <div class="mb-4">
+                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                    {{ $appointmentTypeForm['id'] ? 'Edit Appointment Type Validity' : 'Add Appointment Type Validity' }}
+                                </h3>
+                            </div>
+
+                            <div class="overflow-y-auto" style="max-height: calc(100vh - 200px);">
+                                <form wire:submit.prevent="saveAppointmentType" class="space-y-4">
+                                    <div class="relative" x-data="{ open: false }" x-on:click.outside="open = false">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Appointment Type *</label>
+                                        <div class="relative mt-1">
+                                            <input type="text"
+                                                   wire:model.live="appointmentTypeSearch"
+                                                   x-on:click="open = true"
+                                                   x-on:focus="open = true"
+                                                   placeholder="Type to search appointment type..."
+                                                   class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                                   autocomplete="off">
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        
+                                        <div x-show="open && $wire.appointmentTypeSearch.length > 0"
+                                             x-cloak
+                                             class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-gray-300 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                                            @forelse ($this->filteredAppointmentTypes as $type)
+                                                <button type="button"
+                                                        wire:click="selectAppointmentType({{ $type['id'] }}, '{{ $type['name'] }}')"
+                                                        x-on:click="open = false"
+                                                        class="w-full px-4 py-2 text-left text-sm text-gray-900 hover:bg-blue-50 dark:text-gray-100 dark:hover:bg-gray-700">
+                                                    {{ $type['name'] }}
+                                                </button>
+                                            @empty
+                                                <div class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+                                                    No appointment types found
+                                                </div>
+                                            @endforelse
+                                        </div>
+                                        
+                                        <input type="hidden" wire:model="appointmentTypeForm.appointment_type_id">
+                                        @error('appointmentTypeForm.appointment_type_id')
+                                            <span class="text-sm text-red-500">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <div class="grid gap-4 md:grid-cols-2">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Valid From *</label>
+                                            <input type="date"
+                                                   wire:model.defer="appointmentTypeForm.valid_from"
+                                                   class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"  onclick="this.showPicker()">
+                                            @error('appointmentTypeForm.valid_from')
+                                                <span class="text-sm text-red-500">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Valid To *</label>
+                                            <input type="date"
+                                                   wire:model.defer="appointmentTypeForm.valid_to"
+                                                   class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white" onclick="this.showPicker()">
+                                            @error('appointmentTypeForm.valid_to')
+                                                <span class="text-sm text-red-500">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Applicable For *</label>
+                                        <select id="appointment-type-applicable-for-select"
+                                                wire:model.defer="appointmentTypeForm.applicable_for"
+                                                class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                                data-no-select2="true">
+                                            @foreach ($applicableForOptions as $option)
+                                                <option value="{{ $option }}">{{ $option }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('appointmentTypeForm.applicable_for')
+                                            <span class="text-sm text-red-500">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+
+                                    <div class="flex items-center justify-end gap-3 pt-2">
+                                        <button type="button"
+                                                wire:click="closeAppointmentTypeForm"
+                                                class="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800">
+                                            Clear
+                                        </button>
+                                        <button type="submit"
+                                                class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
+                                            {{ $appointmentTypeForm['id'] ? 'Update' : 'Add' }}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+
         <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
             <div class="space-y-4">
                 <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -133,15 +336,41 @@
                             <div class="overflow-y-auto" style="height: calc(100% - 110px);">
                                 <form wire:submit.prevent="saveMapping" class="space-y-5">
                                     <div class="grid gap-4 md:grid-cols-2">
-                                        <div>
+                                        <div class="relative" x-data="{ open: false }" x-on:click.outside="open = false">
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Appointment type *</label>
-                                            <select wire:model.live="mappingForm.appointment_type_id"
-                                                    class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-                                                <option value="">Select appointment type</option>
-                                                @foreach ($appointmentTypes as $type)
-                                                    <option value="{{ $type['id'] }}">{{ $type['name'] }}</option>
-                                                @endforeach
-                                            </select>
+                                            <div class="relative mt-1">
+                                                <input type="text"
+                                                       wire:model.live="packageAppointmentTypeSearch"
+                                                       x-on:click="open = true"
+                                                       x-on:focus="open = true"
+                                                       placeholder="Type to search appointment type..."
+                                                       class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pr-10 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                                                       autocomplete="off">
+                                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            
+                                            <div x-show="open && $wire.packageAppointmentTypeSearch.length > 0"
+                                                 x-cloak
+                                                 class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-gray-300 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                                                @forelse ($this->filteredPackageAppointmentTypes as $type)
+                                                    <button type="button"
+                                                            wire:click="selectPackageAppointmentType({{ $type['id'] }}, '{{ $type['name'] }}')"
+                                                            x-on:click="open = false"
+                                                            class="w-full px-4 py-2 text-left text-sm text-gray-900 hover:bg-blue-50 dark:text-gray-100 dark:hover:bg-gray-700">
+                                                        {{ $type['name'] }}
+                                                    </button>
+                                                @empty
+                                                    <div class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+                                                        No appointment types found
+                                                    </div>
+                                                @endforelse
+                                            </div>
+                                            
+                                            <input type="hidden" wire:model="mappingForm.appointment_type_id">
                                             @error('mappingForm.appointment_type_id')
                                                 <span class="text-sm text-red-500">{{ $message }}</span>
                                             @enderror
@@ -339,6 +568,13 @@
                         console.error('jQuery or Select2 not loaded');
                         return;
                     }
+                    
+                    // Prevent Select2 from being applied to elements with data-no-select2 attribute
+                    $(document).on('select2:init', function(e) {
+                        if ($(e.target).attr('data-no-select2') === 'true') {
+                            $(e.target).select2('destroy');
+                        }
+                    });
                     
                     // Prevent modal from closing when clicking on Select2 elements
                     $(document).off('click.select2-modal', '.select2-container, .select2-dropdown');

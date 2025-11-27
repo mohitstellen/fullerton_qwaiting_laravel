@@ -1,8 +1,7 @@
 <div class="container">
     @push('styles')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.css"
-        integrity="sha256-uq9PNlMzB+1h01Ij9cx7zeE2OR2pLAfRw3uUUOOPKdA=" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="{{ asset('css/cdn/fullcalendar.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/cdn/flatpickr.min.css') }}">
     <style>
     :root {
         --fc-event-bg-color: var(--bs-primary) !important;
@@ -43,12 +42,10 @@
 </div>
 
 @push('scripts')
-<script src="{{ asset('js/cdn/flatpickr.min.js') }}"></script>
-    integrity="sha512-+ruHlyki4CepPr07VklkX/KM5NXdD16K1xVwSva5VqOVbsotyCQVKEwdQ1tAeo3UkHCXfSMtKU/mZpKjYqkxZA=="
-    crossorigin="anonymous"></script>
-<script src="{{ asset('js/cdn/fullcalendar.min.js') }}"></script>
-<script src="{{ asset('js/cdn/fullcalendar-locales-all.min.js') }}"></script>
-    integrity="sha256-/ZgxvDj3QtyBZNLbfJaHdwbHF8R6OW82+5MT5yBsH9g=" crossorigin="anonymous"></script>
+<script src="{{ asset('js/cdn/flatpickr.min.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/cdn/main.min.js') }}?v={{ time() }}"></script>
+<script src="{{ asset('js/cdn/locales-all.min.js') }}?v={{ time() }}"></script>
+    
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');

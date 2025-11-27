@@ -33,4 +33,9 @@ class Company extends Model
     {
         return $this->hasMany(CompanyPackage::class);
     }
+
+    public function companyAppointmentTypes(): HasMany
+    {
+        return $this->hasMany(CompanyAppointmentType::class);
+    }
 }

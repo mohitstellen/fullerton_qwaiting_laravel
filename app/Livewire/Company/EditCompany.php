@@ -4,6 +4,7 @@ namespace App\Livewire\Company;
 
 use App\Models\Category;
 use App\Models\Company;
+use App\Models\CompanyAppointmentType;
 use App\Models\CompanyPackage;
 use App\Models\Location;
 use Illuminate\Support\Facades\Log;
@@ -37,6 +38,24 @@ class EditCompany extends Component
         'Staff pass',
         'Name List #',
     ];
+
+    // Appointment Type Validity properties
+    public array $companyAppointmentTypes = [];
+
+    public array $appointmentTypeForm = [];
+
+    public bool $showAppointmentTypeForm = false;
+
+    public array $applicableForOptions = ['Both', 'Self'];
+
+    public string $appointmentTypeSearch = '';
+
+    public bool $showAppointmentTypeDropdown = false;
+
+    // Company Package Appointment Type Search
+    public string $packageAppointmentTypeSearch = '';
+
+    public bool $showPackageAppointmentTypeDropdown = false;
 
     protected array $messages = [
         'company.company_name.required' => 'The company name field is required.',
@@ -87,9 +106,11 @@ class EditCompany extends Component
         ]);
 
         $this->mappingForm = $this->emptyMappingForm();
+        $this->appointmentTypeForm = $this->emptyAppointmentTypeForm();
 
         $this->loadOptions();
         $this->loadCompanyPackages();
+        $this->loadCompanyAppointmentTypes();
     }
 
     public function updatedMappingFormAppointmentTypeId($value): void
@@ -130,6 +151,8 @@ class EditCompany extends Component
     {
         $this->mappingForm = $this->emptyMappingForm();
         $this->packageOptions = [];
+        $this->packageAppointmentTypeSearch = '';
+        $this->showPackageAppointmentTypeDropdown = false;
         $this->showForm = true;
         $this->dispatchSelectInitializers();
     }
@@ -137,6 +160,8 @@ class EditCompany extends Component
     public function editMapping(int $mappingId): void
     {
         $mapping = CompanyPackage::where('company_id', $this->companyModel->id)->findOrFail($mappingId);
+
+        $selectedType = collect($this->appointmentTypes)->firstWhere('id', $mapping->appointment_type_id);
 
         $this->mappingForm = [
             'id' => $mapping->id,
@@ -147,9 +172,68 @@ class EditCompany extends Component
             'remarks' => $mapping->remarks,
         ];
 
+        $this->packageAppointmentTypeSearch = $selectedType['name'] ?? '';
+        $this->showPackageAppointmentTypeDropdown = false;
         $this->loadPackageOptions($mapping->appointment_type_id);
         $this->showForm = true;
         $this->dispatchSelectInitializers();
+    }
+
+    public function selectPackageAppointmentType(int $appointmentTypeId, string $appointmentTypeName): void
+    {
+        $this->mappingForm['appointment_type_id'] = (string) $appointmentTypeId;
+        $this->packageAppointmentTypeSearch = $appointmentTypeName;
+        $this->showPackageAppointmentTypeDropdown = false;
+        
+        // Load package options
+        $this->loadPackageOptions($appointmentTypeId);
+        
+        // Filter package IDs to keep only valid ones
+        $packageIds = array_column($this->packageOptions, 'id');
+        if (! empty($this->mappingForm['package_ids']) && is_array($this->mappingForm['package_ids'])) {
+            // Convert package IDs to strings for consistency with wire:model checkboxes
+            $packageIdsStrings = array_map(fn($id) => (string) $id, $packageIds);
+            
+            // Filter to keep only valid package IDs, preserving string format
+            $this->mappingForm['package_ids'] = array_values(array_filter(
+                $this->mappingForm['package_ids'],
+                fn($id) => in_array((string) $id, $packageIdsStrings, true)
+            ));
+        } else {
+            $this->mappingForm['package_ids'] = [];
+        }
+
+        $this->dispatchSelectInitializers();
+    }
+
+    public function updatedPackageAppointmentTypeSearch(): void
+    {
+        $this->showPackageAppointmentTypeDropdown = !empty($this->packageAppointmentTypeSearch);
+        
+        // If search matches exactly with a selected type, keep it selected
+        if (!empty($this->mappingForm['appointment_type_id'])) {
+            $selectedType = collect($this->appointmentTypes)->firstWhere('id', (int) $this->mappingForm['appointment_type_id']);
+            if ($selectedType && strtolower($selectedType['name']) === strtolower($this->packageAppointmentTypeSearch)) {
+                return;
+            }
+        }
+        
+        // Clear selection if search doesn't match
+        $this->mappingForm['appointment_type_id'] = '';
+        $this->packageOptions = [];
+        $this->mappingForm['package_ids'] = [];
+    }
+
+    public function getFilteredPackageAppointmentTypesProperty(): array
+    {
+        if (empty($this->packageAppointmentTypeSearch)) {
+            return $this->appointmentTypes;
+        }
+
+        $search = strtolower($this->packageAppointmentTypeSearch);
+        return array_filter($this->appointmentTypes, function ($type) use ($search) {
+            return str_contains(strtolower($type['name']), $search);
+        });
     }
 
     public function saveMapping(): void
@@ -248,6 +332,8 @@ class EditCompany extends Component
     {
         $this->mappingForm = $this->emptyMappingForm();
         $this->packageOptions = [];
+        $this->packageAppointmentTypeSearch = '';
+        $this->showPackageAppointmentTypeDropdown = false;
         $this->showForm = false;
     }
 
@@ -447,5 +533,173 @@ class EditCompany extends Component
         $values = array_map(static fn ($value) => (int) $value, $values);
 
         return array_values(array_filter($values, static fn ($value) => $value > 0));
+    }
+
+    // ==================== Appointment Type Validity Methods ====================
+
+    public function createAppointmentType(): void
+    {
+        $this->appointmentTypeForm = $this->emptyAppointmentTypeForm();
+        $this->appointmentTypeSearch = '';
+        $this->showAppointmentTypeDropdown = false;
+        $this->showAppointmentTypeForm = true;
+    }
+
+    public function editAppointmentType(int $appointmentTypeId): void
+    {
+        $appointmentType = CompanyAppointmentType::where('company_id', $this->companyModel->id)
+            ->findOrFail($appointmentTypeId);
+
+        $selectedType = collect($this->appointmentTypes)->firstWhere('id', $appointmentType->appointment_type_id);
+
+        $this->appointmentTypeForm = [
+            'id' => $appointmentType->id,
+            'appointment_type_id' => (string) $appointmentType->appointment_type_id,
+            'valid_from' => $appointmentType->valid_from->format('Y-m-d'),
+            'valid_to' => $appointmentType->valid_to->format('Y-m-d'),
+            'applicable_for' => $appointmentType->applicable_for,
+        ];
+
+        $this->appointmentTypeSearch = $selectedType['name'] ?? '';
+        $this->showAppointmentTypeDropdown = false;
+        $this->showAppointmentTypeForm = true;
+    }
+
+    public function selectAppointmentType(int $appointmentTypeId, string $appointmentTypeName): void
+    {
+        $this->appointmentTypeForm['appointment_type_id'] = (string) $appointmentTypeId;
+        $this->appointmentTypeSearch = $appointmentTypeName;
+        $this->showAppointmentTypeDropdown = false;
+    }
+
+    public function updatedAppointmentTypeSearch(): void
+    {
+        $this->showAppointmentTypeDropdown = !empty($this->appointmentTypeSearch);
+        
+        // If search matches exactly with a selected type, keep it selected
+        if (!empty($this->appointmentTypeForm['appointment_type_id'])) {
+            $selectedType = collect($this->appointmentTypes)->firstWhere('id', (int) $this->appointmentTypeForm['appointment_type_id']);
+            if ($selectedType && strtolower($selectedType['name']) === strtolower($this->appointmentTypeSearch)) {
+                return;
+            }
+        }
+        
+        // Clear selection if search doesn't match
+        $this->appointmentTypeForm['appointment_type_id'] = '';
+    }
+
+    public function getFilteredAppointmentTypesProperty(): array
+    {
+        if (empty($this->appointmentTypeSearch)) {
+            return $this->appointmentTypes;
+        }
+
+        $search = strtolower($this->appointmentTypeSearch);
+        return array_filter($this->appointmentTypes, function ($type) use ($search) {
+            return str_contains(strtolower($type['name']), $search);
+        });
+    }
+
+    public function saveAppointmentType(): void
+    {
+        $this->validate($this->appointmentTypeRules(), [
+            'appointmentTypeForm.appointment_type_id.required' => 'Please select an appointment type.',
+            'appointmentTypeForm.valid_from.required' => 'Valid from date is required.',
+            'appointmentTypeForm.valid_to.required' => 'Valid to date is required.',
+            'appointmentTypeForm.valid_to.after_or_equal' => 'Valid to date must be after or equal to valid from date.',
+            'appointmentTypeForm.applicable_for.required' => 'Please select applicable for option.',
+        ]);
+
+        $payload = [
+            'company_id' => $this->companyModel->id,
+            'appointment_type_id' => (int) $this->appointmentTypeForm['appointment_type_id'],
+            'valid_from' => $this->appointmentTypeForm['valid_from'],
+            'valid_to' => $this->appointmentTypeForm['valid_to'],
+            'applicable_for' => $this->appointmentTypeForm['applicable_for'],
+        ];
+
+        if (!empty($this->appointmentTypeForm['id'])) {
+            // Update existing
+            CompanyAppointmentType::where('company_id', $this->companyModel->id)
+                ->findOrFail($this->appointmentTypeForm['id'])
+                ->update($payload);
+            
+            session()->flash('appointmentTypesMessage', 'Appointment type validity updated successfully.');
+        } else {
+            // Create new
+            CompanyAppointmentType::create($payload);
+            session()->flash('appointmentTypesMessage', 'Appointment type validity added successfully.');
+        }
+
+        $this->loadCompanyAppointmentTypes();
+        $this->closeAppointmentTypeForm();
+    }
+
+    public function deleteAppointmentType(int $appointmentTypeId): void
+    {
+        CompanyAppointmentType::where('company_id', $this->companyModel->id)
+            ->findOrFail($appointmentTypeId)
+            ->delete();
+
+        if (($this->appointmentTypeForm['id'] ?? null) === $appointmentTypeId) {
+            $this->closeAppointmentTypeForm();
+        }
+
+        $this->loadCompanyAppointmentTypes();
+        session()->flash('appointmentTypesMessage', 'Appointment type validity removed.');
+    }
+
+    public function closeAppointmentTypeForm(): void
+    {
+        $this->appointmentTypeForm = $this->emptyAppointmentTypeForm();
+        $this->appointmentTypeSearch = '';
+        $this->showAppointmentTypeDropdown = false;
+        $this->showAppointmentTypeForm = false;
+    }
+
+    protected function appointmentTypeRules(): array
+    {
+        $teamId = $this->companyModel->team_id;
+
+        return [
+            'appointmentTypeForm.appointment_type_id' => [
+                'required',
+                Rule::exists('categories', 'id')->where(fn ($query) => $query->where('team_id', $teamId)),
+            ],
+            'appointmentTypeForm.valid_from' => ['required', 'date'],
+            'appointmentTypeForm.valid_to' => ['required', 'date', 'after_or_equal:appointmentTypeForm.valid_from'],
+            'appointmentTypeForm.applicable_for' => ['required', 'in:Both,Self'],
+        ];
+    }
+
+    protected function loadCompanyAppointmentTypes(): void
+    {
+        $this->companyAppointmentTypes = $this->companyModel->companyAppointmentTypes()
+            ->with(['appointmentType:id,name'])
+            ->orderByDesc('updated_at')
+            ->get()
+            ->map(function (CompanyAppointmentType $appointmentType) {
+                return [
+                    'id' => $appointmentType->id,
+                    'appointment_type_id' => $appointmentType->appointment_type_id,
+                    'appointment_type_name' => $appointmentType->appointmentType->name ?? 'N/A',
+                    'valid_from' => $appointmentType->valid_from->format('d-M-Y'),
+                    'valid_to' => $appointmentType->valid_to->format('d-M-Y'),
+                    'applicable_for' => $appointmentType->applicable_for,
+                    'updated_at' => optional($appointmentType->updated_at)->diffForHumans(),
+                ];
+            })
+            ->toArray();
+    }
+
+    protected function emptyAppointmentTypeForm(): array
+    {
+        return [
+            'id' => null,
+            'appointment_type_id' => '',
+            'valid_from' => '',
+            'valid_to' => '',
+            'applicable_for' => 'Both',
+        ];
     }
 }
