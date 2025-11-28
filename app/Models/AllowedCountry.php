@@ -9,5 +9,5 @@ class AllowedCountry extends Model
 {
    use HasFactory;
 
-    protected $fillable = ['team_id','location_id','country_id','name', 'iso_code', 'phone_code'];
+    protected $fillable = ['team_id','location_id','country_id','name', 'iso_code', 'phone_code', 'country_code', 'mobile_length'];
 }

@@ -563,6 +563,11 @@ $langArr = [
         "reason"=>"Reason",
         "is_approved"=>"Is Approved",
         "Body"=>"Body",
+        "Email Templates" => "Email Templates",
+        "Confirmation Communication" => "Confirmation Communication",
+        "Rescheduling Communication" => "Rescheduling Communication",
+        "Cancel Communication" => "Cancel Communication",
+        "Email Body" => "Email Body",
 
         "Ticket Generation Notifications" => "Ticket Generation Notifications",
         "Service Call Notifications" => "Service Call Notifications",
@@ -973,6 +978,8 @@ $langArr = [
         "Parent Appointment Type" => "Parent Appointment Type",
         "Available for Public Booking" => "Available for Public Booking",
         "select" => "Select",
+        "Company" => "Company",
+        "Email Subject" => "Email Subject",
 
 ];
 

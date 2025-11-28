@@ -9,6 +9,8 @@ use App\Models\PaymentSetting;
 use App\Models\Level;
 use App\Models\Location;
 use App\Models\FormField;
+use App\Models\Company;
+use App\Models\NotificationTemplate;
 use Livewire\WithFileUploads;
 use Auth;
 use Livewire\Attributes\Title;
@@ -47,6 +49,19 @@ class CategoryCreateComponent extends Component
     public $leadTimeValue;
     public $leadTimeUnit = 'days';
     public $enableEVoucher = '0';
+    public $company_id = null;
+    public $companySearch = '';
+    public $allCompanies = [];
+    public $selectedCompanyName = '';
+    public $showCompanyDropdown = false;
+    
+    // Email templates
+    public $confirmationTitle = '';
+    public $confirmationContent = '';
+    public $reschedulingTitle = '';
+    public $reschedulingContent = '';
+    public $cancelTitle = '';
+    public $cancelContent = '';
 
     public function mount($level = null, $categoryId = null)
     {
@@ -73,10 +88,6 @@ class CategoryCreateComponent extends Component
             ->select('id', 'enable_payment', 'category_level')
             ->first();
 
-        //   if(empty($this->paymentSet)){
-        //   return redirect('ticket-screen-settings');
-        // }
-
         $this->tab = $level;
         $this->visitor_in_queue = 1;
         $this->sort = 0;
@@ -91,7 +102,6 @@ class CategoryCreateComponent extends Component
             $this->category = Category::findOrFail($duplicateCategoryId);
             $this->isEdit = false; // This is a new category, not an edit
             $this->loadCategoryData();
-           
         } elseif ($categoryId) {
             $this->category = Category::findOrFail($categoryId);
             $this->isEdit = true;
@@ -130,6 +140,48 @@ class CategoryCreateComponent extends Component
                 ->select('location_name', 'id')
                 ->get();
         }
+
+        // Don't load all companies initially - only load when searching
+        $this->allCompanies = [];
+    }
+
+    public function updatedCompanySearch()
+    {
+        if (strlen($this->companySearch) >= 1) {
+            $this->allCompanies = Company::where('team_id', $this->teamId)
+                ->where('status', 'active')
+                ->where('company_name', 'like', '%' . $this->companySearch . '%')
+                ->select('id', 'company_name')
+                ->orderBy('company_name')
+                ->limit(20)
+                ->get();
+            $this->showCompanyDropdown = true;
+        } elseif (empty($this->companySearch)) {
+            $this->allCompanies = [];
+            $this->showCompanyDropdown = false;
+            if ($this->company_id) {
+                // Load selected company name
+                $company = Company::find($this->company_id);
+                $this->selectedCompanyName = $company ? $company->company_name : '';
+            }
+        }
+    }
+
+    public function selectCompany($companyId, $companyName)
+    {
+        $this->company_id = $companyId;
+        $this->selectedCompanyName = $companyName;
+        $this->companySearch = $companyName;
+        $this->showCompanyDropdown = false;
+    }
+
+    public function clearCompany()
+    {
+        $this->company_id = null;
+        $this->selectedCompanyName = '';
+        $this->companySearch = '';
+        $this->showCompanyDropdown = false;
+        $this->allCompanies = [];
     }
 
     private function loadCategoryData()
@@ -160,6 +212,44 @@ class CategoryCreateComponent extends Component
         $this->label_font_color = $this->category->label_font_color ?? '#000000';
         $this->label_text = $this->category->label_text ?? '';
         $this->bg_color = $this->category->bg_color ?? '';
+        $this->company_id = $this->category->company_id ?? null;
+        
+        // Load selected company name if editing
+        if ($this->company_id) {
+            $company = Company::find($this->company_id);
+            $this->selectedCompanyName = $company ? $company->company_name : '';
+            $this->companySearch = $this->selectedCompanyName;
+        }
+        
+        // Load email templates
+        $this->loadEmailTemplates();
+    }
+    
+    private function loadEmailTemplates()
+    {
+        if (!$this->isEdit || !$this->category) {
+            return;
+        }
+        
+        $template = NotificationTemplate::where('appointment_type_id', $this->category->id)
+            ->where('team_id', $this->teamId)
+            ->where('location_id', $this->locationId)
+            ->first();
+            
+        if ($template) {
+            if ($template->appointment_confirmation_email) {
+                $this->confirmationTitle = $template->appointment_confirmation_email['subject'] ?? '';
+                $this->confirmationContent = $template->appointment_confirmation_email['body'] ?? '';
+            }
+            if ($template->appointment_rescheduling_email) {
+                $this->reschedulingTitle = $template->appointment_rescheduling_email['subject'] ?? '';
+                $this->reschedulingContent = $template->appointment_rescheduling_email['body'] ?? '';
+            }
+            if ($template->appointment_cancel_email) {
+                $this->cancelTitle = $template->appointment_cancel_email['subject'] ?? '';
+                $this->cancelContent = $template->appointment_cancel_email['body'] ?? '';
+            }
+        }
     }
 
 
@@ -180,6 +270,7 @@ class CategoryCreateComponent extends Component
         // Also clear preview
         $this->img = null;
     }
+
     public function deleteOldLabelImage()
     {
         if ($this->isEdit && $this->category->label_image && \Storage::disk('public')->exists($this->category->label_image)) {
@@ -216,9 +307,12 @@ class CategoryCreateComponent extends Component
             'img' => $this->isEdit ? 'nullable|mimes:jpg,jpeg,png|max:2048' : 'nullable|mimes:jpg,jpeg,png|max:2048',
             'label_image' => $this->isEdit ? 'nullable|mimes:jpg,jpeg,png|max:2048' : 'nullable|mimes:jpg,jpeg,png|max:2048',
             'parent_id' => $this->tab > 1 ? 'required|integer' : 'nullable',
+            'company_id' => 'nullable|integer|exists:companies,id',
+            'confirmationTitle' => 'required|string|max:255',
         ], [
 
             'parent_id.required' => 'Parent Service is required',
+            'confirmationTitle.required' => 'Confirmation email subject is required',
         ]);
 
         if ($this->paymentSet && $this->paymentSet->enable_payment == 1 && $this->paymentSet->category_level == $this->tab) {
@@ -296,6 +390,7 @@ class CategoryCreateComponent extends Component
             'label_font_color' => $this->label_font_color ?? '#000000',
             'label_text' => $this->label_text ?? '',
             'bg_color' => $this->bg_color ?? '',
+            'company_id' => $this->company_id ?? null,
         ];
 
         // Add paid details if applicable
@@ -318,7 +413,8 @@ class CategoryCreateComponent extends Component
             $this->dispatch('updated',  '/category-management?tab=' . $this->tab);
         } else {
             // If this is a duplicate, copy relationships from original category
-            if (isset($this->category) && !$this->isEdit) {
+            // Check if $this->category is actually a Category instance (not just an array)
+            if ($this->category instanceof \App\Models\Category && !$this->isEdit) {
                 // Copy form_fields relationship
                 $formFieldIds = $this->category->form_fields()->pluck('id')->toArray();
                 if (!empty($formFieldIds)) {
@@ -330,7 +426,7 @@ class CategoryCreateComponent extends Component
                     ->where('category_id', $this->category->id)
                     ->pluck('user_id')
                     ->toArray();
-                
+
                 if (!empty($userIds)) {
                     $syncData = [];
                     foreach ($userIds as $userId) {
@@ -352,11 +448,44 @@ class CategoryCreateComponent extends Component
                     $formfield->categories()->sync($categoryDetail);
                 }
             }
-            
+
             $this->dispatch('created', '/category-management?tab=' . $this->tab);
         }
-        // session()->flash('success', $this->isEdit ? 'Category updated successfully' : 'Category created successfully');
-        // return redirect()->route('category.index');
+        
+        // Save email templates
+        $this->saveEmailTemplates($categoryDetail->id);
+
+    }
+    
+    private function saveEmailTemplates($categoryId)
+    {
+        $emailTemplates = [
+            'appointment_confirmation_email' => [
+                'subject' => $this->confirmationTitle ?? '',
+                'body' => $this->confirmationContent ?? '',
+            ],
+            'appointment_rescheduling_email' => [
+                'subject' => $this->reschedulingTitle ?? '',
+                'body' => $this->reschedulingContent ?? '',
+            ],
+            'appointment_cancel_email' => [
+                'subject' => $this->cancelTitle ?? '',
+                'body' => $this->cancelContent ?? '',
+            ],
+        ];
+        
+        NotificationTemplate::updateOrCreate(
+            [
+                'appointment_type_id' => $categoryId,
+                'team_id' => $this->teamId,
+                'location_id' => $this->locationId,
+            ],
+            [
+                'appointment_confirmation_email' => $emailTemplates['appointment_confirmation_email'],
+                'appointment_rescheduling_email' => $emailTemplates['appointment_rescheduling_email'],
+                'appointment_cancel_email' => $emailTemplates['appointment_cancel_email'],
+            ]
+        );
     }
 
     public function render()

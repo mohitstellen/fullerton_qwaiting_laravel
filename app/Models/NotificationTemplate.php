@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Log;
 
 class NotificationTemplate extends Model
@@ -14,6 +15,7 @@ class NotificationTemplate extends Model
     protected $fillable = [
         'team_id',
         'location_id',
+        'appointment_type_id',
         'ticket_notification',
         'ticket_notification_subject',
         'ticket_notification_status',
@@ -44,17 +46,28 @@ class NotificationTemplate extends Model
         'booking_confirmed_admin_notification',
         'booking_confirmed_admin_notification_subject',
         'booking_confirmed_admin_notification_status',
+        'appointment_confirmation_email',
+        'appointment_rescheduling_email',
+        'appointment_cancel_email',
     ];
 
     // Define any date casting if necessary
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'appointment_confirmation_email' => 'array',
+        'appointment_rescheduling_email' => 'array',
+        'appointment_cancel_email' => 'array',
     ];
 
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class,'team_id','id');
+    }
+
+    public function appointmentType(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'appointment_type_id', 'id');
     }
 
      public static function createDefaultTemplates($teamId, $locationId)

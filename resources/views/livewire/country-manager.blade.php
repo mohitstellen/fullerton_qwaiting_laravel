@@ -15,6 +15,8 @@
                     <tr class="bg-gray-200">
                         <th class="border px-2 py-1">S.No</th>
                         <th class="border px-2 py-1">Country (Code)</th>
+                        <th class="border px-2 py-1">Country Code</th>
+                        <th class="border px-2 py-1">Mobile Length</th>
                         <th class="border px-2 py-1">Created</th>
                         <th class="border px-2 py-1">{{ __('text.Actions') }}</th>
                     </tr>
@@ -29,22 +31,31 @@
                                 {{ ($countries->currentPage() - 1) * $countries->perPage() + $index + 1 }}
                             </td>
                             <td class="border px-2 py-1">{{ $country->name }} (+{{ $country->phone_code }})</td>
+                            <td class="border px-2 py-1">{{ $country->country_code ?? '-' }}</td>
+                            <td class="border px-2 py-1">{{ $country->mobile_length ?? '-' }}</td>
                             <td class="border px-2 py-1">{{ $country->created_at->format($dateformat) }}</td>
-                            <td class="border  px-5 py-4 sm:px-6">
-                                <div x-data="{openDropDown: false}" class="relative">
-                                    <button @click="openDropDown = !openDropDown" class="text-gray-500 dark:text-gray-400 action-btn">
-                                        ⋮
+                            <td class="border px-2 py-1">
+                                <div class="flex items-center gap-2">
+                                    <button wire:click="viewLogs({{ $country->id }})" 
+                                            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors flex items-center justify-center" 
+                                            title="View Logs"
+                                            type="button">
+                                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                        </svg>
                                     </button>
-                                     <div x-show="openDropDown" @click.outside="openDropDown = false" class="dropdown-menu shadow-theme-lg dark:bg-gray-dark absolute top-full left-0 z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 dark:border-gray-800" style="display: none;">
-                                        <button class="text-theme-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-                                                wire:click="openEditModal({{ $country->id }})">
-                                            {{ __('text.Edit') }}
-                                        </button>
-                                        <button class="text-theme-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-                                                wire:click="confirmDelete({{ $country->id }})">
-                                            {{ __('text.Delete') }}
-                                        </button>
-                                    </div>
+                                    <button wire:click="openEditModal({{ $country->id }})" 
+                                            class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors" 
+                                            title="Edit"
+                                            type="button">
+                                        <i class="ri-edit-line text-lg"></i>
+                                    </button>
+                                    <button wire:click="confirmDelete({{ $country->id }})" 
+                                            class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors" 
+                                            title="Delete"
+                                            type="button">
+                                        <i class="ri-delete-bin-line text-lg"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -65,18 +76,92 @@
         </div>
     </div>
 
-    {{-- Modal --}}
+    {{-- Activity Logs Modal --}}
+    @if ($showLogsModal && $selectedCountryForLogs)
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center" style="padding-left: 290px;">
+            <div class="bg-white p-6 rounded w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col mx-auto">
+                <h2 class="text-lg font-bold mb-4">Country Audit Details</h2>
+                
+                <div class="overflow-y-auto flex-1">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
+                            <thead>
+                                <tr class="bg-gray-200">
+                                    <th class="border px-2 py-1">S.No</th>
+                                    <th class="border px-2 py-1">Country Name</th>
+                                    <th class="border px-2 py-1">Country Code</th>
+                                    <th class="border px-2 py-1">MobileNoLength</th>
+                                    <th class="border px-2 py-1">Created By</th>
+                                    <th class="border px-2 py-1">Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @forelse($activityLogs as $index => $log)
+                                    <tr>
+                                        <td class="border px-2 py-1">{{ $index + 1 }}</td>
+                                        <td class="border px-2 py-1">{{ $selectedCountryForLogs->name }}</td>
+                                        <td class="border px-2 py-1">{{ $selectedCountryForLogs->country_code ?? '-' }}</td>
+                                        <td class="border px-2 py-1">{{ $selectedCountryForLogs->mobile_length ?? '-' }}</td>
+                                        <td class="border px-2 py-1">{{ $log->createdBy->name ?? 'N/A' }}</td>
+                                        <td class="border px-2 py-1">{{ $log->created_at->format('d/m/Y') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="border px-2 py-4 text-center">
+                                            <p><strong>No activity logs found for this country.</strong></p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 mt-4">
+                    <button wire:click="$set('showLogsModal', false)" class="bg-gray-300 px-3 py-2 rounded">Close</button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Add/Edit Modal --}}
     @if ($showcountryModel)
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div class="bg-white p-6 rounded w-96">
                 <h2 class="text-lg font-bold mb-4">{{ $countryId ? 'Edit Country Code' : 'Add Country Code' }}</h2>
 
-                <select wire:model="select_countryId" class="w-full border rounded px-2 py-1 mb-4">
-                    <option value="">-- Select Country --</option>
-                    @foreach ($allcountries as $country)
-                        <option value="{{ $country->id }}">{{ $country->name }} (+{{ $country->phonecode }})</option>
-                    @endforeach
-                </select>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
+                        Country <span class="text-red-500">*</span>
+                    </label>
+                    <select wire:model="select_countryId" class="w-full border rounded px-2 py-1 dark:bg-dark-900 dark:text-white/90 dark:border-gray-700">
+                        <option value="">-- Select Country --</option>
+                        @foreach ($allcountries as $country)
+                            <option value="{{ $country->id }}">{{ $country->name }} (+{{ $country->phonecode }})</option>
+                        @endforeach
+                    </select>
+                    @error('select_countryId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
+                        Country Code <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" wire:model="countryCode" 
+                           class="w-full border rounded px-2 py-1 dark:bg-dark-900 dark:text-white/90 dark:border-gray-700" 
+                           placeholder="Enter country code" />
+                    @error('countryCode') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
+                        Mobile Length <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" wire:model="mobileLength" 
+                           class="w-full border rounded px-2 py-1 dark:bg-dark-900 dark:text-white/90 dark:border-gray-700" 
+                           placeholder="Enter mobile length" min="1" max="20" />
+                    @error('mobileLength') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                </div>
 
                 <div class="flex justify-end gap-2">
                     <button wire:click="$set('showcountryModel', false)" class="bg-gray-300 px-3 py-2 rounded">Cancel</button>

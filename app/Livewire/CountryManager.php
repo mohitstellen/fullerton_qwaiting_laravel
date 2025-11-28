@@ -6,7 +6,9 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Country;
 use App\Models\AllowedCountry;
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 
 class CountryManager extends Component
@@ -17,17 +19,23 @@ class CountryManager extends Component
     public $allcountries;
     public $select_countryId;
     public $countryId;
+    public $countryCode;
+    public $mobileLength;
     public $showcountryModel = false;
+    public $showLogsModal = false;
+    public $activityLogs = [];
+    public $selectedCountryForLogs = null;
     public $perPage = 10; // number of records per page
+    public $userAuth;
 
     protected $paginationTheme = 'tailwind'; // works well with Tailwind
 
     public function mount()
     {
-
         $this->teamId = tenant('id');
         $this->location = Session::get('selectedLocation');
         $this->allcountries = Country::orderBy('name')->get();
+        $this->userAuth = Auth::user();
 
         // code for add all country code
         // if($this->teamId == 268){
@@ -57,7 +65,7 @@ class CountryManager extends Component
 
     public function openAddModal(): void
     {
-        $this->reset(['countryId', 'select_countryId']);
+        $this->reset(['countryId', 'select_countryId', 'countryCode', 'mobileLength']);
         $this->showcountryModel = true;
     }
 
@@ -66,15 +74,25 @@ class CountryManager extends Component
         $country = AllowedCountry::findOrFail($id);
         $this->countryId = $country->id;
         $this->select_countryId = $country->country_id;
+        $this->countryCode = $country->country_code;
+        $this->mobileLength = $country->mobile_length;
         $this->showcountryModel = true;
     }
 
     public function save(): void
     {
-        if (!$this->select_countryId) {
-            $this->dispatch('alert', type: 'error', message: 'Please select a country.');
-            return;
-        }
+        $this->validate([
+            'select_countryId' => 'required',
+            'countryCode' => 'required|string|max:10',
+            'mobileLength' => 'required|integer|min:1|max:20',
+        ], [
+            'select_countryId.required' => 'Please select a country.',
+            'countryCode.required' => 'Country code is required.',
+            'mobileLength.required' => 'Mobile length is required.',
+            'mobileLength.integer' => 'Mobile length must be a number.',
+            'mobileLength.min' => 'Mobile length must be at least 1.',
+            'mobileLength.max' => 'Mobile length cannot exceed 20.',
+        ]);
 
         $exists = $this->countriesQuery()
             ->where('country_id', $this->select_countryId)
@@ -88,19 +106,56 @@ class CountryManager extends Component
 
         $data = Country::findOrFail($this->select_countryId);
 
-        AllowedCountry::updateOrCreate(
+        $isUpdate = !empty($this->countryId);
+        $countryName = $data->name;
+
+        $allowedCountry = AllowedCountry::updateOrCreate(
             ['id' => $this->countryId,'team_id'=> $this->teamId,'location_id'=> $this->location],
             [
                 'country_id' => $data->id,
                 'name'       => $data->name,
                 'iso_code'   => strtoupper($data->code),
                 'phone_code' => $data->phonecode,
+                'country_code' => $this->countryCode,
+                'mobile_length' => $this->mobileLength,
             ]
         );
 
-        $this->reset(['showcountryModel', 'select_countryId', 'countryId']);
-        $this->dispatch('alert', type: 'success', message: $this->countryId ? 'Country Updated!' : 'Country Added!');
+        // Store activity log
+        $actionText = $isUpdate ? ActivityLog::EDIT : ActivityLog::ADD;
+        $logText = $isUpdate 
+            ? "Country Updated"
+            : "Country Added";
+        
+        ActivityLog::storeLog(
+            $this->teamId, 
+            $this->userAuth->id ?? null, 
+            null, 
+            null, 
+            $logText, 
+            $this->location, 
+            ActivityLog::SETTINGS, 
+            null, 
+            $this->userAuth ?? null,
+            $allowedCountry->id
+        );
+
+        $this->reset(['showcountryModel', 'select_countryId', 'countryId', 'countryCode', 'mobileLength']);
+        $this->dispatch('alert', type: 'success', message: $isUpdate ? 'Country Updated!' : 'Country Added!');
         $this->resetPage(); // reset pagination after save
+    }
+
+    public function viewLogs(int $id): void
+    {
+        $this->selectedCountryForLogs = AllowedCountry::findOrFail($id);
+        $this->activityLogs = ActivityLog::where('team_id', $this->teamId)
+            ->where('location_id', $this->location)
+            ->where('country_id', $id)
+            ->where('type', ActivityLog::SETTINGS)
+            ->with('createdBy')
+            ->latest()
+            ->get();
+        $this->showLogsModal = true;
     }
 
     public function confirmDelete(int $id): void
@@ -112,8 +167,32 @@ class CountryManager extends Component
     #[On('delete')]
     public function delete(): void
     {
-        AllowedCountry::find($this->countryId)?->delete();
-        $this->reset(['countryId', 'select_countryId']);
+        $country = AllowedCountry::find($this->countryId);
+        
+        if ($country) {
+            $countryName = $country->name;
+            $countryCode = $country->country_code;
+            $mobileLength = $country->mobile_length;
+            
+            $country->delete();
+            
+            // Store activity log
+            $logText = "Country Deleted: {$countryName} (Code: {$countryCode}, Mobile Length: {$mobileLength})";
+            ActivityLog::storeLog(
+                $this->teamId, 
+                $this->userAuth->id ?? null, 
+                null, 
+                null, 
+                $logText, 
+                $this->location, 
+                ActivityLog::SETTINGS, 
+                null, 
+                $this->userAuth ?? null,
+                $this->countryId
+            );
+        }
+        
+        $this->reset(['countryId', 'select_countryId', 'countryCode', 'mobileLength']);
         $this->dispatch('alert', type: 'success', message: 'Country Deleted!');
         $this->resetPage(); // reset pagination after delete
     }

@@ -20,6 +20,7 @@ class ActivityLog extends Model
         'call_book_id',
         'queues_storage_id',
         'location_id',
+        'country_id',
         'user_details',
         'remark',
         'created_by',
@@ -78,7 +79,7 @@ class ActivityLog extends Model
         return $this->belongsTo( Location::class );
     }
 
-    public static function storeLog( $teamID, $userAuthID, $callBookID = null,$queueStorageID = null, $text, $locationID, $type = self::TYPE_CALL, $remark = null, $userAuth = null ) {
+    public static function storeLog( $teamID, $userAuthID, $callBookID = null,$queueStorageID = null, $text, $locationID, $type = self::TYPE_CALL, $remark = null, $userAuth = null, $countryID = null ) {
 
         return self::create( [
             'team_id' => $teamID,
@@ -90,6 +91,7 @@ class ActivityLog extends Model
             'created_by' => $userAuthID,
             'ip_address' => request()->ip(),
             'location_id' => $locationID ?? '',
+            'country_id' => $countryID,
             'user_details' => !empty($userAuth) ? json_encode($userAuth, true) : null
         ] );
     }

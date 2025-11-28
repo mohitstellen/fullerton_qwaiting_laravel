@@ -187,6 +187,24 @@
                         </a>
                     </li>
 
+                    <li>
+                        <a data-tooltip="Import Member Details" href="{{ route('tenant.import-member-details') }}" class="menu-item group"
+                            :class=" request()->routeIs('tenant.import-member-details') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
+                            <svg :class="request()->routeIs('tenant.import-member-details') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                                width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" class="menu-item-icon-inactive">
+                                <path
+                                    fill-rule="evenodd"
+                                    clip-rule="evenodd"
+                                    d="M12 2C12.4142 2 12.75 2.33579 12.75 2.75V11.25H21.25C21.6642 11.25 22 11.5858 22 12C22 12.4142 21.6642 12.75 21.25 12.75H12.75V21.25C12.75 21.6642 12.4142 22 12 22C11.5858 22 11.25 21.6642 11.25 21.25V12.75H2.75C2.33579 12.75 2 12.4142 2 12C2 11.5858 2.33579 11.25 2.75 11.25H11.25V2.75C11.25 2.33579 11.5858 2 12 2Z"
+                                    fill="" />
+                            </svg>
+                            <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                {{ __('sidebar.Import Member Details') }}
+                            </span>
+                        </a>
+                    </li>
+
                     {{-- <li>
                         <a data-tooltip="break-reason" href="{{ route('tenant.break-reason') }}" class="menu-item group"
                             :class=" (selected === 'break-reason') || (page === 'break-reason') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">

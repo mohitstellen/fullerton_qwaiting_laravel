@@ -174,6 +174,7 @@ use App\Http\Controllers\ImportQueueController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use App\Livewire\RfCardList;
+use App\Livewire\ImportMemberDetails;
 
 /*
 |--------------------------------------------------------------------------
@@ -381,6 +382,18 @@ Route::middleware([
         // CSV Import for old records
         Route::get('/import/queues', [ImportQueueController::class, 'showForm'])->name('import-queues.form');
         Route::post('/import/queues', [ImportQueueController::class, 'upload'])->name('import-queues.upload');
+
+        // Import Member Details
+        Route::get('/import/member-details', ImportMemberDetails::class)->name('import-member-details');
+        Route::get('/import/member-details/download-template', function () {
+            $filePath = public_path('csv/Member Templates.xlsx');
+            
+            if (file_exists($filePath)) {
+                return response()->download($filePath, 'Member Templates.xlsx');
+            }
+            
+            abort(404);
+        })->name('import-member-details.download-template');
     });
 
     //2FA Verification Routes
