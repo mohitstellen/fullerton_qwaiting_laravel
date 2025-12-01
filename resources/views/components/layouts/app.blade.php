@@ -11,8 +11,7 @@
     <title>{{ $title ?? 'Qwaiting'}}</title>
     <link rel="icon" href="{{ url('images/favicon.ico') }}" />
 
-    {{-- Vite compiled assets (includes Tailwind CSS with custom config) --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+ 
 
     <script src="{{ asset('js/cdn/tailwind3.js') }}"></script>
     <script src="{{ asset('js/cdn/tailwind4.js') }}"></script>
@@ -38,29 +37,9 @@
 
     <style>
         html.light {
-            --primary-color: {
-                    {
-                    $theme->theme_color ?? '#4CAF50'
-                }
-            }
-
-            ;
-
-            --button-color: {
-                    {
-                    $theme->button_color ?? '#007bff'
-                }
-            }
-
-            ;
-
-            --font-color: {
-                    {
-                    $theme->font_color ?? '#000'
-                }
-            }
-
-            ;
+            --primary-color: {{ $theme->theme_color ?? '#4CAF50' }};
+            --button-color: {{ $theme->button_color ?? '#007bff' }};
+            --font-color: {{ $theme->font_color ?? '#000' }};
         }
 
         html.light body,
