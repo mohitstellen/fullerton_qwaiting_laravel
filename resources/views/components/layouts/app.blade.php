@@ -6,10 +6,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    
+
 
     <title>{{ $title ?? 'Qwaiting'}}</title>
     <link rel="icon" href="{{ url('images/favicon.ico') }}" />
+
+    {{-- Vite compiled assets (includes Tailwind CSS with custom config) --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <script src="{{ asset('js/cdn/tailwind3.js') }}"></script>
     <script src="{{ asset('js/cdn/tailwind4.js') }}"></script>
 
@@ -33,38 +37,58 @@
     @livewireStyles
 
     <style>
-    html.light {
-        --primary-color: {{ $theme->theme_color ?? '#4CAF50' }};
-        --button-color: {{ $theme->button_color ?? '#007bff' }};
-        --font-color: {{ $theme->font_color ?? '#000' }};
-    }
+        html.light {
+            --primary-color: {
+                    {
+                    $theme->theme_color ?? '#4CAF50'
+                }
+            }
 
-    html.light body,
-    html.light a,
-    html.light h1,
-    html.light h2,
-    html.light h3,
-    html.light h4,
-    html.light h5,
-    html.light p,
-    html.light select option,
-    html.light label,
-    html.light .text-gray-500,
-    body.light div {
-        color: var(--font-color);
-    }
+            ;
 
-    html.light .btn,
-    html.light .bg-brand-500 {
-        background-color: var(--button-color);
-        color: var(--font-color);
-    }
+            --button-color: {
+                    {
+                    $theme->button_color ?? '#007bff'
+                }
+            }
 
-    html.light .btn:hover,
-    html.light .bg-brand-500:hover {
-        background-color: color-mix(in srgb, var(--button-color) 90%, black 10%);
-    }
-</style>
+            ;
+
+            --font-color: {
+                    {
+                    $theme->font_color ?? '#000'
+                }
+            }
+
+            ;
+        }
+
+        html.light body,
+        html.light a,
+        html.light h1,
+        html.light h2,
+        html.light h3,
+        html.light h4,
+        html.light h5,
+        html.light p,
+        html.light select option,
+        html.light label,
+        html.light .text-gray-500,
+        body.light div {
+            color: var(--font-color);
+        }
+
+        html.light .btn,
+        html.light .bg-brand-500 {
+            background-color: var(--button-color);
+            color: var(--font-color);
+        }
+
+        html.light .btn:hover,
+        html.light .bg-brand-500:hover {
+            background-color: color-mix(in srgb, var(--button-color) 90%, black 10%);
+        }
+    </style>
 
     <script>
         // Set theme immediately to avoid "flash" of wrong mode
@@ -250,7 +274,8 @@
                     confirmButtonText: "{{ __('message.OK') }}"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = redirectUrl;
+                        // window.location.href = redirectUrl;
+                        location.reload();
                     }
                 });
             });

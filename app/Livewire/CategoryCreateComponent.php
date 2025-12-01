@@ -54,7 +54,7 @@ class CategoryCreateComponent extends Component
     public $allCompanies = [];
     public $selectedCompanyName = '';
     public $showCompanyDropdown = false;
-    
+
     // Email templates
     public $confirmationTitle = '';
     public $confirmationContent = '';
@@ -213,29 +213,29 @@ class CategoryCreateComponent extends Component
         $this->label_text = $this->category->label_text ?? '';
         $this->bg_color = $this->category->bg_color ?? '';
         $this->company_id = $this->category->company_id ?? null;
-        
+
         // Load selected company name if editing
         if ($this->company_id) {
             $company = Company::find($this->company_id);
             $this->selectedCompanyName = $company ? $company->company_name : '';
             $this->companySearch = $this->selectedCompanyName;
         }
-        
+
         // Load email templates
         $this->loadEmailTemplates();
     }
-    
+
     private function loadEmailTemplates()
     {
         if (!$this->isEdit || !$this->category) {
             return;
         }
-        
+
         $template = NotificationTemplate::where('appointment_type_id', $this->category->id)
             ->where('team_id', $this->teamId)
             ->where('location_id', $this->locationId)
             ->first();
-            
+
         if ($template) {
             if ($template->appointment_confirmation_email) {
                 $this->confirmationTitle = $template->appointment_confirmation_email['subject'] ?? '';
@@ -451,12 +451,11 @@ class CategoryCreateComponent extends Component
 
             $this->dispatch('created', '/category-management?tab=' . $this->tab);
         }
-        
+
         // Save email templates
         $this->saveEmailTemplates($categoryDetail->id);
-
     }
-    
+
     private function saveEmailTemplates($categoryId)
     {
         $emailTemplates = [
@@ -473,7 +472,7 @@ class CategoryCreateComponent extends Component
                 'body' => $this->cancelContent ?? '',
             ],
         ];
-        
+
         NotificationTemplate::updateOrCreate(
             [
                 'appointment_type_id' => $categoryId,

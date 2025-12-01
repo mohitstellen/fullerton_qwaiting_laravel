@@ -175,6 +175,8 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use App\Livewire\RfCardList;
 use App\Livewire\ImportMemberDetails;
+use App\Livewire\PublicUserList;
+use App\Livewire\PublicUserForm;
 
 /*
 |--------------------------------------------------------------------------
@@ -239,12 +241,12 @@ Route::middleware([
         // Route::post('saml/acs', [JumpCloudController::class, 'acs'])->name('sso.jumpcloud.acs');
         // Route::get('saml/metadata', [JumpCloudController::class, 'metadata'])->name('sso.jumpcloud.metadata');
 
-    Route::prefix('sso')->group(function () {
-    Route::get('/login', [JumpCloudController::class, 'login']);
-    Route::post('/acs', [JumpCloudController::class, 'acs']);
-    Route::get('/metadata', [JumpCloudController::class, 'metadata']);
-    Route::get('/logout', [JumpCloudController::class, 'logout']);
-});
+        Route::prefix('sso')->group(function () {
+            Route::get('/login', [JumpCloudController::class, 'login']);
+            Route::post('/acs', [JumpCloudController::class, 'acs']);
+            Route::get('/metadata', [JumpCloudController::class, 'metadata']);
+            Route::get('/logout', [JumpCloudController::class, 'logout']);
+        });
     });
     Route::middleware([TenantAuthMiddleware::class])->name('tenant.')->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
@@ -375,7 +377,7 @@ Route::middleware([
         Route::get('country-manager', CountryManager::class)->name('country-manager');
         Route::get('select-location', LocationSelectorPage::class)->name('select-location');
 
-          // Virtual Queue Settings
+        // Virtual Queue Settings
         Route::get('virtual-queue-settings', VirtualQueueSettings::class)->name('virtual-queue-settings');
         Route::get('rf-cards', RfCardList::class)->name('rf-cards');
 
@@ -387,13 +389,18 @@ Route::middleware([
         Route::get('/import/member-details', ImportMemberDetails::class)->name('import-member-details');
         Route::get('/import/member-details/download-template', function () {
             $filePath = public_path('csv/Member Templates.xlsx');
-            
+
             if (file_exists($filePath)) {
                 return response()->download($filePath, 'Member Templates.xlsx');
             }
-            
+
             abort(404);
         })->name('import-member-details.download-template');
+
+        // Public User Management
+        Route::get('/public-user', PublicUserList::class)->name('public-user.index');
+        Route::get('/public-user/create', PublicUserForm::class)->name('public-user.create');
+        Route::get('/public-user/{memberId}/edit', PublicUserForm::class)->name('public-user.edit');
     });
 
     //2FA Verification Routes
@@ -456,10 +463,10 @@ Route::middleware([
 
     Route::get('visits/{id}', TicketVisit::class);
 
-   Route::get('/ds-bbj/{id}', [DisplayScreenController::class, 'show'])->name('bbj.show');
+    Route::get('/ds-bbj/{id}', [DisplayScreenController::class, 'show'])->name('bbj.show');
 
-// Optional AJAX refresh endpoint
-Route::post('/ds-bbj/refresh', [DisplayScreenController::class, 'refreshQueues'])->name('bbj.refresh');
+    // Optional AJAX refresh endpoint
+    Route::post('/ds-bbj/refresh', [DisplayScreenController::class, 'refreshQueues'])->name('bbj.refresh');
 
     Route::get('qr-code-scanner', QRCodeScanner::class)->name('qr-code-scanner');
 
@@ -468,7 +475,7 @@ Route::post('/ds-bbj/refresh', [DisplayScreenController::class, 'refreshQueues']
     Route::get('virtual-queue-type-staff/{location_id?}', VirtualQueueTypeSelection::class)->name('virtual-queue-type-selection-staff');
     Route::get('ai-agent-call-staff/{virtualQueueId}', AIAgentCall::class)->name('ai-agent-call-staff');
     Route::get('human-agent-waiting-staff/{virtualQueueId}', HumanAgentWaiting::class)->name('human-agent-waiting-staff');
-    
+
     Route::get('/clear-cache', function () {
         Artisan::call('cache:clear');
         Artisan::call('config:clear');
@@ -523,32 +530,32 @@ Route::post('/ds-bbj/refresh', [DisplayScreenController::class, 'refreshQueues']
 
     // Public AI Agent Call Routes (Accessible without tenant domain)
     Route::name('public.')->group(function () {
-    // Location Selection - First entry point for public access
-    Route::get('/choose-locations', PublicLocationSelection::class)
-        ->name('choose-locations');
-    
-    // Virtual Queue Type Selection - Entry point for public access
-    Route::get('/virtual-queue', PublicVirtualQueueTypeSelection::class)
-        ->name('virtual-queue-type-selection');
-    
-    // AI Agent Call - Public access
-    Route::get('/ai-agent-call/{virtualQueueId}', PublicAIAgentCall::class)
-        ->name('ai-agent-call');
-    
-    // Placeholder routes for human agent waiting and virtual meeting
-    // These should be implemented if needed
-    Route::get('/human-agent-waiting/{virtualQueueId}', function($virtualQueueId) {
-        return view('public.human-agent-waiting', compact('virtualQueueId'));
-    })->name('human-agent-waiting');
-    
-    Route::get('/virtual-meeting/{room}/{queueId}', function($room, $queueId) {
-        return view('public.virtual-meeting', compact('room', 'queueId'));
-    })->name('virtual-meeting');
-    
-    Route::get('/queue-selection', function() {
-        return redirect()->route('public.virtual-queue-type-selection');
-    })->name('queue-selection');
-});
+        // Location Selection - First entry point for public access
+        Route::get('/choose-locations', PublicLocationSelection::class)
+            ->name('choose-locations');
+
+        // Virtual Queue Type Selection - Entry point for public access
+        Route::get('/virtual-queue', PublicVirtualQueueTypeSelection::class)
+            ->name('virtual-queue-type-selection');
+
+        // AI Agent Call - Public access
+        Route::get('/ai-agent-call/{virtualQueueId}', PublicAIAgentCall::class)
+            ->name('ai-agent-call');
+
+        // Placeholder routes for human agent waiting and virtual meeting
+        // These should be implemented if needed
+        Route::get('/human-agent-waiting/{virtualQueueId}', function ($virtualQueueId) {
+            return view('public.human-agent-waiting', compact('virtualQueueId'));
+        })->name('human-agent-waiting');
+
+        Route::get('/virtual-meeting/{room}/{queueId}', function ($room, $queueId) {
+            return view('public.virtual-meeting', compact('room', 'queueId'));
+        })->name('virtual-meeting');
+
+        Route::get('/queue-selection', function () {
+            return redirect()->route('public.virtual-queue-type-selection');
+        })->name('queue-selection');
+    });
 });
 
 Route::get('/tts', function () {
@@ -588,7 +595,7 @@ Route::get('/phpinfo', function () {
     phpinfo();
 });
 Route::get('/bright-test', function () {
-   return view('bright-sign');
+    return view('bright-sign');
 });
 
 
@@ -621,7 +628,3 @@ Route::get('/run-queue-until-empty', function () {
 
     return "Queue processed until empty.";
 });
-
-
-
-

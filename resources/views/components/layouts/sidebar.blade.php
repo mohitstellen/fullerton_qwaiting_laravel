@@ -11,9 +11,9 @@
                 $settingsidebar = App\Models\SiteDetail::viewImage('business_logo', tenant('id'), $sidebarlocation)
 
                 ?>
-        
+
                 <img class="dark:hidden h-full" src="{{ url($settingsidebar) }}" alt="Logo" height="40" width="150" />
-             
+
                 <img class="hidden dark:block" src="{{ url($settingsidebar) }}" alt="Logo" height="40" width="150" />
             </span>
 
@@ -130,7 +130,7 @@
                                 <g transform="matrix(1.18,0,0,1.18,-90.00000000000006,-89.99910461425804)">
                                     <path
                                         d="M567.07 781.26H401.8a10 10 0 0 1-10-10V606a10 10 0 0 1 10-10h165.27a10 10 0 0 1 10 10v165.26a10 10 0 0 1-10 10zm-155.27-20h145.27V616H411.8zM567.07 342.93H401.8a10 10 0 0 1-10-10V167.66a10 10 0 0 1 10-10h165.27a10 10 0 0 1 10 10v165.27a10 10 0 0 1-10 10zm-155.27-20h145.27V177.66H411.8zM265.27 781.26H100a10 10 0 0 1-10-10V606a10 10 0 0 1 10-10h165.27a10 10 0 0 1 10 10v165.26a10 10 0 0 1-10 10zm-155.27-20h145.27V616H110zM900 781.26H734.73a10 10 0 0 1-10-10V606a10 10 0 0 1 10-10H900a10 10 0 0 1 10 10v165.26a10 10 0 0 1-10 10zm-155.27-20H890V616H744.73zM812.9 560.9a10 10 0 0 1-9.5-6.89 80.24 80.24 0 0 0-76.4-55.39H273.05A80.24 80.24 0 0 0 196.6 554a10 10 0 1 1-19-6.22 100.19 100.19 0 0 1 95.45-69.17H727a100.19 100.19 0 0 1 95.45 69.17 10 10 0 0 1-9.5 13.11z"
-                                         class=""></path>
+                                        class=""></path>
                                     <path
                                         d="M474.43 421.56h20V550.9h-20zM100 822.33h165.27v20H100zM401.8 822.33h165.27v20H401.8zM401.8 379.22h165.27v20H401.8zM734.73 822.33H900v20H734.73z">
                                     </path>
@@ -188,9 +188,27 @@
                     </li>
 
                     <li>
-                        <a data-tooltip="Import Member Details" href="{{ route('tenant.import-member-details') }}" class="menu-item group"
-                            :class=" request()->routeIs('tenant.import-member-details') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
-                            <svg :class="request()->routeIs('tenant.import-member-details') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                        <a data-tooltip="Patient Search" href="{{ route('tenant.public-user.index') }}" class="menu-item group"
+                            :class=" (selected === 'PatientSearch') || (page === 'public-user') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
+                            <svg :class="(selected === 'PatientSearch') || (page === 'public-user') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                                width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" class="menu-item-icon-inactive">
+                                <path
+                                    fill-rule="evenodd"
+                                    clip-rule="evenodd"
+                                    d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H11V21H5V3H13V9H21ZM23 14L21.5 12.5L18.5 15.5L16.5 13.5L15 15L18.5 18.5L23 14ZM14 13V11H10V13H14ZM14 17V15H10V17H14Z"
+                                    fill="" />
+                            </svg>
+                            <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                {{ __('sidebar.Patient Search') }}
+                            </span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a data-tooltip="Import Member Details" href="{{ route('tenant.import-member-details') }}"
+                            class="menu-item group {{ request()->routeIs('tenant.import-member-details') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300' }}">
+                            <svg class="{{ request()->routeIs('tenant.import-member-details') ? 'menu-item-icon-active'  :'menu-item-icon-inactive' }}"
                                 width="24" height="24" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg" class="menu-item-icon-inactive">
                                 <path
@@ -207,29 +225,29 @@
 
                     {{-- <li>
                         <a data-tooltip="break-reason" href="{{ route('tenant.break-reason') }}" class="menu-item group"
-                            :class=" (selected === 'break-reason') || (page === 'break-reason') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
-                            <svg :class="(selected === 'break-reason') || (page === 'break-reason') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
-                                width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg" class="menu-item-icon-inactive">
-                                <g>
-                                    <path
-                                        d="M8.5 20a.5.5 0 0 1-.383-.82l1.068-1.282a2.92 2.92 0 0 0 .369-3.174.499.499 0 0 1 .094-.577l1.823-1.823a1.874 1.874 0 0 0 0-2.646L5.84 14.869a.5.5 0 1 1-.678-.736l5.631-5.19a.996.996 0 0 1 1.385.028 2.874 2.874 0 0 1 0 4.061l-1.581 1.581a3.92 3.92 0 0 1-.643 3.927l-1.07 1.28A.498.498 0 0 1 8.5 20z">
-                                    </path>
-                                    <path
-                                        d="M10.5 24h-7c-.827 0-1.5-.673-1.5-1.5v-6.596a7.542 7.542 0 0 1 2.969-5.977l2.079-1.576a.5.5 0 1 1 .605.797l-2.079 1.576A6.535 6.535 0 0 0 3 15.904V22.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-.998a.5.5 0 0 1 .5-.5c1.103 0 2-.897 2-2V16.75a.5.5 0 0 1 1 0v2.252A3.004 3.004 0 0 1 12 21.96v.54c0 .827-.673 1.5-1.5 1.5z">
-                                    </path>
-                                    <path
-                                        d="M19.5 19h-2a.499.499 0 0 1-.447-.277l-.105-.211C16.481 17.58 15.543 17 14.5 17s-1.981.58-2.447 1.513l-.105.211A.503.503 0 0 1 11.5 19h-2a.5.5 0 0 1 0-1h1.692c.647-1.236 1.908-2 3.308-2s2.661.764 3.309 2H19.5c.827 0 1.5-.673 1.5-1.5v-14c0-.827-.673-1.5-1.5-1.5h-1.692C17.161 2.235 15.9 3 14.5 3s-2.661-.765-3.309-2H9.5C8.673 1 8 1.673 8 2.5v10.156a.5.5 0 0 1-1 0V2.5C7 1.122 8.122 0 9.5 0h2a.5.5 0 0 1 .447.276l.106.211C12.519 1.42 13.457 2 14.5 2s1.981-.58 2.448-1.513l.106-.211A.498.498 0 0 1 17.5 0h2C20.878 0 22 1.122 22 2.5v14c0 1.378-1.122 2.5-2.5 2.5z">
-                                    </path>
-                                    <path
-                                        d="M8.5 7h-1a.5.5 0 0 1 0-1h1a.5.5 0 0 1 0 1zM17.73 7h-1.846a.5.5 0 0 1 0-1h1.846a.5.5 0 0 1 0 1zm-4.615 0h-1.846a.5.5 0 0 1 0-1h1.846a.5.5 0 0 1 0 1zM21.5 7h-1a.5.5 0 0 1 0-1h1a.5.5 0 0 1 0 1z">
-                                    </path>
-                                </g>
-                            </svg>
-                            <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                                {{ __('sidebar.Break Reason') }}
-                            </span>
-                        </a>
+                    :class=" (selected === 'break-reason') || (page === 'break-reason') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
+                    <svg :class="(selected === 'break-reason') || (page === 'break-reason') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                        width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg" class="menu-item-icon-inactive">
+                        <g>
+                            <path
+                                d="M8.5 20a.5.5 0 0 1-.383-.82l1.068-1.282a2.92 2.92 0 0 0 .369-3.174.499.499 0 0 1 .094-.577l1.823-1.823a1.874 1.874 0 0 0 0-2.646L5.84 14.869a.5.5 0 1 1-.678-.736l5.631-5.19a.996.996 0 0 1 1.385.028 2.874 2.874 0 0 1 0 4.061l-1.581 1.581a3.92 3.92 0 0 1-.643 3.927l-1.07 1.28A.498.498 0 0 1 8.5 20z">
+                            </path>
+                            <path
+                                d="M10.5 24h-7c-.827 0-1.5-.673-1.5-1.5v-6.596a7.542 7.542 0 0 1 2.969-5.977l2.079-1.576a.5.5 0 1 1 .605.797l-2.079 1.576A6.535 6.535 0 0 0 3 15.904V22.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-.998a.5.5 0 0 1 .5-.5c1.103 0 2-.897 2-2V16.75a.5.5 0 0 1 1 0v2.252A3.004 3.004 0 0 1 12 21.96v.54c0 .827-.673 1.5-1.5 1.5z">
+                            </path>
+                            <path
+                                d="M19.5 19h-2a.499.499 0 0 1-.447-.277l-.105-.211C16.481 17.58 15.543 17 14.5 17s-1.981.58-2.447 1.513l-.105.211A.503.503 0 0 1 11.5 19h-2a.5.5 0 0 1 0-1h1.692c.647-1.236 1.908-2 3.308-2s2.661.764 3.309 2H19.5c.827 0 1.5-.673 1.5-1.5v-14c0-.827-.673-1.5-1.5-1.5h-1.692C17.161 2.235 15.9 3 14.5 3s-2.661-.765-3.309-2H9.5C8.673 1 8 1.673 8 2.5v10.156a.5.5 0 0 1-1 0V2.5C7 1.122 8.122 0 9.5 0h2a.5.5 0 0 1 .447.276l.106.211C12.519 1.42 13.457 2 14.5 2s1.981-.58 2.448-1.513l.106-.211A.498.498 0 0 1 17.5 0h2C20.878 0 22 1.122 22 2.5v14c0 1.378-1.122 2.5-2.5 2.5z">
+                            </path>
+                            <path
+                                d="M8.5 7h-1a.5.5 0 0 1 0-1h1a.5.5 0 0 1 0 1zM17.73 7h-1.846a.5.5 0 0 1 0-1h1.846a.5.5 0 0 1 0 1zm-4.615 0h-1.846a.5.5 0 0 1 0-1h1.846a.5.5 0 0 1 0 1zM21.5 7h-1a.5.5 0 0 1 0-1h1a.5.5 0 0 1 0 1z">
+                            </path>
+                        </g>
+                    </svg>
+                    <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                        {{ __('sidebar.Break Reason') }}
+                    </span>
+                    </a>
 
                     </li> --}}
 
@@ -287,7 +305,7 @@
 
                     </li> --}}
                     @endcan
-                  @can('Public link')
+                    @can('Public link')
                     <li>
                         <a data-tooltip="Public Links"
                             href="javascript:void(0)"
@@ -304,7 +322,7 @@
                         </a>
 
                     </li>
- @endcan
+                    @endcan
 
                     @if(App\Models\AccountSetting::where('team_id',tenant('id'))
                     ->where('location_id', Session::get('selectedLocation'))
@@ -360,7 +378,7 @@
                         </div>
                     </li>
                     @endif
-                     @can('Reports')
+                    @can('Reports')
 
                     <li>
                         <a data-tooltip="all-report" href="{{ route('tenant.all-report') }}" class="menu-item group"
@@ -376,7 +394,7 @@
                                 </g>
                             </svg>
                             <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                              {{ __('sidebar.All Reports') }}
+                                {{ __('sidebar.All Reports') }}
                             </span>
                         </a>
 
@@ -388,7 +406,7 @@
                     <li>
                         <a data-tooltip="Analytics" href="{{ route('tenant.analytics') }}" class="menu-item group"
                             :class=" (selected === 'analytics') || (page === 'analytics') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
-                           <svg :class="(selected === 'Reports') || (page === 'categories-report') ? 'menu-item-icon-active'  : 'menu-item-icon-inactive'"
+                            <svg :class="(selected === 'Reports') || (page === 'categories-report') ? 'menu-item-icon-active'  : 'menu-item-icon-inactive'"
                                 width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 36 36">
                                 <g
@@ -399,7 +417,7 @@
                                 </g>
                             </svg>
                             <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                             {{ __('sidebar.analytics') }}
+                                {{ __('sidebar.analytics') }}
                             </span>
                         </a>
 
@@ -444,485 +462,485 @@
                                         {{ __('sidebar.All Reports') }}
                                     </a>
                                 </li>
-                                   {{-- <li>
+                                {{-- <li>
                         <a data-tooltip="break-request" href="{{ route('tenant.break-request') }}" class="menu-item group"
-                            :class=" (selected === 'break-request') || (page === 'break-request') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
-                            <svg :class="(selected === 'break-request') || (page === 'break-request') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
-                                width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                                class="menu-item-icon-inactive" viewBox="0 0 409.6 409.6">
-                                <g>
-                                    <path
-                                        d="M358.4 40.96H51.2C22.979 40.96 0 63.918 0 92.16V256c0 28.242 22.979 51.2 51.2 51.2h143.36v40.96H81.92c-5.652 0-10.24 4.588-10.24 10.24s4.588 10.24 10.24 10.24h245.76c5.652 0 10.24-4.588 10.24-10.24s-4.588-10.24-10.24-10.24H215.04V307.2H358.4c28.221 0 51.2-22.958 51.2-51.2V92.16c0-28.242-22.979-51.2-51.2-51.2zM389.12 256c0 16.937-13.783 30.72-30.72 30.72H51.2c-16.937 0-30.72-13.783-30.72-30.72V92.16c0-16.937 13.783-30.72 30.72-30.72h307.2c16.937 0 30.72 13.783 30.72 30.72z">
-                                    </path>
-                                </g>
-                            </svg>
-                            <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                                {{ __('sidebar.Staff Break Request') }}
-                            </span>
-                        </a>
+                                :class=" (selected === 'break-request') || (page === 'break-request') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
+                                <svg :class="(selected === 'break-request') || (page === 'break-request') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                                    width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                                    class="menu-item-icon-inactive" viewBox="0 0 409.6 409.6">
+                                    <g>
+                                        <path
+                                            d="M358.4 40.96H51.2C22.979 40.96 0 63.918 0 92.16V256c0 28.242 22.979 51.2 51.2 51.2h143.36v40.96H81.92c-5.652 0-10.24 4.588-10.24 10.24s4.588 10.24 10.24 10.24h245.76c5.652 0 10.24-4.588 10.24-10.24s-4.588-10.24-10.24-10.24H215.04V307.2H358.4c28.221 0 51.2-22.958 51.2-51.2V92.16c0-28.242-22.979-51.2-51.2-51.2zM389.12 256c0 16.937-13.783 30.72-30.72 30.72H51.2c-16.937 0-30.72-13.783-30.72-30.72V92.16c0-16.937 13.783-30.72 30.72-30.72h307.2c16.937 0 30.72 13.783 30.72 30.72z">
+                                        </path>
+                                    </g>
+                                </svg>
+                                <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                    {{ __('sidebar.Staff Break Request') }}
+                                </span>
+                                </a>
 
                     </li> --}}
-                               <li>
-                                    <a href="{{ route('tenant.break-request') }}"
-                                        class="menu-dropdown-item group
+                    <li>
+                        <a href="{{ route('tenant.break-request') }}"
+                            class="menu-dropdown-item group
            {{ request()->routeIs('tenant.break-request') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                         {{ __('sidebar.Staff Break Request') }}
-                                    </a>
-                                </li>
-                                <!-- <li>
+                            {{ __('sidebar.Staff Break Request') }}
+                        </a>
+                    </li>
+                    <!-- <li>
                                     <a href="{{ route('tenant.monthly-report') }}"
                                         class="menu-dropdown-item group
            {{ request()->routeIs('tenant.monthly-report') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' }}">
                                         Monthly Report
                                     </a>
                                 </li> -->
-                                <li>
-                                    <a href="{{ route('tenant.categories-report') }}"
-                                        class="menu-dropdown-item group
+                    <li>
+                        <a href="{{ route('tenant.categories-report') }}"
+                            class="menu-dropdown-item group
            {{ request()->routeIs('tenant.categories-report') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Services Report') }}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('tenant.sub-categories-report') }}"
-                                        class="menu-dropdown-item group
+                            {{ __('sidebar.Services Report') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('tenant.sub-categories-report') }}"
+                            class="menu-dropdown-item group
            {{ request()->routeIs('tenant.sub-categories-report') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Sub Services Report') }}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('tenant.overview-per-day-report') }}"
-                                        class="menu-dropdown-item group
+                            {{ __('sidebar.Sub Services Report') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('tenant.overview-per-day-report') }}"
+                            class="menu-dropdown-item group
            {{ request()->routeIs('tenant.overview-per-day-report') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Overview Per Day') }}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('tenant.staff-performance-reports') }}"
-                                        class="menu-dropdown-item group
+                            {{ __('sidebar.Overview Per Day') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('tenant.staff-performance-reports') }}"
+                            class="menu-dropdown-item group
            {{ request()->routeIs('tenant.staff-performance-reports') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Staff Performance Report') }}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('tenant.overview-per-time-period-reports') }}"
-                                        class="menu-dropdown-item group
+                            {{ __('sidebar.Staff Performance Report') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('tenant.overview-per-time-period-reports') }}"
+                            class="menu-dropdown-item group
            {{ request()->routeIs('tenant.overview-per-time-period-reports') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Overview Per Time Period Reports') }}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('tenant.feedback-reports') }}"
-                                        class="menu-dropdown-item group
+                            {{ __('sidebar.Overview Per Time Period Reports') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('tenant.feedback-reports') }}"
+                            class="menu-dropdown-item group
            {{ request()->routeIs('tenant.feedback-reports') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Feedback Report') }}
-                                    </a>
-                                </li>
-                                <!-- <li>
+                            {{ __('sidebar.Feedback Report') }}
+                        </a>
+                    </li>
+                    <!-- <li>
                                     <a href="{{ route('tenant.statistics-report') }}"
                                         class="menu-dropdown-item group
            {{ request()->routeIs('tenant.statistics-report') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' }}">
                                         Statistics Reports
                                     </a>
                                 </li> -->
-                                <!-- <li>
+                    <!-- <li>
                                     <a href="{{ route('tenant.feedback-statistics-report') }}"
                                         class="menu-dropdown-item group
            {{ request()->routeIs('tenant.feedback-statistics-report') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' }}">
                                         Feedback Statistics Reports
                                     </a>
                                 </li> -->
-                                <!-- <li>
+                    <!-- <li>
                                     <a href="{{ route('tenant.activity.logs') }}"
                                         class="menu-dropdown-item group
            {{ request()->routeIs('tenant.activity.logs') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' }}">
                                         Activity Logs
                                     </a>
                                 </li> -->
-                                <!-- <li>
+                    <!-- <li>
                                     <a href="{{ route('tenant.sms-transactions-report') }}"
                                         class="menu-dropdown-item group
            {{ request()->routeIs('tenant.sms-transactions-report') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' }}">
                                         SMS Transactions
                                     </a>
                                 </li> -->
-                                <!-- <li>
+                    <!-- <li>
                                     <a href="{{ route('tenant.payment-report') }}"
                                         class="menu-dropdown-item group
            {{ request()->routeIs('tenant.payment-report') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive' }}">
                                         Revenue Report
                                     </a>
                                 </li> -->
-                            </ul>
-                        </div>
-                    </li>
-                    @endcan
-
-                    @if(auth()->user()->hasRole('superadmin'))
-                    @can('Reports')
-                    <li>
-                        <p data-tooltip="Branch Reports" @click.prevent="selected = (selected === 'Branch Reports' ? '':'Branch Reports')" class="menu-item group"
-                            :class=" (selected === 'Branch Reports') || (page === 'categories-report') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
-                            <svg :class="(selected === 'Branch Reports') || (page === 'categories-report') ? 'menu-item-icon-active'  : 'menu-item-icon-inactive'"
-                                width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 36 36">
-                                <g
-                                    transform="matrix(1.0899999999999996,0,0,1.0899999999999996,-1.619999999999994,-1.6194457483291558)">
-                                    <path
-                                        d="M4 33.99h2.5c1.103 0 2-.898 2-2v-3.46c0-1.103-.897-2-2-2H4c-1.103 0-2 .897-2 2v3.46c0 1.102.897 2 2 2zm0-5.46h2.5l.002 3.46H4zM12.5 33.99H15c1.103 0 2-.898 2-2v-12.4c0-1.102-.897-2-2-2h-2.5c-1.103 0-2 .898-2 2v12.4c0 1.102.897 2 2 2zm0-14.4H15l.002 12.4H12.5zM21 21.07c-1.103 0-2 .897-2 2v8.92c0 1.102.897 2 2 2h2.5c1.103 0 2-.898 2-2v-8.92c0-1.103-.897-2-2-2zm0 10.92v-8.92h2.5l.002 8.92zM34 31.99V12.57c0-1.103-.897-2-2-2h-2.5c-1.103 0-2 .897-2 2v19.42c0 1.102.897 2 2 2H32c1.103 0 2-.898 2-2zm-4.5-19.42H32l.002 19.42H29.5zM5.947 16.737l7.546-7.546a1.003 1.003 0 0 1 1.134-.197l5.956 2.801a3 3 0 0 0 3.398-.592l7.487-7.486a1 1 0 1 0-1.414-1.414L22.567 9.79a1 1 0 0 1-1.132.197l-5.956-2.803a3.012 3.012 0 0 0-3.4.594l-7.546 7.546a1 1 0 1 0 1.414 1.414z">
-                                    </path>
-                                </g>
-                            </svg>
-
-                            <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                                {{ __('sidebar.Branch Reports') }}
-                            </span>
-
-                            <svg class="menu-item-arrow absolute right-2.5 top-1/2 -translate-y-1/2 stroke-current"
-                                :class="[(selected === 'Branch Reports') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
-                                width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585" stroke="" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </p>
-
-                        <div class="overflow-hidden transform translate"
-                            :class="(selected === 'Branch Reports') ? 'block' :'hidden'">
-                            <ul :class="sidebarToggle ? 'lg:hidden' : 'flex'"
-                                class="flex flex-col gap-1 mt-2 menu-dropdown pl-9">
-                                <li>
-                                    <a href="{{ route('tenant.queue-overview-report') }}"
-                                        class="menu-dropdown-item group
-           {{ request()->routeIs('tenant.queue-overview-report') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Queue Overview') }}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('tenant.overall-overview-report') }}"
-                                        class="menu-dropdown-item group
-           {{ request()->routeIs('tenant.overall-overview-report') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Overview') }}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('tenant.branches-monthly-report') }}"
-                                        class="menu-dropdown-item group
-           {{ request()->routeIs('tenant.branches-monthly-report') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Branches Monthly Report') }}
-                                    </a>
-                                </li>
-
-                            </ul>
-                        </div>
-                    </li>
-                    @endcan
-                    @endif
-                    @can('Integration')
-                    <li>
-                        <a data-tooltip="Integrations" href="{{ route('tenant.integrations') }}" class="menu-item group"
-                            :class=" (selected === 'Integrations') || (page === 'integrations') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
-                            <svg :class="(selected === 'Integrations') || (page === 'integrations') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
-                                width="24" height="24" viewBox="0 0 32 32" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <g transform="matrix(1.04,0,0,1.04,-0.6399995923042319,-0.6402819967269906)">
-                                    <g data-name="Layer 2">
-                                        <path
-                                            d="M29.21 11.84a3.92 3.92 0 0 1-3.09-5.3 1.84 1.84 0 0 0-.55-2.07 14.75 14.75 0 0 0-4.4-2.55 1.85 1.85 0 0 0-2.09.58 3.91 3.91 0 0 1-6.16 0 1.85 1.85 0 0 0-2.09-.58 14.82 14.82 0 0 0-4.1 2.3 1.86 1.86 0 0 0-.58 2.13 3.9 3.9 0 0 1-3.25 5.36 1.85 1.85 0 0 0-1.62 1.49A14.14 14.14 0 0 0 1 16a14.32 14.32 0 0 0 .19 2.35 1.85 1.85 0 0 0 1.63 1.55A3.9 3.9 0 0 1 6 25.41a1.82 1.82 0 0 0 .51 2.18 14.86 14.86 0 0 0 4.36 2.51 2 2 0 0 0 .63.11 1.84 1.84 0 0 0 1.5-.78 3.87 3.87 0 0 1 3.2-1.68 3.92 3.92 0 0 1 3.14 1.58 1.84 1.84 0 0 0 2.16.61 15 15 0 0 0 4-2.39 1.85 1.85 0 0 0 .54-2.11 3.9 3.9 0 0 1 3.13-5.39 1.85 1.85 0 0 0 1.57-1.52A14.5 14.5 0 0 0 31 16a14.35 14.35 0 0 0-.25-2.67 1.83 1.83 0 0 0-1.54-1.49zm-.42 6.24a5.91 5.91 0 0 0-4.65 8 12.69 12.69 0 0 1-3.3 2 5.87 5.87 0 0 0-4.67-2.29 5.94 5.94 0 0 0-4.76 2.43 13.07 13.07 0 0 1-3.58-2.06 5.87 5.87 0 0 0-.29-5.26 5.93 5.93 0 0 0-4.44-2.94A13.67 13.67 0 0 1 3 16a12.28 12.28 0 0 1 .22-2.31 5.9 5.9 0 0 0 4.37-2.82 5.86 5.86 0 0 0 .46-5.14 12.79 12.79 0 0 1 3.37-1.9 5.92 5.92 0 0 0 9.16 0 12.76 12.76 0 0 1 3.63 2.11 5.92 5.92 0 0 0 4.59 7.86A12.77 12.77 0 0 1 29 16a13.46 13.46 0 0 1-.17 2.08z">
-                                        </path>
-                                        <path d="M16 10a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 10a4 4 0 1 1 4-4 4 4 0 0 1-4 4z">
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                            <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                                {{ __('sidebar.Integrations') }}
-                            </span>
-                        </a>
-
-                    </li>
-                    @endcan
-                    @if(Auth::user()->hasAnyPermission(['Booking Setting', 'Call Screen Setting','Color Settings','Display Settings','Pusher Settings','Logo Update','Ticket Screen Setting','QR Code Setting','Feedback Setting','Message Template Edit','Location','Form Field Read','Term and Condition','Category Read']))
-                    <li>
-                        <p data-tooltip="Settings" @click.prevent="selected = (selected === 'Settings' ? '':'Settings')" class="menu-item group"
-                            :class=" (selected === 'Settings') || (page === 'settings') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
-                            <svg :class="(selected === 'Settings') || (page === 'settings') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
-                                width="24" height="24" viewBox="0 0 32 32" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <g transform="matrix(1.04,0,0,1.04,-0.6399995923042319,-0.6402819967269906)">
-                                    <g data-name="Layer 2">
-                                        <path
-                                            d="M29.21 11.84a3.92 3.92 0 0 1-3.09-5.3 1.84 1.84 0 0 0-.55-2.07 14.75 14.75 0 0 0-4.4-2.55 1.85 1.85 0 0 0-2.09.58 3.91 3.91 0 0 1-6.16 0 1.85 1.85 0 0 0-2.09-.58 14.82 14.82 0 0 0-4.1 2.3 1.86 1.86 0 0 0-.58 2.13 3.9 3.9 0 0 1-3.25 5.36 1.85 1.85 0 0 0-1.62 1.49A14.14 14.14 0 0 0 1 16a14.32 14.32 0 0 0 .19 2.35 1.85 1.85 0 0 0 1.63 1.55A3.9 3.9 0 0 1 6 25.41a1.82 1.82 0 0 0 .51 2.18 14.86 14.86 0 0 0 4.36 2.51 2 2 0 0 0 .63.11 1.84 1.84 0 0 0 1.5-.78 3.87 3.87 0 0 1 3.2-1.68 3.92 3.92 0 0 1 3.14 1.58 1.84 1.84 0 0 0 2.16.61 15 15 0 0 0 4-2.39 1.85 1.85 0 0 0 .54-2.11 3.9 3.9 0 0 1 3.13-5.39 1.85 1.85 0 0 0 1.57-1.52A14.5 14.5 0 0 0 31 16a14.35 14.35 0 0 0-.25-2.67 1.83 1.83 0 0 0-1.54-1.49zm-.42 6.24a5.91 5.91 0 0 0-4.65 8 12.69 12.69 0 0 1-3.3 2 5.87 5.87 0 0 0-4.67-2.29 5.94 5.94 0 0 0-4.76 2.43 13.07 13.07 0 0 1-3.58-2.06 5.87 5.87 0 0 0-.29-5.26 5.93 5.93 0 0 0-4.44-2.94A13.67 13.67 0 0 1 3 16a12.28 12.28 0 0 1 .22-2.31 5.9 5.9 0 0 0 4.37-2.82 5.86 5.86 0 0 0 .46-5.14 12.79 12.79 0 0 1 3.37-1.9 5.92 5.92 0 0 0 9.16 0 12.76 12.76 0 0 1 3.63 2.11 5.92 5.92 0 0 0 4.59 7.86A12.77 12.77 0 0 1 29 16a13.46 13.46 0 0 1-.17 2.08z">
-                                        </path>
-                                        <path d="M16 10a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 10a4 4 0 1 1 4-4 4 4 0 0 1-4 4z">
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-
-                            <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                                {{ __('sidebar.Settings') }}
-                            </span>
-
-                            <svg class="menu-item-arrow absolute right-2.5 top-1/2 -translate-y-1/2 stroke-current"
-                                :class="[(selected === 'Settings') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
-                                width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585" stroke="" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </p>
-
-                        <div class="overflow-hidden transform translate"
-                            :class="(selected === 'Settings') ? 'block' :'hidden'">
-                            <ul :class="sidebarToggle ? 'lg:hidden' : 'flex'"
-                                class="flex flex-col gap-1 mt-2 menu-dropdown pl-9">
-
-                                 <li>
-                                    <a href="{{ route('tenant.automation') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.automation') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Automation') }}
-                                    </a>
-                                </li>
-
-                                <li>
-                                    <a href="{{ route('tenant.addons') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.addons') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Addons') }}
-                                    </a>
-                                </li>
-
-                                @can('Booking Setting')
-                                <li>
-                                    <a href="{{ route('tenant.booking-settings') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.booking-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Booking Settings') }}
-                                    </a>
-                                </li>
-                                @endcan
-
-                                <li>
-                                    <a href="{{ route('tenant.break-request') }}"
-                                        class="menu-dropdown-item group
-           {{ request()->routeIs('tenant.break-request') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                         {{ __('sidebar.Staff Break Request') }}
-                                    </a>
-                                </li>
-
-                                  <li>
-                                    <a href="{{ route('tenant.break-reason') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.break-reason') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                         {{ __('sidebar.Break Reason') }}
-                                    </a>
-                                </li>
-
-
-                                @can('Service Read')
-                                <li>
-                                    <a href="{{ route('category-level') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('category-level') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Service Level') }}
-                                    </a>
-                                </li>
-                                @endcan
-                                @can('Call Screen Setting')
-                                <li>
-                                    <a href="{{ route('tenant.call-screen-settings') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.call-screen-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Call Screen Settings') }}
-                                    </a>
-                                </li>
-                                @endcan
-
-                                @can('Color Settings')
-                                <li>
-                                    <a href="{{ route('tenant.color-settings') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.color-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Color Settings') }}
-                                    </a>
-                                </li>
-                                @endcan
-
-                                @can('Display Settings')
-                                <li>
-                                    <a href="{{ route('tenant.screen-templates') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.screen-templates') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Screen Templates and Settings') }}
-                                    </a>
-                                </li>
-                                @endcan
-                                @can('Pusher Settings')
-                                <li>
-                                    <a href="{{ route('tenant.pusher-settings') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.pusher-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Pusher Settings') }}
-                                    </a>
-                                </li>
-                                @endcan
-
-                                @can('Logo Update')
-                                <li>
-                                    <a href="{{ route('tenant.logo-update') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.logo-update') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Logo Update') }}
-                                    </a>
-                                </li>
-                                @endcan
-                                @can('Ticket Screen Setting')
-                                <li>
-                                    <a href="{{ route('tenant.ticket-generate-settings') }}"
-                                        class="menu-dropdown-item group {{ (request()->routeIs('tenant.ticket-generate-settings') || request()->routeIs('tenant.ticket-screen-settings')) ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Ticket Screen Settings') }}
-                                    </a>
-                                </li>
-                                @endcan
-
-                                @can('QR Code Setting')
-                                <li>
-                                    <a href="{{ route('tenant.qr-code') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.qr-code') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Qr Code') }}
-                                    </a>
-                                </li>
-                                @endcan
-                                @can('Feedback Setting')
-                                <li>
-                                    <a href="{{ route('tenant.feedback-form') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.feedback-form') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Feedback Form') }}
-                                    </a>
-                                </li>
-                                @endcan
-                                @can('Feedback Setting')
-                                <li>
-                                    <a href="{{ route('tenant.feedback-settings') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.feedback-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Feedback Settings') }}
-                                    </a>
-                                </li>
-                                @endcan
-                                @can('Booking Setting')
-                                <li>
-                                    <a href="{{ route('tenant.mobile.app.setting') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.mobile.app.setting') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Mobile API Settings') }}
-                                    </a>
-                                </li>
-                                @endcan
-                                @can('Message Template Edit')
-                                <li>
-                                    <a href="{{ route('tenant.notification-settings') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.notification-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Notification Settings') }}
-                                    </a>
-                                </li>
-                                @endcan
-
-
-                                @can('Form Field Read')
-                                <li>
-                                    <a href="{{ route('tenant.form-fields') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.form-fields') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Manage Form Fields') }}
-                                    </a>
-                                </li>
-                                @endcan
-                                @can('Location')
-                                <li>
-                                    <a href="{{ route('tenant.locations') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.locations') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Clinics') }}
-                                    </a>
-                                </li>
-                                @endcan
-
-                                <li>
-                                    <a href="{{ route('tenant.language-settings') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.language-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Language Settings') }}
-                                    </a>
-                                </li>
-
-
-                                @can('Term and Condition')
-                                <li>
-                                    <a href="{{ route('tenant.terms-conditions') }}"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.terms-conditions') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                        {{ __('sidebar.Terms & Conditions') }}
-                                    </a>
-                                </li>
-                                @endcan
-                                <li>
-                                    <a href="{{ route('tenant.country-manager') }}"
-                                        class="menu-dropdown-item group
-           {{ request()->routeIs('tenant.country-manager') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                         {{ __('sidebar.Allowed Country') }}
-                                    </a>
-                                </li>
-                            </ul>
-
-                        </div>
-                    </li>
-
-                    <li>
-                        <p data-tooltip="Help" @click.prevent="selected = (selected === 'Help' ? '':'Help')" class="menu-item group"
-                            :class=" (selected === 'Help') || (page === 'Help') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
-                            <svg :class="(selected === 'Help') || (page === 'help') ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
-                            width="24" height="24" viewBox="0 0 32 32" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <g transform="matrix(1.04,0,0,1.04,-0.6399995923042319,-0.6402819967269906)">
-                                <g data-name="Help Support">
-                                    <circle cx="16" cy="16" r="13" stroke="currentColor" stroke-width="2" fill="none"/>
-                                    <path d="M16 11C17.6569 11 19 12.3431 19 14C19 15.6569 17.5 16.5 17.5 17.5C17.5 17.7761 17.2761 18 17 18H15C14.7239 18 14.5 17.7761 14.5 17.5C14.5 15.5 16 15 16 14C16 13.4477 15.5523 13 15 13C14.4477 13 14 13.4477 14 14H12C12 12.3431 13.3431 11 15 11H16Z"
-                                        fill="currentColor"/>
-                                    <rect x="15" y="20" width="2" height="2" rx="1" fill="currentColor"/>
-                                </g>
-                            </g>
-                        </svg>
-
-
-                            <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                                {{ __('sidebar.Help') }}
-                            </span>
-
-                             <svg class="menu-item-arrow absolute right-2.5 top-1/2 -translate-y-1/2 stroke-current"
-                                :class="[(selected === 'Settings') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
-                                width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585" stroke="" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-
-                        </p>
-
-                        <div class="overflow-hidden transform translate"
-                            :class="(selected === 'Help') ? 'block' :'hidden'">
-                            <ul :class="sidebarToggle ? 'lg:hidden' : 'flex'"
-                                class="flex flex-col gap-1 mt-2 menu-dropdown pl-9">
-
-                                <li>
-                                    <a href="https://help.qwaiting.com/en"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.addons') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}" target="_blank">
-                                        {{ __('sidebar.Help Docs') }}
-                                    </a>
-                                </li>
-
-                                <li>
-                                    <a href="https://help.qwaiting.com/en/collections/10041739-product-updates"
-                                        class="menu-dropdown-item group {{ request()->routeIs('tenant.addons') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}" target="_blank">
-                                        {{ __("sidebar.What's New") }}
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                    @endif
-                    <!-- Menu Item Pages -->
                 </ul>
             </div>
+            </li>
+            @endcan
 
-        </nav>
-        <!-- Sidebar Menu -->
+            @if(auth()->user()->hasRole('superadmin'))
+            @can('Reports')
+            <li>
+                <p data-tooltip="Branch Reports" @click.prevent="selected = (selected === 'Branch Reports' ? '':'Branch Reports')" class="menu-item group"
+                    :class=" (selected === 'Branch Reports') || (page === 'categories-report') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
+                    <svg :class="(selected === 'Branch Reports') || (page === 'categories-report') ? 'menu-item-icon-active'  : 'menu-item-icon-inactive'"
+                        width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 36 36">
+                        <g
+                            transform="matrix(1.0899999999999996,0,0,1.0899999999999996,-1.619999999999994,-1.6194457483291558)">
+                            <path
+                                d="M4 33.99h2.5c1.103 0 2-.898 2-2v-3.46c0-1.103-.897-2-2-2H4c-1.103 0-2 .897-2 2v3.46c0 1.102.897 2 2 2zm0-5.46h2.5l.002 3.46H4zM12.5 33.99H15c1.103 0 2-.898 2-2v-12.4c0-1.102-.897-2-2-2h-2.5c-1.103 0-2 .898-2 2v12.4c0 1.102.897 2 2 2zm0-14.4H15l.002 12.4H12.5zM21 21.07c-1.103 0-2 .897-2 2v8.92c0 1.102.897 2 2 2h2.5c1.103 0 2-.898 2-2v-8.92c0-1.103-.897-2-2-2zm0 10.92v-8.92h2.5l.002 8.92zM34 31.99V12.57c0-1.103-.897-2-2-2h-2.5c-1.103 0-2 .897-2 2v19.42c0 1.102.897 2 2 2H32c1.103 0 2-.898 2-2zm-4.5-19.42H32l.002 19.42H29.5zM5.947 16.737l7.546-7.546a1.003 1.003 0 0 1 1.134-.197l5.956 2.801a3 3 0 0 0 3.398-.592l7.487-7.486a1 1 0 1 0-1.414-1.414L22.567 9.79a1 1 0 0 1-1.132.197l-5.956-2.803a3.012 3.012 0 0 0-3.4.594l-7.546 7.546a1 1 0 1 0 1.414 1.414z">
+                            </path>
+                        </g>
+                    </svg>
+
+                    <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                        {{ __('sidebar.Branch Reports') }}
+                    </span>
+
+                    <svg class="menu-item-arrow absolute right-2.5 top-1/2 -translate-y-1/2 stroke-current"
+                        :class="[(selected === 'Branch Reports') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
+                        width="20" height="20" viewBox="0 0 20 20" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585" stroke="" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </p>
+
+                <div class="overflow-hidden transform translate"
+                    :class="(selected === 'Branch Reports') ? 'block' :'hidden'">
+                    <ul :class="sidebarToggle ? 'lg:hidden' : 'flex'"
+                        class="flex flex-col gap-1 mt-2 menu-dropdown pl-9">
+                        <li>
+                            <a href="{{ route('tenant.queue-overview-report') }}"
+                                class="menu-dropdown-item group
+           {{ request()->routeIs('tenant.queue-overview-report') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Queue Overview') }}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('tenant.overall-overview-report') }}"
+                                class="menu-dropdown-item group
+           {{ request()->routeIs('tenant.overall-overview-report') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Overview') }}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('tenant.branches-monthly-report') }}"
+                                class="menu-dropdown-item group
+           {{ request()->routeIs('tenant.branches-monthly-report') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Branches Monthly Report') }}
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </li>
+            @endcan
+            @endif
+            @can('Integration')
+            <li>
+                <a data-tooltip="Integrations" href="{{ route('tenant.integrations') }}" class="menu-item group"
+                    :class=" (selected === 'Integrations') || (page === 'integrations') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
+                    <svg :class="(selected === 'Integrations') || (page === 'integrations') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                        width="24" height="24" viewBox="0 0 32 32" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g transform="matrix(1.04,0,0,1.04,-0.6399995923042319,-0.6402819967269906)">
+                            <g data-name="Layer 2">
+                                <path
+                                    d="M29.21 11.84a3.92 3.92 0 0 1-3.09-5.3 1.84 1.84 0 0 0-.55-2.07 14.75 14.75 0 0 0-4.4-2.55 1.85 1.85 0 0 0-2.09.58 3.91 3.91 0 0 1-6.16 0 1.85 1.85 0 0 0-2.09-.58 14.82 14.82 0 0 0-4.1 2.3 1.86 1.86 0 0 0-.58 2.13 3.9 3.9 0 0 1-3.25 5.36 1.85 1.85 0 0 0-1.62 1.49A14.14 14.14 0 0 0 1 16a14.32 14.32 0 0 0 .19 2.35 1.85 1.85 0 0 0 1.63 1.55A3.9 3.9 0 0 1 6 25.41a1.82 1.82 0 0 0 .51 2.18 14.86 14.86 0 0 0 4.36 2.51 2 2 0 0 0 .63.11 1.84 1.84 0 0 0 1.5-.78 3.87 3.87 0 0 1 3.2-1.68 3.92 3.92 0 0 1 3.14 1.58 1.84 1.84 0 0 0 2.16.61 15 15 0 0 0 4-2.39 1.85 1.85 0 0 0 .54-2.11 3.9 3.9 0 0 1 3.13-5.39 1.85 1.85 0 0 0 1.57-1.52A14.5 14.5 0 0 0 31 16a14.35 14.35 0 0 0-.25-2.67 1.83 1.83 0 0 0-1.54-1.49zm-.42 6.24a5.91 5.91 0 0 0-4.65 8 12.69 12.69 0 0 1-3.3 2 5.87 5.87 0 0 0-4.67-2.29 5.94 5.94 0 0 0-4.76 2.43 13.07 13.07 0 0 1-3.58-2.06 5.87 5.87 0 0 0-.29-5.26 5.93 5.93 0 0 0-4.44-2.94A13.67 13.67 0 0 1 3 16a12.28 12.28 0 0 1 .22-2.31 5.9 5.9 0 0 0 4.37-2.82 5.86 5.86 0 0 0 .46-5.14 12.79 12.79 0 0 1 3.37-1.9 5.92 5.92 0 0 0 9.16 0 12.76 12.76 0 0 1 3.63 2.11 5.92 5.92 0 0 0 4.59 7.86A12.77 12.77 0 0 1 29 16a13.46 13.46 0 0 1-.17 2.08z">
+                                </path>
+                                <path d="M16 10a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 10a4 4 0 1 1 4-4 4 4 0 0 1-4 4z">
+                                </path>
+                            </g>
+                        </g>
+                    </svg>
+                    <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                        {{ __('sidebar.Integrations') }}
+                    </span>
+                </a>
+
+            </li>
+            @endcan
+            @if(Auth::user()->hasAnyPermission(['Booking Setting', 'Call Screen Setting','Color Settings','Display Settings','Pusher Settings','Logo Update','Ticket Screen Setting','QR Code Setting','Feedback Setting','Message Template Edit','Location','Form Field Read','Term and Condition','Category Read']))
+            <li>
+                <p data-tooltip="Settings" @click.prevent="selected = (selected === 'Settings' ? '':'Settings')" class="menu-item group"
+                    :class=" (selected === 'Settings') || (page === 'settings') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
+                    <svg :class="(selected === 'Settings') || (page === 'settings') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                        width="24" height="24" viewBox="0 0 32 32" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g transform="matrix(1.04,0,0,1.04,-0.6399995923042319,-0.6402819967269906)">
+                            <g data-name="Layer 2">
+                                <path
+                                    d="M29.21 11.84a3.92 3.92 0 0 1-3.09-5.3 1.84 1.84 0 0 0-.55-2.07 14.75 14.75 0 0 0-4.4-2.55 1.85 1.85 0 0 0-2.09.58 3.91 3.91 0 0 1-6.16 0 1.85 1.85 0 0 0-2.09-.58 14.82 14.82 0 0 0-4.1 2.3 1.86 1.86 0 0 0-.58 2.13 3.9 3.9 0 0 1-3.25 5.36 1.85 1.85 0 0 0-1.62 1.49A14.14 14.14 0 0 0 1 16a14.32 14.32 0 0 0 .19 2.35 1.85 1.85 0 0 0 1.63 1.55A3.9 3.9 0 0 1 6 25.41a1.82 1.82 0 0 0 .51 2.18 14.86 14.86 0 0 0 4.36 2.51 2 2 0 0 0 .63.11 1.84 1.84 0 0 0 1.5-.78 3.87 3.87 0 0 1 3.2-1.68 3.92 3.92 0 0 1 3.14 1.58 1.84 1.84 0 0 0 2.16.61 15 15 0 0 0 4-2.39 1.85 1.85 0 0 0 .54-2.11 3.9 3.9 0 0 1 3.13-5.39 1.85 1.85 0 0 0 1.57-1.52A14.5 14.5 0 0 0 31 16a14.35 14.35 0 0 0-.25-2.67 1.83 1.83 0 0 0-1.54-1.49zm-.42 6.24a5.91 5.91 0 0 0-4.65 8 12.69 12.69 0 0 1-3.3 2 5.87 5.87 0 0 0-4.67-2.29 5.94 5.94 0 0 0-4.76 2.43 13.07 13.07 0 0 1-3.58-2.06 5.87 5.87 0 0 0-.29-5.26 5.93 5.93 0 0 0-4.44-2.94A13.67 13.67 0 0 1 3 16a12.28 12.28 0 0 1 .22-2.31 5.9 5.9 0 0 0 4.37-2.82 5.86 5.86 0 0 0 .46-5.14 12.79 12.79 0 0 1 3.37-1.9 5.92 5.92 0 0 0 9.16 0 12.76 12.76 0 0 1 3.63 2.11 5.92 5.92 0 0 0 4.59 7.86A12.77 12.77 0 0 1 29 16a13.46 13.46 0 0 1-.17 2.08z">
+                                </path>
+                                <path d="M16 10a6 6 0 1 0 6 6 6 6 0 0 0-6-6zm0 10a4 4 0 1 1 4-4 4 4 0 0 1-4 4z">
+                                </path>
+                            </g>
+                        </g>
+                    </svg>
+
+                    <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                        {{ __('sidebar.Settings') }}
+                    </span>
+
+                    <svg class="menu-item-arrow absolute right-2.5 top-1/2 -translate-y-1/2 stroke-current"
+                        :class="[(selected === 'Settings') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
+                        width="20" height="20" viewBox="0 0 20 20" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585" stroke="" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </p>
+
+                <div class="overflow-hidden transform translate"
+                    :class="(selected === 'Settings') ? 'block' :'hidden'">
+                    <ul :class="sidebarToggle ? 'lg:hidden' : 'flex'"
+                        class="flex flex-col gap-1 mt-2 menu-dropdown pl-9">
+
+                        <li>
+                            <a href="{{ route('tenant.automation') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.automation') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Automation') }}
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('tenant.addons') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.addons') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Addons') }}
+                            </a>
+                        </li>
+
+                        @can('Booking Setting')
+                        <li>
+                            <a href="{{ route('tenant.booking-settings') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.booking-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Booking Settings') }}
+                            </a>
+                        </li>
+                        @endcan
+
+                        <li>
+                            <a href="{{ route('tenant.break-request') }}"
+                                class="menu-dropdown-item group
+           {{ request()->routeIs('tenant.break-request') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Staff Break Request') }}
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('tenant.break-reason') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.break-reason') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Break Reason') }}
+                            </a>
+                        </li>
+
+
+                        @can('Service Read')
+                        <li>
+                            <a href="{{ route('category-level') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('category-level') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Service Level') }}
+                            </a>
+                        </li>
+                        @endcan
+                        @can('Call Screen Setting')
+                        <li>
+                            <a href="{{ route('tenant.call-screen-settings') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.call-screen-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Call Screen Settings') }}
+                            </a>
+                        </li>
+                        @endcan
+
+                        @can('Color Settings')
+                        <li>
+                            <a href="{{ route('tenant.color-settings') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.color-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Color Settings') }}
+                            </a>
+                        </li>
+                        @endcan
+
+                        @can('Display Settings')
+                        <li>
+                            <a href="{{ route('tenant.screen-templates') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.screen-templates') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Screen Templates and Settings') }}
+                            </a>
+                        </li>
+                        @endcan
+                        @can('Pusher Settings')
+                        <li>
+                            <a href="{{ route('tenant.pusher-settings') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.pusher-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Pusher Settings') }}
+                            </a>
+                        </li>
+                        @endcan
+
+                        @can('Logo Update')
+                        <li>
+                            <a href="{{ route('tenant.logo-update') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.logo-update') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Logo Update') }}
+                            </a>
+                        </li>
+                        @endcan
+                        @can('Ticket Screen Setting')
+                        <li>
+                            <a href="{{ route('tenant.ticket-generate-settings') }}"
+                                class="menu-dropdown-item group {{ (request()->routeIs('tenant.ticket-generate-settings') || request()->routeIs('tenant.ticket-screen-settings')) ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Ticket Screen Settings') }}
+                            </a>
+                        </li>
+                        @endcan
+
+                        @can('QR Code Setting')
+                        <li>
+                            <a href="{{ route('tenant.qr-code') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.qr-code') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Qr Code') }}
+                            </a>
+                        </li>
+                        @endcan
+                        @can('Feedback Setting')
+                        <li>
+                            <a href="{{ route('tenant.feedback-form') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.feedback-form') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Feedback Form') }}
+                            </a>
+                        </li>
+                        @endcan
+                        @can('Feedback Setting')
+                        <li>
+                            <a href="{{ route('tenant.feedback-settings') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.feedback-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Feedback Settings') }}
+                            </a>
+                        </li>
+                        @endcan
+                        @can('Booking Setting')
+                        <li>
+                            <a href="{{ route('tenant.mobile.app.setting') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.mobile.app.setting') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Mobile API Settings') }}
+                            </a>
+                        </li>
+                        @endcan
+                        @can('Message Template Edit')
+                        <li>
+                            <a href="{{ route('tenant.notification-settings') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.notification-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Notification Settings') }}
+                            </a>
+                        </li>
+                        @endcan
+
+
+                        @can('Form Field Read')
+                        <li>
+                            <a href="{{ route('tenant.form-fields') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.form-fields') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Manage Form Fields') }}
+                            </a>
+                        </li>
+                        @endcan
+                        @can('Location')
+                        <li>
+                            <a href="{{ route('tenant.locations') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.locations') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Clinics') }}
+                            </a>
+                        </li>
+                        @endcan
+
+                        <li>
+                            <a href="{{ route('tenant.language-settings') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.language-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Language Settings') }}
+                            </a>
+                        </li>
+
+
+                        @can('Term and Condition')
+                        <li>
+                            <a href="{{ route('tenant.terms-conditions') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.terms-conditions') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Terms & Conditions') }}
+                            </a>
+                        </li>
+                        @endcan
+                        <li>
+                            <a href="{{ route('tenant.country-manager') }}"
+                                class="menu-dropdown-item group
+           {{ request()->routeIs('tenant.country-manager') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Allowed Country') }}
+                            </a>
+                        </li>
+                    </ul>
+
+                </div>
+            </li>
+
+            <li>
+                <p data-tooltip="Help" @click.prevent="selected = (selected === 'Help' ? '':'Help')" class="menu-item group"
+                    :class=" (selected === 'Help') || (page === 'Help') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
+                    <svg :class="(selected === 'Help') || (page === 'help') ? 'menu-item-icon-active' : 'menu-item-icon-inactive'"
+                        width="24" height="24" viewBox="0 0 32 32" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <g transform="matrix(1.04,0,0,1.04,-0.6399995923042319,-0.6402819967269906)">
+                            <g data-name="Help Support">
+                                <circle cx="16" cy="16" r="13" stroke="currentColor" stroke-width="2" fill="none" />
+                                <path d="M16 11C17.6569 11 19 12.3431 19 14C19 15.6569 17.5 16.5 17.5 17.5C17.5 17.7761 17.2761 18 17 18H15C14.7239 18 14.5 17.7761 14.5 17.5C14.5 15.5 16 15 16 14C16 13.4477 15.5523 13 15 13C14.4477 13 14 13.4477 14 14H12C12 12.3431 13.3431 11 15 11H16Z"
+                                    fill="currentColor" />
+                                <rect x="15" y="20" width="2" height="2" rx="1" fill="currentColor" />
+                            </g>
+                        </g>
+                    </svg>
+
+
+                    <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                        {{ __('sidebar.Help') }}
+                    </span>
+
+                    <svg class="menu-item-arrow absolute right-2.5 top-1/2 -translate-y-1/2 stroke-current"
+                        :class="[(selected === 'Settings') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
+                        width="20" height="20" viewBox="0 0 20 20" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585" stroke="" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+
+                </p>
+
+                <div class="overflow-hidden transform translate"
+                    :class="(selected === 'Help') ? 'block' :'hidden'">
+                    <ul :class="sidebarToggle ? 'lg:hidden' : 'flex'"
+                        class="flex flex-col gap-1 mt-2 menu-dropdown pl-9">
+
+                        <li>
+                            <a href="https://help.qwaiting.com/en"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.addons') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}" target="_blank">
+                                {{ __('sidebar.Help Docs') }}
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="https://help.qwaiting.com/en/collections/10041739-product-updates"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.addons') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}" target="_blank">
+                                {{ __("sidebar.What's New") }}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            @endif
+            <!-- Menu Item Pages -->
+            </ul>
+    </div>
+
+    </nav>
+    <!-- Sidebar Menu -->
 
 
     </div>

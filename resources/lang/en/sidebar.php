@@ -12,6 +12,7 @@ $langArr = [
   "Display Screen" => " Display Screen",
   "Public Links" => "Public Links",
   "Companies" => "Companies",
+  "Patient Search" => "Patient Search",
   "Import Member Details" => "Import Member Details",
   "Booking Management" => "Booking Management",
   "Online Booking" => "Online Booking",

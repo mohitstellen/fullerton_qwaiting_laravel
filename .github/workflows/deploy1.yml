@@ -65,20 +65,7 @@ jobs:
 
           git pull origin main
 
-          php artisan migrate --path=database/migrations/2025_11_28_101635_add_company_id_to_categories_table.php --force
-
-          php artisan migrate --path=database/migrations/2025_11_28_111709_add_appointment_email_templates_to_notification_templates_table.php --force
-
-          php artisan migrate --path=database/migrations/2025_11_28_120000_rename_appointment_email_columns_in_notification_templates_table.php --force
-
-          php artisan migrate --path=database/migrations/2025_11_28_151819_add_country_code_and_mobile_length_to_allowed_countries_table.php --force
-
-          php artisan migrate --path=database/migrations/2025_11_28_155045_add_company_id_to_activity_logs_table.php --force
-
-          php artisan migrate --path=database/migrations/2025_11_28_155417_rename_company_id_to_country_id_in_activity_logs_table.php --force
-
-          php artisan migrate --path=database/migrations/2025_11_28_164341_create_member_imports_table.php --force
-
+          php artisan migrate --path=database/migrations/2025_12_01_000000_create_public_users_table.php --force
           php artisan o:clear
           
       

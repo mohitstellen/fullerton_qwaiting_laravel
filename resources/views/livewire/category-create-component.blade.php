@@ -120,488 +120,488 @@
                                 @error('display_on') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
 
-                        <div class="w-full px-2.5 xl:w-1/2">
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                {{__('text.For Screen')}}
-                            </label>
-                            <div x-data="{ isOptionSelected: false }" class="relative z-20 bg-transparent">
-                                <select
-                                    wire:model="booking_category_show_for"
-                                    class="dark:bg-dark-900 z-20 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                                    :class="isOptionSelected && 'text-gray-500 dark:text-gray-400'"
-                                    @change="isOptionSelected = true">
-                                    <option value="Backend & Online Appointment Screen" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-                                        {{ __('text.Display on Backend & Online Appointment Screen')}}
-                                    </option>
-                                    <option value="Backend" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-                                        {{ __('text.Backend')}}
-                                    </option>
-
-                                    <option value="Online" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-                                        {{ __('text.Online Appointment Screen')}}
-                                    </option>
-                                </select>
-                                <span class="absolute z-30 text-gray-500 -translate-y-1/4 right-4 top-1/2 dark:text-gray-400 rtl:right-auto rtl:left-3">
-                                    <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke="" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </span>
-                            </div>
-                            @error('booking_category_show_for') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        </div>
-
-                        <div class="w-full px-2.5 xl:w-1/2">
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                {{ __('text.visitor in queue')}}
-                            </label>
-                            <input
-                                type="number"
-                                wire:model="visitor_in_queue"
-                                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                            @error('visitor_in_queue') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        </div>
-                        @if($tab == 1)
-                        <div class="w-full px-2.5 xl:w-1/2">
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                {{ __('text.Lead Time') }}
-                            </label>
-                            <div class="flex flex-col gap-3 sm:flex-row">
-                                <input
-                                    type="number"
-                                    min="0"
-                                    wire:model="leadTimeValue"
-                                    class="dark:bg-dark-900 h-11 flex-1 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                                <div class="relative sm:w-40">
+                            <div class="w-full px-2.5 xl:w-1/2">
+                                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                    {{__('text.For Screen')}}
+                                </label>
+                                <div x-data="{ isOptionSelected: false }" class="relative z-20 bg-transparent">
                                     <select
-                                        wire:model="leadTimeUnit"
-                                        class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
-                                        <option value="minutes">{{ __('text.Minutes') }}</option>
-                                        <option value="hours">{{ __('text.Hours') }}</option>
-                                        <option value="days">{{ __('text.Days') }}</option>
+                                        wire:model="booking_category_show_for"
+                                        class="dark:bg-dark-900 z-20 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                        :class="isOptionSelected && 'text-gray-500 dark:text-gray-400'"
+                                        @change="isOptionSelected = true">
+                                        <option value="Backend & Online Appointment Screen" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+                                            {{ __('text.Display on Backend & Online Appointment Screen')}}
+                                        </option>
+                                        <option value="Backend" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+                                            {{ __('text.Backend')}}
+                                        </option>
+
+                                        <option value="Online" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+                                            {{ __('text.Online Appointment Screen')}}
+                                        </option>
                                     </select>
-                                    <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 dark:text-gray-400">
+                                    <span class="absolute z-30 text-gray-500 -translate-y-1/4 right-4 top-1/2 dark:text-gray-400 rtl:right-auto rtl:left-3">
                                         <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke="" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                                         </svg>
                                     </span>
                                 </div>
-                            </div>
-                            <div class="mt-1">
-                                @error('leadTimeValue') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                                @error('leadTimeUnit') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                            </div>
-                        </div>
-                        @endif
-                        @if($this->paymentSet && $this->paymentSet->enable_payment == 1 && $this->paymentSet->category_level == $tab)
-
-                        <div class="w-full px-2.5 xl:w-1/2">
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                {{ $tab == 2 ? __('text.Select package is paid or free') : __('text.Select appointment type is paid or free') }}
-                            </label>
-                            <div x-data="{ isOptionSelected: false }" class="relative z-20 bg-transparent">
-                                <select
-                                    wire:model.live="is_paid"
-                                    class="dark:bg-dark-900 z-20 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                                    :class="isOptionSelected && 'text-gray-500 dark:text-gray-400'"
-                                    @change="isOptionSelected = true">
-                                    <option value="" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-                                        Select
-                                    </option>
-                                    <option value="0" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-                                        Free
-                                    </option>
-                                    <option value="1" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-                                        Paid
-                                    </option>
-                                </select>
-                                <span class="absolute z-30 text-gray-500 -translate-y-1/2 right-4 top-1/2 dark:text-gray-400 rtl:right-auto rtl:left-3">
-                                    <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke="" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </span>
+                                @error('booking_category_show_for') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
 
-                            @error('is_paid') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        </div>
+                            <div class="w-full px-2.5 xl:w-1/2">
+                                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                    {{ __('text.visitor in queue')}}
+                                </label>
+                                <input
+                                    type="number"
+                                    wire:model="visitor_in_queue"
+                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                                @error('visitor_in_queue') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                            @if($tab == 1)
+                            <div class="w-full px-2.5 xl:w-1/2">
+                                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                    {{ __('text.Lead Time') }}
+                                </label>
+                                <div class="flex flex-col gap-3 sm:flex-row">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        wire:model="leadTimeValue"
+                                        class="dark:bg-dark-900 h-11 flex-1 rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                                    <div class="relative sm:w-40">
+                                        <select
+                                            wire:model="leadTimeUnit"
+                                            class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                                            <option value="minutes">{{ __('text.Minutes') }}</option>
+                                            <option value="hours">{{ __('text.Hours') }}</option>
+                                            <option value="days">{{ __('text.Days') }}</option>
+                                        </select>
+                                        <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 dark:text-gray-400">
+                                            <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mt-1">
+                                    @error('leadTimeValue') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                    @error('leadTimeUnit') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
+                            @endif
+                            @if($this->paymentSet && $this->paymentSet->enable_payment == 1 && $this->paymentSet->category_level == $tab)
 
-                        @if($is_paid == 1)
-                        <div class="w-full px-2.5 xl:w-1/2">
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                {{ $tab == 2 ? __('text.Package Amount') : __('text.Appointment Type Amount') }}
-                            </label>
-                            <input
-                                type="text"
-                                wire:model="amount"
-                                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                            @error('amount') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        </div>
-                        @endif
-                        @endif
-                        {{-- <div class="w-full px-2.5 xl:w-1/2">
+                            <div class="w-full px-2.5 xl:w-1/2">
+                                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                    {{ $tab == 2 ? __('text.Select package is paid or free') : __('text.Select appointment type is paid or free') }}
+                                </label>
+                                <div x-data="{ isOptionSelected: false }" class="relative z-20 bg-transparent">
+                                    <select
+                                        wire:model.live="is_paid"
+                                        class="dark:bg-dark-900 z-20 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                        :class="isOptionSelected && 'text-gray-500 dark:text-gray-400'"
+                                        @change="isOptionSelected = true">
+                                        <option value="" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+                                            Select
+                                        </option>
+                                        <option value="0" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+                                            Free
+                                        </option>
+                                        <option value="1" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+                                            Paid
+                                        </option>
+                                    </select>
+                                    <span class="absolute z-30 text-gray-500 -translate-y-1/2 right-4 top-1/2 dark:text-gray-400 rtl:right-auto rtl:left-3">
+                                        <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke="" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
+                                </div>
+
+                                @error('is_paid') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+
+                            @if($is_paid == 1)
+                            <div class="w-full px-2.5 xl:w-1/2">
+                                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                    {{ $tab == 2 ? __('text.Package Amount') : __('text.Appointment Type Amount') }}
+                                </label>
+                                <input
+                                    type="text"
+                                    wire:model="amount"
+                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                                @error('amount') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                            @endif
+                            @endif
+                            {{-- <div class="w-full px-2.5 xl:w-1/2">
                     <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                     Image</label>
             <input type="file" wire:model="img" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
             @if ($img)
                 <img src="{{ $img->temporaryUrl() }}" class="mt-2 h-24">
-                        @elseif ($isEdit && $category->img)
-                        <img src="{{ url('storage/' . $category->img) }}" class="mt-2 h-24">
-                        @endif
-                    </div> --}}
+                            @elseif ($isEdit && $category->img)
+                            <img src="{{ url('storage/' . $category->img) }}" class="mt-2 h-24">
+                            @endif
+                        </div> --}}
 
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{ __('text.Image')}}
-                        </label>
-                        <input type="file" wire:model="img" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                        @error('img')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                        @if ($img)
-                        @if (Str::startsWith($img->getMimeType(), 'image/'))
-                        <div class="mt-2 relative w-fit">
-                            <img src="{{ $img->temporaryUrl() }}" class="h-24">
-                            <button type="button" wire:click="removeTempImage"
-                                class="absolute top-0 right-0 bg-red-500 text-white text-xs px-1 py-0.5 rounded-full">✕</button>
-                        </div>
-                        @else
-                        <div class="mt-2">
-                            <p class="text-sm text-gray-600">Uploaded file: {{ $img->getClientOriginalName() }}</p>
-                            <button type="button" wire:click="removeTempImage"
-                                class="mt-1 bg-red-500 text-white text-xs px-2 py-1 rounded">Remove File</button>
-                        </div>
-                        @endif
-                        @elseif ($isEdit && $category->img)
-                        <div class="mt-2 relative w-fit">
-                            <img src="{{ url('storage/' . $category->img) }}" class="h-24">
-                            <button type="button" wire:click="deleteOldImage"
-                                class="absolute top-0 right-0 bg-red-500 text-white text-xs px-1 py-0.5 rounded-full">✕</button>
-                        </div>
-                        @endif
-                    </div>
-
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <div class="mb-1.5">
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{{ __('text.Locations') }}*</label>
-                            <div wire:ignore>
-                                <select wire:model="locations" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" multiple id="locations-select">
-                                    @if(!empty($allLocations))
-                                    @foreach($allLocations as $location)
-                                    <option value="{{ $location->id }}">{{ $location->location_name }}</option>
-                                    @endforeach
-                                    @endif
-                                </select>
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                {{ __('text.Image')}}
+                            </label>
+                            <input type="file" wire:model="img" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                            @error('img')
+                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                            @if ($img)
+                            @if (Str::startsWith($img->getMimeType(), 'image/'))
+                            <div class="mt-2 relative w-fit">
+                                <img src="{{ $img->temporaryUrl() }}" class="h-24">
+                                <button type="button" wire:click="removeTempImage"
+                                    class="absolute top-0 right-0 bg-red-500 text-white text-xs px-1 py-0.5 rounded-full">✕</button>
                             </div>
-                            @error('locations') <span class="text-red-500">{{ $message }}</span> @enderror
-                        </div>
-                    </div>
-
-                    @if($isEdit)
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{__('text.Company')}}
-                        </label>
-                        <div x-data="{ 
-                            showDropdown: @entangle('showCompanyDropdown'),
-                            isFocused: false
-                        }"
-                            class="relative z-20 bg-transparent"
-                            @click.away="showDropdown = false">
-                            <div class="relative">
-                                <input
-                                    type="text"
-                                    wire:model.live.debounce.300ms="companySearch"
-                                    @focus="showDropdown = true; isFocused = true"
-                                    @keydown.escape="showDropdown = false"
-                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                            @else
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-600">Uploaded file: {{ $img->getClientOriginalName() }}</p>
+                                <button type="button" wire:click="removeTempImage"
+                                    class="mt-1 bg-red-500 text-white text-xs px-2 py-1 rounded">Remove File</button>
                             </div>
-
-                            @if($showCompanyDropdown && count($allCompanies) > 0)
-                            <div class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-auto">
-                                @foreach($allCompanies as $company)
-                                <div
-                                    wire:click="selectCompany({{ $company->id }}, {{ json_encode($company->company_name) }})"
-                                    class="px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-800 dark:text-white/90 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
-                                    {{ $company->company_name }}
-                                </div>
-                                @endforeach
-                            </div>
-                            @elseif($showCompanyDropdown && strlen($companySearch) >= 1 && count($allCompanies) == 0)
-                            <div class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
-                                <div class="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400">
-                                    {{__('text.No companies found')}}
-                                </div>
+                            @endif
+                            @elseif ($isEdit && $category->img)
+                            <div class="mt-2 relative w-fit">
+                                <img src="{{ url('storage/' . $category->img) }}" class="h-24">
+                                <button type="button" wire:click="deleteOldImage"
+                                    class="absolute top-0 right-0 bg-red-500 text-white text-xs px-1 py-0.5 rounded-full">✕</button>
                             </div>
                             @endif
                         </div>
-                        @error('company_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-                    @endif
 
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{__('text.Redirect Url')}}
-                        </label>
-                        <input
-                            type="url"
-                            wire:model="redirectUrl"
-                            class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-
-
-                        @error('redirectUrl') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div class="w-full px-2.5">
-                        <label class="switch">
-                            <input type="checkbox" {{ $isService == true ? 'checked' :'' }}
-                                wire:model.live="isService">
-                            <span class="slider round"></span>
-                        </label>
-                        {{ $tab == 2 ? __('text.Enable/Disable Package Note.') : __('text.Enable/Disable Appointment Type Note.') }}
-                    </div>
-
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{ $tab == 2 ? __('text.Package Time (in mins)') : __('text.Appointment Type Time (in mins)') }}
-                        </label>
-                        <input
-                            type="number"
-                            wire:model="serviceTime"
-                            class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                        @error('serviceTime') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{ $tab == 2 ? __('text.Package Note') : __('text.Appointment Type Note') }}
-                        </label>
-                        <textarea wire:model="note" row="5" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
-
-                        @error('note') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{__('text.description')}}
-                        </label>
-                        <div>
-                            <textarea id="editor" wire:model="description" class="bg-white dark:bg-dark-900 datepickerTwo shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-4 pl-4 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"></textarea>
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <div class="mb-1.5">
+                                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">{{ __('text.Locations') }}*</label>
+                                <div wire:ignore>
+                                    <select wire:model="locations" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" multiple id="locations-select">
+                                        @if(!empty($allLocations))
+                                        @foreach($allLocations as $location)
+                                        <option value="{{ $location->id }}">{{ $location->location_name }}</option>
+                                        @endforeach
+                                        @endif
+                                    </select>
+                                </div>
+                                @error('locations') <span class="text-red-500">{{ $message }}</span> @enderror
+                            </div>
                         </div>
 
-                        @error('description') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
+                        @if($isEdit)
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                {{__('text.Company')}}
+                            </label>
+                            <div x-data="{ 
+                            showDropdown: @entangle('showCompanyDropdown'),
+                            isFocused: false
+                        }"
+                                class="relative z-20 bg-transparent"
+                                @click.away="showDropdown = false">
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        wire:model.live.debounce.300ms="companySearch"
+                                        @focus="showDropdown = true; isFocused = true"
+                                        @keydown.escape="showDropdown = false"
+                                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                                </div>
 
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{__('text.Ticket Note')}}
-                        </label>
-                        <textarea wire:model="ticket_note" row="5" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
-
-                        @error('ticket_note') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{ __('text.Label Image')}}
-                        </label>
-                        <input type="file" wire:model="label_image" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                        @error('label_image')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                        @if ($label_image)
-                        @if (Str::startsWith($label_image->getMimeType(), 'image/'))
-                        <div class="mt-2 relative w-fit">
-                            <img src="{{ $label_image->temporaryUrl() }}" class="h-24">
-                            <button type="button" wire:click="removeTempImage"
-                                class="absolute top-0 right-0 bg-red-500 text-white text-xs px-1 py-0.5 rounded-full">✕</button>
-                        </div>
-                        @else
-                        <div class="mt-2">
-                            <p class="text-sm text-gray-600">Uploaded file: {{ $label_image->getClientOriginalName() }}</p>
-                            <button type="button" wire:click="removeTempImage"
-                                class="mt-1 bg-red-500 text-white text-xs px-2 py-1 rounded">Remove File</button>
+                                @if($showCompanyDropdown && count($allCompanies) > 0)
+                                <div class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-auto">
+                                    @foreach($allCompanies as $company)
+                                    <div
+                                        wire:click="selectCompany({{ $company->id }}, {{ json_encode($company->company_name) }})"
+                                        class="px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-800 dark:text-white/90 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+                                        {{ $company->company_name }}
+                                    </div>
+                                    @endforeach
+                                </div>
+                                @elseif($showCompanyDropdown && strlen($companySearch) >= 1 && count($allCompanies) == 0)
+                                <div class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg">
+                                    <div class="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400">
+                                        {{__('text.No companies found')}}
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                            @error('company_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
                         @endif
-                        @elseif ($isEdit && $category->label_image)
-                        <div class="mt-2 relative w-fit">
-                            <img src="{{ url('storage/' . $category->label_image) }}" class="h-24">
-                            <button type="button" wire:click="deleteOldLabelImage"
-                                class="absolute top-0 right-0 bg-red-500 text-white text-xs px-1 py-0.5 rounded-full">✕</button>
+
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                {{__('text.Redirect Url')}}
+                            </label>
+                            <input
+                                type="url"
+                                wire:model="redirectUrl"
+                                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+
+
+                            @error('redirectUrl') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="w-full px-2.5">
+                            <label class="switch">
+                                <input type="checkbox" {{ $isService == true ? 'checked' :'' }}
+                                    wire:model.live="isService">
+                                <span class="slider round"></span>
+                            </label>
+                            {{ $tab == 2 ? __('text.Enable/Disable Package Note.') : __('text.Enable/Disable Appointment Type Note.') }}
+                        </div>
+
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                {{ $tab == 2 ? __('text.Package Time (in mins)') : __('text.Appointment Type Time (in mins)') }}
+                            </label>
+                            <input
+                                type="number"
+                                wire:model="serviceTime"
+                                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                            @error('serviceTime') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                {{ $tab == 2 ? __('text.Package Note') : __('text.Appointment Type Note') }}
+                            </label>
+                            <textarea wire:model="note" row="5" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
+
+                            @error('note') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                {{__('text.description')}}
+                            </label>
+                            <div>
+                                <textarea id="editor" wire:model="description" class="bg-white dark:bg-dark-900 datepickerTwo shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-4 pl-4 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"></textarea>
+                            </div>
+
+                            @error('description') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                {{__('text.Ticket Note')}}
+                            </label>
+                            <textarea wire:model="ticket_note" row="5" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
+
+                            @error('ticket_note') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                {{ __('text.Label Image')}}
+                            </label>
+                            <input type="file" wire:model="label_image" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                            @error('label_image')
+                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                            @if ($label_image)
+                            @if (Str::startsWith($label_image->getMimeType(), 'image/'))
+                            <div class="mt-2 relative w-fit">
+                                <img src="{{ $label_image->temporaryUrl() }}" class="h-24">
+                                <button type="button" wire:click="removeTempImage"
+                                    class="absolute top-0 right-0 bg-red-500 text-white text-xs px-1 py-0.5 rounded-full">✕</button>
+                            </div>
+                            @else
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-600">Uploaded file: {{ $label_image->getClientOriginalName() }}</p>
+                                <button type="button" wire:click="removeTempImage"
+                                    class="mt-1 bg-red-500 text-white text-xs px-2 py-1 rounded">Remove File</button>
+                            </div>
+                            @endif
+                            @elseif ($isEdit && $category->label_image)
+                            <div class="mt-2 relative w-fit">
+                                <img src="{{ url('storage/' . $category->label_image) }}" class="h-24">
+                                <button type="button" wire:click="deleteOldLabelImage"
+                                    class="absolute top-0 right-0 bg-red-500 text-white text-xs px-1 py-0.5 rounded-full">✕</button>
+                            </div>
+                            @endif
+                        </div>
+
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                {{ __('text.Color') }}
+                            </label>
+                            <div class="flex items-center gap-3">
+                                <input type="color" wire:model="service_color"
+                                    class="h-9 w-16 rounded border border-gray-300 bg-transparent dark:border-gray-700 dark:bg-gray-900" />
+                                <input type="text" wire:model="service_color"
+                                    class="dark:bg-dark-900 h-9 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                    placeholder="#000000" />
+                            </div>
+                            @error('service_color')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                {{ __('text.Label Background Color') }}
+                            </label>
+                            <div class="mt-1 flex items-center gap-3">
+                                <input
+                                    type="color"
+                                    wire:model="label_background_color"
+                                    class="h-9 w-16 rounded border border-gray-300 bg-transparent dark:border-gray-700 dark:bg-gray-900" />
+                                <input
+                                    type="text"
+                                    wire:model="label_background_color"
+                                    class="dark:bg-dark-900 h-9 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                    placeholder="#000000" />
+                            </div>
+                        </div>
+
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                {{ __('text.Label Font Color') }}
+                            </label>
+                            <div class="mt-1 flex items-center gap-3">
+                                <input
+                                    type="color"
+                                    wire:model="label_font_color"
+                                    class="h-9 w-16 rounded border border-gray-300 bg-transparent dark:border-gray-700 dark:bg-gray-900" />
+                                <input
+                                    type="text"
+                                    wire:model="label_font_color"
+                                    class="dark:bg-dark-900 h-9 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                    placeholder="#FFFFFF" />
+                            </div>
+                        </div>
+
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                {{ __('text.Label Text') }}
+                            </label>
+                            <input
+                                type="text"
+                                wire:model="label_text"
+                                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                            @error('label_text')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                {{ __('text.Background Color') }}
+                            </label>
+                            <div class="mt-1 flex items-center gap-3">
+                                <input
+                                    type="color"
+                                    wire:model="bg_color"
+                                    class="h-9 w-16 rounded border border-gray-300 bg-transparent dark:border-gray-700 dark:bg-gray-900" />
+                                <input
+                                    type="text"
+                                    wire:model="bg_color"
+                                    class="dark:bg-dark-900 h-9 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                    placeholder="#4F46E5" />
+                            </div>
+                        </div>
+
+                        @if($tab == 2)
+                        <div class="w-full px-2.5 xl:w-1/2">
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                {{ __('text.Enable eVoucher') }}
+                            </label>
+                            <div class="relative">
+                                <select
+                                    wire:model="enableEVoucher"
+                                    class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                                    <option value="0">{{ __('text.no') }}</option>
+                                    <option value="1">{{ __('text.yes') }}</option>
+                                </select>
+                                <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 dark:text-gray-400">
+                                    <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
+                            </div>
+                            @error('enableEVoucher') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
                         @endif
-                    </div>
 
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{ __('text.Color') }}
-                        </label>
-                        <div class="flex items-center gap-3">
-                            <input type="color" wire:model="service_color"
-                                class="h-9 w-16 rounded border border-gray-300 bg-transparent dark:border-gray-700 dark:bg-gray-900" />
-                            <input type="text" wire:model="service_color"
-                                class="dark:bg-dark-900 h-9 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                                placeholder="#000000" />
-                        </div>
-                        @error('service_color')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                        @enderror
-                    </div>
+                        {{-- Email Templates Section --}}
+                        <div class="w-full px-2.5">
+                            <h3 class="text-lg font-semibold dark:text-white/90 mb-4 mt-6">{{ __('text.Email Templates') }}</h3>
 
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{ __('text.Label Background Color') }}
-                        </label>
-                        <div class="mt-1 flex items-center gap-3">
-                            <input
-                                type="color"
-                                wire:model="label_background_color"
-                                class="h-9 w-16 rounded border border-gray-300 bg-transparent dark:border-gray-700 dark:bg-gray-900" />
-                            <input
-                                type="text"
-                                wire:model="label_background_color"
-                                class="dark:bg-dark-900 h-9 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                                placeholder="#000000" />
-                        </div>
-                    </div>
+                            {{-- Confirmation Communication --}}
+                            <div class="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                    {{ __('text.Confirmation Communication') }} <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    wire:model="confirmationTitle"
+                                    placeholder="{{ __('text.Email Subject') }}"
+                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 mb-3" />
+                                @error('confirmationTitle') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                <div wire:ignore>
+                                    <div
+                                        id="confirmation-editor"
+                                        class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                                        style="min-height: 300px;"></div>
+                                </div>
+                            </div>
 
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{ __('text.Label Font Color') }}
-                        </label>
-                        <div class="mt-1 flex items-center gap-3">
-                            <input
-                                type="color"
-                                wire:model="label_font_color"
-                                class="h-9 w-16 rounded border border-gray-300 bg-transparent dark:border-gray-700 dark:bg-gray-900" />
-                            <input
-                                type="text"
-                                wire:model="label_font_color"
-                                class="dark:bg-dark-900 h-9 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                                placeholder="#FFFFFF" />
-                        </div>
-                    </div>
+                            {{-- Rescheduling Communication --}}
+                            <div class="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                    {{ __('text.Rescheduling Communication') }}
+                                </label>
+                                <input
+                                    type="text"
+                                    wire:model="reschedulingTitle"
+                                    placeholder="{{ __('text.Email Subject') }}"
+                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 mb-3" />
+                                <div wire:ignore>
+                                    <div
+                                        id="rescheduling-editor"
+                                        class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                                        style="min-height: 300px;"></div>
+                                </div>
+                            </div>
 
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{ __('text.Label Text') }}
-                        </label>
-                        <input
-                            type="text"
-                            wire:model="label_text"
-                            class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                        @error('label_text')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{ __('text.Background Color') }}
-                        </label>
-                        <div class="mt-1 flex items-center gap-3">
-                            <input
-                                type="color"
-                                wire:model="bg_color"
-                                class="h-9 w-16 rounded border border-gray-300 bg-transparent dark:border-gray-700 dark:bg-gray-900" />
-                            <input
-                                type="text"
-                                wire:model="bg_color"
-                                class="dark:bg-dark-900 h-9 flex-1 rounded-lg border border-gray-300 bg-transparent px-3 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                                placeholder="#4F46E5" />
-                        </div>
-                    </div>
-
-                    @if($tab == 2)
-                    <div class="w-full px-2.5 xl:w-1/2">
-                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                            {{ __('text.Enable eVoucher') }}
-                        </label>
-                        <div class="relative">
-                            <select
-                                wire:model="enableEVoucher"
-                                class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
-                                <option value="0">{{ __('text.no') }}</option>
-                                <option value="1">{{ __('text.yes') }}</option>
-                            </select>
-                            <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 dark:text-gray-400">
-                                <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            </span>
-                        </div>
-                        @error('enableEVoucher') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                    </div>
-                    @endif
-
-                    {{-- Email Templates Section --}}
-                    <div class="w-full px-2.5">
-                        <h3 class="text-lg font-semibold dark:text-white/90 mb-4 mt-6">{{ __('text.Email Templates') }}</h3>
-                        
-                        {{-- Confirmation Communication --}}
-                        <div class="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                {{ __('text.Confirmation Communication') }} <span class="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                wire:model="confirmationTitle"
-                                placeholder="{{ __('text.Email Subject') }}"
-                                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 mb-3" />
-                            @error('confirmationTitle') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                            <div wire:ignore>
-                                <div
-                                    id="confirmation-editor"
-                                    class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-                                    style="min-height: 300px;"></div>
+                            {{-- Cancel Communication --}}
+                            <div class="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                    {{ __('text.Cancel Communication') }}
+                                </label>
+                                <input
+                                    type="text"
+                                    wire:model="cancelTitle"
+                                    placeholder="{{ __('text.Email Subject') }}"
+                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 mb-3" />
+                                <div wire:ignore>
+                                    <div
+                                        id="cancel-editor"
+                                        class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                                        style="min-height: 300px;"></div>
+                                </div>
                             </div>
                         </div>
-                        
-                        {{-- Rescheduling Communication --}}
-                        <div class="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                {{ __('text.Rescheduling Communication') }}
-                            </label>
-                            <input
-                                type="text"
-                                wire:model="reschedulingTitle"
-                                placeholder="{{ __('text.Email Subject') }}"
-                                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 mb-3" />
-                            <div wire:ignore>
-                                <div
-                                    id="rescheduling-editor"
-                                    class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-                                    style="min-height: 300px;"></div>
-                            </div>
-                        </div>
-                        
-                        {{-- Cancel Communication --}}
-                        <div class="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                            <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                {{ __('text.Cancel Communication') }}
-                            </label>
-                            <input
-                                type="text"
-                                wire:model="cancelTitle"
-                                placeholder="{{ __('text.Email Subject') }}"
-                                class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 mb-3" />
-                            <div wire:ignore>
-                                <div
-                                    id="cancel-editor"
-                                    class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-                                    style="min-height: 300px;"></div>
-                            </div>
-                        </div>
-                    </div>
 
+                    </div>
+                    <div class="w-full xl:w-1/2 flex gap-3">
+                        <button type="submit" onclick="syncQuillContent(); return true;" class="text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 primary-btn py-2 px-3 font-medium text-white transition-colors rounded-md bg-brand-500 hover:bg-brand-600 flex gap-x-2">
+                            {{ $isEdit ? __('text.Update') : __('text.Create') }}
+                        </button>
+                        <a href="{{ url('category-management') }}" class="px-4 py-3 text-sm font-medium text-white rounded-lg bg-error-500 shadow-theme-xs hover:bg-error-600">
+                            {{ __('text.Cancel') }}</a>
+                    </div>
             </div>
-            <div class="w-full xl:w-1/2 flex gap-3">
-                <button type="submit" onclick="syncQuillContent(); return true;" class="text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 primary-btn py-2 px-3 font-medium text-white transition-colors rounded-md bg-brand-500 hover:bg-brand-600 flex gap-x-2">
-                    {{ $isEdit ? __('text.Update') : __('text.Create') }}
-                </button>
-                <a href="{{ url('category-management') }}" class="px-4 py-3 text-sm font-medium text-white rounded-lg bg-error-500 shadow-theme-xs hover:bg-error-600">
-                    {{ __('text.Cancel') }}</a>
-            </div>
+            </form>
         </div>
-        </form>
     </div>
-</div>
 </div>
 
 <script src="{{ asset('js/cdn/sweetalert2.js') }}"></script>
@@ -611,13 +611,13 @@
 <script>
     // Store Quill instances globally
     window.quillInstances = window.quillInstances || {};
-    
+
     function initQuillEditor(editorId, propertyName) {
         let editorElement = document.getElementById(editorId);
         if (!editorElement) {
             return;
         }
-        
+
         // Check if Quill is already initialized on this element
         if (editorElement._quill && typeof editorElement._quill.root !== 'undefined') {
             // Quill already initialized, just update content if needed
@@ -627,46 +627,54 @@
             }
             return;
         }
-        
+
         // Clean up any existing Quill instance
         if (window.quillInstances[editorId]) {
             try {
                 if (window.quillInstances[editorId].root) {
                     window.quillInstances[editorId] = null;
                 }
-            } catch(e) {
+            } catch (e) {
                 // Ignore cleanup errors
             }
         }
-        
+
         // Clear the element
         editorElement.innerHTML = '';
-        
+
         try {
             let quill = new Quill('#' + editorId, {
                 theme: 'snow',
                 modules: {
                     toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
+                        [{
+                            'header': [1, 2, 3, false]
+                        }],
                         ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'align': [] }],
+                        [{
+                            'list': 'ordered'
+                        }, {
+                            'list': 'bullet'
+                        }],
+                        [{
+                            'align': []
+                        }],
                         ['link', 'image'],
                         ['clean']
                     ]
                 }
             });
-            
+
             // Store the instance
             window.quillInstances[editorId] = quill;
             editorElement._quill = quill;
-            
+
             // Set initial content
             let content = @this.get(propertyName) || '';
             if (content) {
                 quill.root.innerHTML = content;
             }
-            
+
             // Update Livewire property on content change (with shorter debounce)
             let updateTimeout;
             quill.on('text-change', function() {
@@ -675,27 +683,27 @@
                     @this.set(propertyName, quill.root.innerHTML);
                 }, 100);
             });
-            
+
             // Also sync on blur to ensure content is saved
             quill.root.addEventListener('blur', function() {
                 @this.set(propertyName, quill.root.innerHTML);
             });
-        } catch(e) {
+        } catch (e) {
             console.error('Error initializing Quill editor for ' + editorId + ':', e);
         }
     }
-    
+
     function initQuillEditors() {
         // Confirmation email editor - QuillEditor
         initQuillEditor('confirmation-editor', 'confirmationContent');
-        
+
         // Rescheduling email editor - QuillEditor
         initQuillEditor('rescheduling-editor', 'reschedulingContent');
-        
+
         // Cancel email editor - QuillEditor
         initQuillEditor('cancel-editor', 'cancelContent');
     }
-    
+
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
@@ -704,7 +712,7 @@
     } else {
         setTimeout(initQuillEditors, 100);
     }
-    
+
     // Initialize when Livewire is ready
     document.addEventListener('livewire:init', function() {
         initQuillEditors();
@@ -716,7 +724,7 @@
             }, 100);
         });
     });
-    
+
     // Sync QuillEditor content before form submission
     function syncQuillContent() {
         if (window.quillInstances['confirmation-editor']) {
@@ -740,6 +748,5 @@
             });
         });
     });
-
 </script>
 </div>
