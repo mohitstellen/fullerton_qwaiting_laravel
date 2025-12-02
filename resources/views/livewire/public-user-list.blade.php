@@ -131,7 +131,7 @@
                                         </svg>
                                     </a>
                                     <button type="button" 
-                                            wire:click="sendEmail({{ $member->id }})"
+                                            wire:click="sendMemberEmail({{ $member->id }})"
                                             class="inline-flex items-center rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-green-700"
                                             title="Send Email">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

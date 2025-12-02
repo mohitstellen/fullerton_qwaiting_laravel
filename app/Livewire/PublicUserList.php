@@ -9,10 +9,12 @@ use Livewire\WithPagination;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
+use App\Traits\SendsEmails;
 
 class PublicUserList extends Component
 {
-    use WithPagination;
+    use WithPagination, SendsEmails;
 
     #[Title('Patient Search')]
 
@@ -56,19 +58,77 @@ class PublicUserList extends Component
         $this->resetPage();
     }
 
-    public function sendEmail($memberId)
+    public function sendMemberEmail($memberId)
     {
-        $member = Member::findOrFail($memberId);
-        
-        if (!$member->email) {
-            session()->flash('error', 'Member does not have an email address.');
-            return;
-        }
+        try {
+            $member = Member::where('team_id', $this->teamId)
+                ->findOrFail($memberId);
+            
+            if (!$member->email) {
+                session()->flash('error', 'Member does not have an email address.');
+                return;
+            }
 
-        // Dispatch event to send email - we'll handle this in the form component
-        $this->dispatch('send-member-email', memberId: $memberId);
+            // Generate new password
+            $newPassword = $this->generateRandomPassword();
+            
+            // Update member password
+            $member->password = $newPassword;
+            $member->save();
+
+            // Get company information
+            $company = Company::find($member->company_id);
+            
+            // Prepare email data
+            $emailData = [
+                'to_mail' => $member->email,
+                'member_name' => $member->full_name,
+                'member_email' => $member->email,
+                'member_mobile' => $member->full_mobile,
+                'login_id' => $member->full_mobile,
+                'password' => $newPassword,
+                'company_name' => $company ? $company->company_name : 'N/A',
+            ];
+
+            // Send email using the trait
+            $this->sendEmail($emailData, 'Your Account Credentials', 'member-info', $this->teamId);
+            
+            session()->flash('message', 'New credentials sent successfully to ' . $member->email);
+        } catch (\Exception $e) {
+            // Log error
+            Log::error('Failed to send email to member ' . $memberId . ': ' . $e->getMessage());
+            session()->flash('error', 'Failed to send email. Please try again.');
+        }
+    }
+
+    /**
+     * Generate a random password
+     * 
+     * @return string
+     */
+    protected function generateRandomPassword($length = 8)
+    {
+        // Generate a secure random password with uppercase, lowercase, numbers, and special characters
+        $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        $numbers = '0123456789';
+        $special = '!@#$%&*';
         
-        session()->flash('message', 'Email sent successfully.');
+        // Ensure at least one character from each set
+        $password = '';
+        $password .= $uppercase[random_int(0, strlen($uppercase) - 1)];
+        $password .= $lowercase[random_int(0, strlen($lowercase) - 1)];
+        $password .= $numbers[random_int(0, strlen($numbers) - 1)];
+        $password .= $special[random_int(0, strlen($special) - 1)];
+        
+        // Fill the rest randomly
+        $allCharacters = $uppercase . $lowercase . $numbers . $special;
+        for ($i = 4; $i < $length; $i++) {
+            $password .= $allCharacters[random_int(0, strlen($allCharacters) - 1)];
+        }
+        
+        // Shuffle the password to randomize character positions
+        return str_shuffle($password);
     }
 
     public function render()

@@ -65,11 +65,6 @@ jobs:
 
           git pull origin main
 
-
-          php artisan migrate --path=database/migrations/2025_12_02_100000_add_salutation_to_members_table.php --force 
-
-          php artisan migrate --path=database/migrations/2025_12_02_110000_add_package_for_to_categories_table.php --force 
-
           php artisan o:clear
           
       
