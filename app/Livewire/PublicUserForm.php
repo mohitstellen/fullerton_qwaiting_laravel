@@ -24,6 +24,7 @@ class PublicUserForm extends Component
     // Form fields
     public $identification_type = '';
     public $nric_fin = '';
+    public $salutation = '';
     public $full_name = '';
     public $date_of_birth = '';
     public $gender = '';
@@ -73,6 +74,7 @@ class PublicUserForm extends Component
 
         $this->identification_type = $member->identification_type ?? '';
         $this->nric_fin = $member->nric_fin ?? '';
+        $this->salutation = $member->salutation ?? '';
         $this->full_name = $member->full_name ?? '';
         $this->date_of_birth = $member->date_of_birth ? $member->date_of_birth->format('Y-m-d') : '';
         $this->gender = $member->gender ?? '';
@@ -89,6 +91,7 @@ class PublicUserForm extends Component
         $rules = [
             'identification_type' => 'required',
             'nric_fin' => 'required|string',
+            'salutation' => 'nullable|string|in:Mr,Mrs,Ms,Dr',
             'full_name' => 'required|string|max:255',
             'date_of_birth' => 'required|date',
             'gender' => 'required|in:Male,Female',
@@ -133,6 +136,7 @@ class PublicUserForm extends Component
             'location_id' => $this->locationId,
             'identification_type' => $this->identification_type,
             'nric_fin' => $this->nric_fin,
+            'salutation' => $this->salutation,
             'full_name' => $this->full_name,
             'date_of_birth' => $this->date_of_birth,
             'gender' => $this->gender,
@@ -304,6 +308,9 @@ class PublicUserForm extends Component
         // Get identification types
         $identificationTypes = ['NRIC', 'FIN', 'Passport'];
 
+        // Get salutation options
+        $salutations = ['Mr', 'Mrs', 'Ms', 'Dr'];
+
         // Get gender options
         $genders = ['Male', 'Female'];
 
@@ -317,6 +324,7 @@ class PublicUserForm extends Component
             'nationalities' => $nationalities,
             'phoneCodeCountries' => $phoneCodeCountries,
             'identificationTypes' => $identificationTypes,
+            'salutations' => $salutations,
             'genders' => $genders,
         ])->title($title);
     }

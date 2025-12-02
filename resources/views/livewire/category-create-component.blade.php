@@ -18,7 +18,7 @@
                             @if($tab > 1 && !empty($parentCategory))
                             <div class="w-full px-2.5 xl:w-1/2">
                                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                    {{ $tab == 2 ? __('text.appointment type') : __('text.Parent Appointment Type') }}*
+                                    {{ $tab == 2 ? __('text.appointment type') : __('text.Parent Appointment Type') }}<span class="text-red-500">*</span>
                                 </label>
                                 <div x-data="{ isOptionSelected: false }" class="relative z-20 bg-transparent">
                                     <select
@@ -41,20 +41,20 @@
                                         </svg>
                                     </span>
                                 </div>
-                                @error('parent_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                @error('parent_id') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
                             @endif
 
 
                             <div class="w-full px-2.5 xl:w-1/2">
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                    {{__('text.name')}}*
+                                    {{__('text.name')}}<span class="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     wire:model="name"
                                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                                @error('name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                @error('name') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="w-full px-2.5 xl:w-1/2">
@@ -65,7 +65,7 @@
                                     type="text"
                                     wire:model="other_name"
                                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                                @error('other_name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                @error('other_name') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="w-full px-2.5 xl:w-1/2">
@@ -76,8 +76,35 @@
                                     type="text"
                                     wire:model="acronym"
                                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                                @error('acronym') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                @error('acronym') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
+
+                            @if($tab == 2)
+                            <div class="w-full px-2.5 xl:w-1/2">
+                                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                    {{__('text.Package for')}}<span class="text-red-500">*</span>
+                                </label>
+                                <div x-data="{ isOptionSelected: false }" class="relative z-20 bg-transparent">
+                                    <select
+                                        wire:model="package_for"
+                                        class="dark:bg-dark-900 z-20 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                        :class="isOptionSelected && 'text-gray-500 dark:text-gray-400'"
+                                        @change="isOptionSelected = true">
+                                        <option value="">{{__('text.select')}}</option>
+                                        <option value="Both" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">Both</option>
+                                        <option value="Self" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">Self</option>
+                                        <option value="Dependent" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">Dependent</option>
+                                    </select>
+                                    <span class="absolute z-30 text-gray-500 -translate-y-1/2 right-4 top-1/2 dark:text-gray-400 rtl:right-auto rtl:left-3">
+                                        <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke="" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
+                                </div>
+                                @error('package_for') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
+                            </div>
+                            @endif
+
                             <div class="w-full px-2.5 xl:w-1/2">
                                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                     {{__('text.Sort')}}
@@ -86,7 +113,7 @@
                                     type="number"
                                     wire:model="sort"
                                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                                @error('sort') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                @error('sort') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
 
 
@@ -117,7 +144,7 @@
                                         </svg>
                                     </span>
                                 </div>
-                                @error('display_on') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                @error('display_on') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="w-full px-2.5 xl:w-1/2">
@@ -147,7 +174,7 @@
                                         </svg>
                                     </span>
                                 </div>
-                                @error('booking_category_show_for') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                @error('booking_category_show_for') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="w-full px-2.5 xl:w-1/2">
@@ -158,7 +185,7 @@
                                     type="number"
                                     wire:model="visitor_in_queue"
                                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                                @error('visitor_in_queue') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                @error('visitor_in_queue') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
                             @if($tab == 1)
                             <div class="w-full px-2.5 xl:w-1/2">
@@ -187,8 +214,8 @@
                                     </div>
                                 </div>
                                 <div class="mt-1">
-                                    @error('leadTimeValue') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                                    @error('leadTimeUnit') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                    @error('leadTimeValue') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
+                                    @error('leadTimeUnit') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                             @endif
@@ -221,7 +248,7 @@
                                     </span>
                                 </div>
 
-                                @error('is_paid') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                @error('is_paid') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
 
                             @if($is_paid == 1)
@@ -233,7 +260,7 @@
                                     type="text"
                                     wire:model="amount"
                                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                                @error('amount') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                @error('amount') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
                             @endif
                             @endif
@@ -291,7 +318,7 @@
                                         @endif
                                     </select>
                                 </div>
-                                @error('locations') <span class="text-red-500">{{ $message }}</span> @enderror
+                                @error('locations') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
                         </div>
 
@@ -347,7 +374,7 @@
                                 class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
 
 
-                            @error('redirectUrl') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            @error('redirectUrl') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="w-full px-2.5">
@@ -367,7 +394,7 @@
                                 type="number"
                                 wire:model="serviceTime"
                                 class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                            @error('serviceTime') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            @error('serviceTime') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                         </div>
                         <div class="w-full px-2.5 xl:w-1/2">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
@@ -375,7 +402,7 @@
                             </label>
                             <textarea wire:model="note" row="5" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
 
-                            @error('note') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            @error('note') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                         </div>
                         <div class="w-full px-2.5 xl:w-1/2">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
@@ -385,7 +412,7 @@
                                 <textarea id="editor" wire:model="description" class="bg-white dark:bg-dark-900 datepickerTwo shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-4 pl-4 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"></textarea>
                             </div>
 
-                            @error('description') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            @error('description') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="w-full px-2.5 xl:w-1/2">
@@ -394,7 +421,7 @@
                             </label>
                             <textarea wire:model="ticket_note" row="5" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
 
-                            @error('ticket_note') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            @error('ticket_note') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="w-full px-2.5 xl:w-1/2">
@@ -526,7 +553,7 @@
                                     </svg>
                                 </span>
                             </div>
-                            @error('enableEVoucher') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            @error('enableEVoucher') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                         </div>
                         @endif
 
@@ -543,9 +570,9 @@
                                     type="text"
                                     wire:model="confirmationTitle"
                                     placeholder="{{ __('text.Email Subject') }}"
-                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 mb-3" />
-                                @error('confirmationTitle') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                                <div wire:ignore>
+                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                                @error('confirmationTitle') <span class="text-red-500 text-sm mt-1 block mb-3">{{ $message }}</span> @enderror
+                                <div wire:ignore class="@if(!$errors->has('confirmationTitle')) mt-3 @endif">
                                     <div
                                         id="confirmation-editor"
                                         class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
@@ -562,8 +589,9 @@
                                     type="text"
                                     wire:model="reschedulingTitle"
                                     placeholder="{{ __('text.Email Subject') }}"
-                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 mb-3" />
-                                <div wire:ignore>
+                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                                @error('reschedulingTitle') <span class="text-red-500 text-sm mt-1 block mb-3">{{ $message }}</span> @enderror
+                                <div wire:ignore class="@if(!$errors->has('reschedulingTitle')) mt-3 @endif">
                                     <div
                                         id="rescheduling-editor"
                                         class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
@@ -580,8 +608,9 @@
                                     type="text"
                                     wire:model="cancelTitle"
                                     placeholder="{{ __('text.Email Subject') }}"
-                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 mb-3" />
-                                <div wire:ignore>
+                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                                @error('cancelTitle') <span class="text-red-500 text-sm mt-1 block mb-3">{{ $message }}</span> @enderror
+                                <div wire:ignore class="@if(!$errors->has('cancelTitle')) mt-3 @endif">
                                     <div
                                         id="cancel-editor"
                                         class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"

@@ -19,7 +19,7 @@ class Category extends Model
  {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = [ 'priority', 'img', 'name', 'team_id', 'level_id', 'parent_id', 'other_name', 'acronym', 'display_on', 'for_screen', 'booking_category_show_for', 'category_locations','sort', 'visitor_in_queue','is_paid','redirect_url','description','is_service_template','service_time','lead_time_value','lead_time_unit','enable_e_voucher','note','description','amount','ticket_note','service_color','label_image','label_background_color','label_font_color','label_text','bg_color','company_id','created_at', 'updated_at', 'deleted_at' ];
+    protected $fillable = [ 'priority', 'img', 'name', 'team_id', 'level_id', 'parent_id', 'other_name', 'acronym', 'display_on', 'for_screen', 'booking_category_show_for', 'category_locations','sort', 'visitor_in_queue','is_paid','redirect_url','description','is_service_template','service_time','lead_time_value','lead_time_unit','enable_e_voucher','note','description','amount','ticket_note','service_color','label_image','label_background_color','label_font_color','label_text','bg_color','company_id','package_for','created_at', 'updated_at', 'deleted_at' ];
     
     protected $dates = ['deleted_at'];
 

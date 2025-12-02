@@ -17,6 +17,7 @@ class Member extends Model
         'location_id',
         'identification_type',
         'nric_fin',
+        'salutation',
         'full_name',
         'date_of_birth',
         'gender',
@@ -112,5 +113,7 @@ class Member extends Model
         return $nric;
     }
 }
+
+
 
 

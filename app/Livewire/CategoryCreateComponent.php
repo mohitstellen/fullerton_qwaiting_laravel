@@ -28,6 +28,7 @@ class CategoryCreateComponent extends Component
     public $display_on = "Display on Transfer & Ticket Screen";
     public $for_screen = "Display on Walk-In & Appointment Screen";
     public $booking_category_show_for = "Backend & Online Appointment Screen";
+    public $package_for = '';
     public $isEdit = false;
     public $allLocations = [];
     public $category = [];
@@ -194,6 +195,7 @@ class CategoryCreateComponent extends Component
         $this->for_screen = $this->category->for_screen;
         $this->booking_category_show_for = $this->category->booking_category_show_for;
         $this->visitor_in_queue = $this->category->visitor_in_queue ?? 1;
+        $this->package_for = $this->category->package_for ?? '';
         $this->locations = $this->category->category_locations;
         $this->parent_id = $this->tab > 1 ? $this->category->parent_id : '';
         $this->is_paid = $this->category->is_paid ?? 0;
@@ -308,10 +310,12 @@ class CategoryCreateComponent extends Component
             'label_image' => $this->isEdit ? 'nullable|mimes:jpg,jpeg,png|max:2048' : 'nullable|mimes:jpg,jpeg,png|max:2048',
             'parent_id' => $this->tab > 1 ? 'required|integer' : 'nullable',
             'company_id' => 'nullable|integer|exists:companies,id',
+            'package_for' => $this->tab == 2 ? 'required|in:Both,Self,Dependent' : 'nullable',
             'confirmationTitle' => 'required|string|max:255',
         ], [
 
             'parent_id.required' => 'Parent Service is required',
+            'package_for.required' => 'Package for field is required',
             'confirmationTitle.required' => 'Confirmation email subject is required',
         ]);
 
@@ -391,6 +395,7 @@ class CategoryCreateComponent extends Component
             'label_text' => $this->label_text ?? '',
             'bg_color' => $this->bg_color ?? '',
             'company_id' => $this->company_id ?? null,
+            'package_for' => $this->package_for ?? null,
         ];
 
         // Add paid details if applicable

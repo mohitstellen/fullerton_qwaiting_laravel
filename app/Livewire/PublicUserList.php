@@ -41,6 +41,11 @@ class PublicUserList extends Component
         $this->resetPage();
     }
 
+    public function search()
+    {
+        $this->resetPage();
+    }
+
     public function clearSearch()
     {
         $this->searchNric = '';
@@ -48,31 +53,6 @@ class PublicUserList extends Component
         $this->searchName = '';
         $this->searchEmail = '';
         $this->searchCompany = '';
-        $this->resetPage();
-    }
-
-    public function updatingSearchNric()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingSearchMobile()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingSearchName()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingSearchEmail()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingSearchCompany()
-    {
         $this->resetPage();
     }
 

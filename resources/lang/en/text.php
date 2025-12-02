@@ -980,6 +980,7 @@ $langArr = [
         "select" => "Select",
         "Company" => "Company",
         "Email Subject" => "Email Subject",
+        "Package for" => "Package for",
 
 ];
 

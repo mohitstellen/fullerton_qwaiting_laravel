@@ -14,48 +14,62 @@
 
         <!-- Search Form -->
         <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-            <div class="flex flex-wrap gap-4 items-end">
-                <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">NRIC / FIN / Passport</label>
-                    <input type="text" wire:model.live.debounce.300ms="searchNric" 
+            <div class="flex gap-3 items-end">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">NRIC / FIN / Passport</label>
+                    <input type="text" wire:model="searchNric" 
                            placeholder="NRIC / FIN / Passport"
-                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+                           class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
                 </div>
-                <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Mobile Number</label>
-                    <input type="text" wire:model.live.debounce.300ms="searchMobile" 
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Mobile Number</label>
+                    <input type="text" wire:model="searchMobile" 
                            placeholder="Mobile Number"
-                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+                           class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
                 </div>
-                <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Name</label>
-                    <input type="text" wire:model.live.debounce.300ms="searchName" 
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Name</label>
+                    <input type="text" wire:model="searchName" 
                            placeholder="Name"
-                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+                           class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
                 </div>
-                <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Email</label>
-                    <input type="text" wire:model.live.debounce.300ms="searchEmail" 
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Email</label>
+                    <input type="text" wire:model="searchEmail" 
                            placeholder="Email"
-                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+                           class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
                 </div>
-                <div class="flex-1 min-w-[200px]">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Company</label>
-                    <input type="text" wire:model.live.debounce.300ms="searchCompany" 
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Company</label>
+                    <input type="text" wire:model="searchCompany" 
                            placeholder="Company"
-                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+                           class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
                 </div>
-                <div class="flex gap-2">
+                <div class="flex gap-2 flex-shrink-0">
+                    <button type="button" wire:click="search"
+                            class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 h-11 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 whitespace-nowrap">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        Search
+                    </button>
                     <button type="button" wire:click="clearSearch"
-                            class="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800">
+                            class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 h-11 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 dark:focus:ring-offset-gray-900 whitespace-nowrap">
                         Clear
                     </button>
-                    <a href="{{ route('tenant.public-user.create') }}"
-                       class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        Add User
-                    </a>
                 </div>
             </div>
+        </div>
+
+        <!-- Add User Button -->
+        <div class="flex justify-end">
+            <a href="{{ route('tenant.public-user.create') }}"
+               class="inline-flex items-center rounded-lg bg-blue-600 px-5 py-2.5 text-base font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Add User
+            </a>
         </div>
 
         <!-- Tabs -->
@@ -63,11 +77,11 @@
             <nav class="-mb-px flex space-x-8">
                 <button wire:click="switchTab('active')"
                         class="{{ $activeTab === 'active' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300' }} whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
-                    Active
+                    Active Users
                 </button>
                 <button wire:click="switchTab('inactive')"
                         class="{{ $activeTab === 'inactive' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300' }} whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium">
-                    Non Active
+                    Non Active Users
                 </button>
             </nav>
         </div>
@@ -138,11 +152,20 @@
             </div>
             
             <!-- Pagination -->
-            @if ($members->hasPages())
-                <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-                    {{ $members->links() }}
+            <div class="px-4 py-3 border-t border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-700 dark:text-gray-300">
+                        Showing <span class="font-medium">{{ $members->firstItem() ?? 0 }}</span> 
+                        to <span class="font-medium">{{ $members->lastItem() ?? 0 }}</span> 
+                        of <span class="font-medium">{{ $members->total() }}</span> results
+                    </div>
+                    @if ($members->hasPages())
+                        <div>
+                            {{ $members->links() }}
+                        </div>
+                    @endif
                 </div>
-            @endif
+            </div>
         </div>
     </div>
 </div>
