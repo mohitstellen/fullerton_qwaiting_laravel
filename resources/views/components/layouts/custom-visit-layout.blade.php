@@ -21,11 +21,11 @@
 
     <link rel="stylesheet" href="{{ asset('css/queue.css') }}">
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('js/cdn/sweetalert2.js') }}"></script>
 
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.3.2/main.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/cdn/flatpickr.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/cdn/main.min.css') }}">
 
 
     @stack('styles')

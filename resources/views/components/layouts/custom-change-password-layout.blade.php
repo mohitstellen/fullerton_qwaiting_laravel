@@ -19,8 +19,8 @@
         <link rel="stylesheet" href="{{ asset('css/style-rtl.css?v='.time()) }}">
     @endif
     <link rel="stylesheet" href="{{ asset('css/queue.css') }}">
-    {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.3.2/main.min.css" rel="stylesheet"> --}}
+    <link rel="stylesheet" href="{{ asset('css/cdn/flatpickr.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/cdn/main.min.css') }}">
       <link rel="stylesheet" href="{{ asset('css/cdn/select2.min.css') }}">
 
 
@@ -59,12 +59,10 @@
     {{ $slot }}
 
     @livewireScripts
-    {{-- <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
+    <script src="{{ asset('js/cdn/flowbite.min.js') }}"></script>
     <script src="{{ asset('js/cdn/flatpickr.js') }}"></script>
     <script src="{{ asset('js/cdn/pusher.min.js') }}"></script>
-    <script src="{{ asset('js/cdn/jquery.min.js') }}"></script>  --}}
-        <script src="{{ asset('js/cdn/jquery.min.js') }}"></script>
-   <script src="{{ asset('js/cdn/flowbite.min.js') }}"></script>
+    <script src="{{ asset('js/cdn/jquery.min.js') }}"></script>
     <script src="{{ asset('js/cdn/flatpickr.js') }}"></script>
     <script src="{{ asset('js/cdn/pusher.min.js') }}"></script>
     <script src="{{ asset('js/cdn/sweetalert2.js') }}"></script>
