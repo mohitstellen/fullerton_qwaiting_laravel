@@ -21,7 +21,7 @@
                 wire:click="selectLocation({{ $loc->id }})">
 
                 <img
-                    src="{{ !empty($loc->location_image) ? url('storage/' . $loc->location_image) : asset('images/no_image.jpg') }}"
+                    src="{{ !empty($loc->location_image) ? url('storage/' . $loc->location_image) : asset('images/no-image.jpg') }}"
                     alt="{{ $loc->location_name }}"
                     class="w-full h-64 object-cover rounded-md mb-3" />
 
