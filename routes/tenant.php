@@ -98,6 +98,7 @@ use App\Livewire\DisplayScreen;
 use App\Livewire\MainBookingAppointment;
 use App\Livewire\BookingList;
 use App\Livewire\PreferBookingList;
+use App\Livewire\AppointmentBookingModule;
 use App\Livewire\AppointmentCalendar;
 use App\Livewire\CategoryLevel;
 use App\Livewire\Branches\QueueOverview;
@@ -430,6 +431,7 @@ Route::middleware([
     Route::get('prefer-booking-list', PreferBookingList::class)->name('prefer-booking-list');
     // Route::get('main/booking', MainBooking::class);
     Route::get('/book-appointment/{location_id?}', MainBookingAppointment::class)->name('book-appointment');
+    Route::get('/appointment-booking-module', AppointmentBookingModule::class)->name('appointment-booking-module');
     Route::get('convert-to-queue', ConvertBookToQueue::class)->name('convert-to-queue');
     Route::get('/booking-confirmed/{id}', BookingConfirmed::class)->name('booking-confirmed');
     Route::get('/booking-cancelled/{id}', BookingCancelled::class);

@@ -61,6 +61,7 @@ $langArr = [
   "analytics" => "Analytics",
    "Allowed Country" => "Allowed Country",
    "Appointment Type" => "Appointment Type",
+   "Appointment Booking Module" => "Appointment Booking Module",
 ];
 
 $result = array_map(function ($value) {

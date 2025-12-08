@@ -26,9 +26,15 @@ class Booking extends Model
     'booking_time',
     'refID',
     'name',
+    'title',
+    'identification_type',
+    'date_of_birth',
+    'gender',
+    'nationality',
     'phone',
     'email',
     'category_id',
+    'company_id',
     'sub_category_id',
     'child_category_id',
     'level_id',
@@ -40,9 +46,13 @@ class Booking extends Model
     'cancel_remark',
     'interview_mode',
     'meeting_link',
+    'additional_comments',
     'json',
     'staff_id',
     'status',
+    'payment_status',
+    'is_vip',
+    'is_private_customer',
     'is_convert',
     'is_notification_sent',
     'is_rescheduled',
@@ -60,6 +70,10 @@ class Booking extends Model
     const STATUS_INPROGRESS = 'In Progress';
     const STATUS_CANCELLED = 'Cancelled';
     const STATUS_COMPLETED = 'Completed';
+    const STATUS_RESERVED = 'Reserved';
+    const STATUS_SMSCALLED = 'SMSCalled';
+    const STATUS_ARRIVED = 'Arrived';
+    const STATUS_NOSHOW = 'NoShow';
     const MANUAL_CONFIRM = 'Manual Confirm';
     const AUTO_CONFIRM = 'Auto Confirm';
     const STATUS_YES = 'Yes';
@@ -128,6 +142,11 @@ class Booking extends Model
     public function staff(): BelongsTo
  {
         return $this->belongsTo( User::class, 'staff_id','id')->withTrashed();
+    }
+    
+    public function company(): BelongsTo
+ {
+        return $this->belongsTo( Company::class, 'company_id', 'id' );
     }
 
     public static function checkBooking( $team_id, $appointment_date, $select_time_slot, $location = null )

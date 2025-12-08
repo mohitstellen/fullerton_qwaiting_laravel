@@ -46,3 +46,5 @@ Homestead.json
 Homestead.yaml
 .phpactor.json
 .env
+
+assets/
