@@ -32,6 +32,7 @@ class ActivityLog extends Model
     const LOGIN = 'LOGIN';
     const LOGOUT = 'LOGOUT';
     const TYPE_BOOKING = 'BOOKING';
+    const APPOINTMENT_BOOKING = 'Appointment Booking';
     const QUEUE_REGISTERED = 'Queue Registered';
     const QUEUE_CALLED = 'Queue Called';
     const VISITOR_TRANSFER = 'Visitor Transfer';

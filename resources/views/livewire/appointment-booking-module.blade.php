@@ -181,18 +181,53 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
                     </button>
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <div style="border: 2px solid #3b82f6; padding: 3px 8px; border-radius: 4px; text-align: center; min-width: 50px;">
-                            <div style="font-size: 10px; color: #4b5563; line-height: 1;">DAY</div>
+                    <!-- Hidden date input for date picker -->
+                    @php
+                        // Calculate current date in Y-m-d format
+                        $currentDateValue = Carbon\Carbon::createFromDate($selectedYear, Carbon\Carbon::createFromFormat('M', $selectedMonth)->month, $selectedDay)->format('Y-m-d');
+                    @endphp
+                    <input 
+                        type="date" 
+                        id="appointment-date-picker"
+                        wire:model.live="selectedDate"
+                        value="{{ $selectedDate ?: $currentDateValue }}"
+                        style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: auto;"
+                    />
+                    <div style="display: flex; align-items: center; gap: 6px; position: relative;">
+                        <button 
+                            type="button"
+                            onclick="toggleDatePicker(); return false;"
+                            style="border: 2px solid #3b82f6 !important; padding: 3px 8px; border-radius: 4px; text-align: center; min-width: 50px; background: white; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.backgroundColor='#f0f9ff'; this.style.borderColor='#2563eb';"
+                            onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#3b82f6';"
+                        >
+                            <div style="font-size: 10px; color: #4b5563; line-height: 1; border-bottom: 1px solid #e5e7eb; padding-bottom: 2px; margin-bottom: 2px;">DAY</div>
                             <div style="font-weight: bold; color: #2563eb; font-size: 14px; line-height: 1.2;">{{ $selectedDay }}</div>
-                        </div>
-                        <div style="border: 2px solid #3b82f6; padding: 3px 8px; border-radius: 4px; text-align: center; min-width: 60px;">
-                            <div style="font-size: 10px; color: #4b5563; line-height: 1;">MONTH</div>
+                        </button>
+                        <button 
+                            type="button"
+                            onclick="toggleDatePicker(); return false;"
+                            style="border: 2px solid #3b82f6 !important; padding: 3px 8px; border-radius: 4px; text-align: center; min-width: 60px; background: white; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.backgroundColor='#f0f9ff'; this.style.borderColor='#2563eb';"
+                            onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#3b82f6';"
+                        >
+                            <div style="font-size: 10px; color: #4b5563; line-height: 1; border-bottom: 1px solid #e5e7eb; padding-bottom: 2px; margin-bottom: 2px;">MONTH</div>
                             <div style="font-weight: bold; color: #2563eb; font-size: 14px; line-height: 1.2;">{{ $selectedMonth }}</div>
-                        </div>
-                        <div style="border: 2px solid #3b82f6; padding: 3px 8px; border-radius: 4px; text-align: center; min-width: 60px;">
-                            <div style="font-size: 10px; color: #4b5563; line-height: 1;">YEAR</div>
+                        </button>
+                        <button 
+                            type="button"
+                            onclick="toggleDatePicker(); return false;"
+                            style="border: 2px solid #3b82f6 !important; padding: 3px 8px; border-radius: 4px; text-align: center; min-width: 60px; background: white; cursor: pointer; transition: all 0.2s;"
+                            onmouseover="this.style.backgroundColor='#f0f9ff'; this.style.borderColor='#2563eb';"
+                            onmouseout="this.style.backgroundColor='white'; this.style.borderColor='#3b82f6';"
+                        >
+                            <div style="font-size: 10px; color: #4b5563; line-height: 1; border-bottom: 1px solid #e5e7eb; padding-bottom: 2px; margin-bottom: 2px;">YEAR</div>
                             <div style="font-weight: bold; color: #2563eb; font-size: 14px; line-height: 1.2;">{{ $selectedYear }}</div>
+                        </button>
+                        
+                        <!-- Custom Calendar Picker -->
+                        <div id="custom-date-picker" style="display: none; position: absolute; top: 100%; left: 0; margin-top: 8px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); z-index: 1000; padding: 16px; min-width: 280px;">
+                            <div id="calendar-container"></div>
                         </div>
                     </div>
                     <div style="font-size: 13px; font-weight: 600; color: #374151; padding: 0 8px; white-space: nowrap;">{{ $selectedDayName }}</div>
@@ -204,16 +239,24 @@
                 </div>
 
                 <!-- View Mode Buttons -->
-                <div style="display: flex; gap: 6px; flex-shrink: 0;">
-                    <button style="background-color: #f97316; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 13px; white-space: nowrap;">
+                <div style="display: flex; gap: 6px; flex-shrink: 0; align-items: center;">
+                    @php
+                        $calendarBg = $viewMode === 'calendar' ? '#f97316' : '#f97316';
+                        $timelineBg = $viewMode === 'timeline' ? '#ef4444' : '#ef4444';
+                    @endphp
+                    <button 
+                        wire:click="toggleViewMode"
+                        style="background-color: {{ $calendarBg }}; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 13px; white-space: nowrap;"
+                    >
                         CALENDAR
                     </button>
                     <button 
                         wire:click="toggleViewMode"
-                        style="background-color: #ef4444; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 13px; white-space: nowrap;"
+                        style="background-color: {{ $timelineBg }}; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 13px; white-space: nowrap;"
                     >
                         TIMELINE
                     </button>
+                    
                 </div>
             </div>
 
@@ -275,7 +318,81 @@
                 </div>
             @endif
 
-            @if($showSearchFilters)
+            @if($viewMode === 'timeline')
+                <!-- Gender Filter - Above Table, Right Aligned -->
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+                    <select 
+                        wire:model.live="timelineGender"
+                        style="padding: 6px 12px; border-radius: 6px; border: 1px solid #d1d5db; font-size: 13px; background: white; cursor: pointer; min-width: 100px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" 
+                    >
+                        <option value="All">All</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Unisex">Unisex</option>
+                    </select>
+                </div>
+                
+                <!-- Timeline View - Grouped by Appointment Type -->
+                @if(count($timelineAppointments) > 0)
+                    @foreach($timelineAppointments as $group)
+                        <!-- Clinic Name and Appointment Type Header -->
+                        <div style="margin-bottom: 24px;">
+                            <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #111827;">
+                                {{ $group['location_name'] }}
+                            </h2>
+                            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #374151;">
+                                {{ $group['appointment_type'] }}
+                            </h3>
+                            
+                            <!-- Appointments Table for this Appointment Type -->
+                            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                        <thead class="bg-blue-600">
+                                            <tr>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Time</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Gender</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Name</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Created on</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Company / Package</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">National Id No</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Phone</th>
+                                                <th class="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Remarks</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                            @foreach($group['appointments'] as $appointment)
+                                                <tr 
+                                                    wire:click="openBookingModal({{ $appointment['id'] }})"
+                                                    class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                                                >
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['time'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['gender'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['name'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['created_on'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['company_package'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['national_id'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['phone'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['remarks'] }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <div style="background-color: white; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 1px 2px rgba(0,0,0,0.05); padding: 32px; text-align: center;">
+                        <p style="color: #6b7280;">
+                            No appointments found for {{ $selectedDay }}/{{ $selectedMonth }}/{{ $selectedYear }}
+                            @if($timelineGender !== 'All')
+                                ({{ $timelineGender }})
+                            @endif
+                        </p>
+                    </div>
+                @endif
+            @elseif($showSearchFilters)
                 <!-- Appointments Table (shown when search filters are open) -->
                 <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 shadow-sm overflow-hidden">
                     <div class="overflow-x-auto">
@@ -319,6 +436,7 @@
             @else
                 <!-- Clinics with Time Slots Display -->
                 @php
+                    // Get time slots for currently selected appointment types
                     $timeSlotsData = $this->getTimeSlotsForDisplay();
                 @endphp
                 
@@ -356,7 +474,7 @@
                                             {{-- Empty slot - allow booking --}}
                                             <button 
                                                 wire:click="bookAppointment({{ $slotData['clinic_id'] }}, '{{ $slotData['appointment_type'] }}', '{{ $time }}')"
-                                                style="background-color: #16a34a; color: white; padding: 8px 16px; border-radius: 6px; min-width: 150px; text-align: left; border: none; cursor: pointer; font-weight: 500; font-size: 14px;"
+                                                style="background-color:rgb(255, 255, 255); color: white; padding: 8px 16px; border-radius: 6px; min-width: 150px; text-align: left; border: none; cursor: pointer; font-weight: 500; font-size: 14px; border: rgb(0,0,0) solid; color: rgb(0, 0, 0);"
                                             >
                                                 Empty
                                             </button>
@@ -376,10 +494,6 @@
 
         <!-- Right Sidebar -->
         <aside style="background-color: white; width: 224px; padding: 16px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            <button style="width: 100%; background-color: #ec4899; color: white; padding: 8px 12px; border-radius: 6px; margin-bottom: 16px; font-weight: bold; font-size: 14px;">
-                TIMELINE
-            </button>
-            
             <div>
                 <h3 style="font-size: 16px; font-weight: bold; color: #1f2937; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                     <svg style="width: 16px; height: 16px; color: #6366f1;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -420,13 +534,18 @@
     <!-- Booking Modal -->
     @if($showBookingModal)
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4" wire:click="closeBookingModal">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto mx-auto" wire:click.stop>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto mx-auto" @click.stop>
                 <!-- Modal Header -->
                 <div class="bg-blue-600 text-white px-6 py-4 flex items-center justify-between rounded-t-lg sticky top-0 z-10">
                     <h2 class="text-xl font-semibold">{{ $selectedAppointmentType ?? 'Doctor Review Consult' }}</h2>
-                    <button wire:click="closeBookingModal" class="text-white hover:text-gray-200 transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    <button 
+                        wire:click="closeBookingModal" 
+                        type="button"
+                        class="text-white hover:bg-blue-700 transition-colors p-2 rounded-lg flex items-center justify-center"
+                        style="background-color: rgba(255, 255, 255, 0.1); min-width: 36px; min-height: 36px;"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
@@ -460,31 +579,26 @@
                 </div>
 
                 <!-- Modal Tabs -->
-                <div class="border-b border-gray-200 px-6 pt-4">
+                <div class="border-b-2 border-gray-300 bg-gray-50 px-6 pt-4 pb-0" style="background-color: #f9fafb; border-bottom: 2px solid #d1d5db;">
                     <div class="flex items-center gap-6">
                         <button 
                             wire:click="setActiveTab('booking-details')"
-                            class="pb-2 px-2 border-b-2 {{ $activeTab === 'booking-details' ? 'border-orange-500 text-orange-500' : 'border-transparent text-gray-600' }}"
+                            type="button"
+                            class="pb-3 px-4 font-semibold text-sm transition-colors {{ $activeTab === 'booking-details' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-800 hover:text-orange-500' }}"
+                            style="border-bottom-width: 3px; padding-bottom: 12px; color: {{ $activeTab === 'booking-details' ? '#ea580c' : '#1f2937' }}; border-bottom: 3px solid {{ $activeTab === 'booking-details' ? '#f97316' : 'transparent' }};"
                         >
                             Booking Details
                         </button>
                         <button 
                             wire:click="setActiveTab('audit-trail')"
-                            class="pb-2 px-2 border-b-2 {{ $activeTab === 'audit-trail' ? 'border-orange-500 text-orange-500' : 'border-transparent text-gray-600' }}"
+                            type="button"
+                            class="pb-3 px-4 font-semibold text-sm transition-colors {{ $activeTab === 'audit-trail' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-800 hover:text-orange-500' }}"
+                            style="border-bottom-width: 3px; padding-bottom: 12px; color: {{ $activeTab === 'audit-trail' ? '#ea580c' : '#1f2937' }}; border-bottom: 3px solid {{ $activeTab === 'audit-trail' ? '#f97316' : 'transparent' }};"
                         >
                             Audit Trail
                         </button>
-                        <button 
-                            wire:click="setActiveTab('tester-testing')"
-                            class="pb-2 px-2 border-b-2 {{ $activeTab === 'tester-testing' ? 'border-orange-500 text-orange-500' : 'border-transparent text-gray-600' }}"
-                        >
-                            Tester Testing
-                        </button>
-                        @if($selectedAppointment)
-                            <span class="text-sm text-gray-500 ml-auto">(Booking made by Jin David on {{ $selectedAppointment['created_on'] }})</span>
-                        @else
-                            <span class="text-sm text-gray-500 ml-auto">(Booking made by Jin David on 04/12/2025 06:59PM)</span>
-                        @endif
+                        
+                      
                     </div>
                 </div>
 
@@ -497,7 +611,7 @@
                                 <div class="flex items-center gap-4 mb-4">
                                     <h3 class="text-lg font-semibold border-b-2 border-orange-500 pb-1">Personal Particulars</h3>
                                     <label class="flex items-center gap-2">
-                                        <input type="checkbox" wire:model="isVip" class="w-4 h-4">
+                                        <input type="checkbox" wire:model="isVip" wire:key="vip-checkbox-{{ $isVip ? 'checked' : 'unchecked' }}" class="w-4 h-4">
                                         <span class="text-sm">VIP</span>
                                     </label>
                                 </div>
@@ -531,15 +645,15 @@
                                             
                                             <!-- Autocomplete Dropdown -->
                                             @if($showNricDropdown)
-                                                <div class="absolute z-[9999] w-full mt-1">
+                                                <div class="absolute z-[9999] w-full mt-1" x-data @click.outside="$wire.closeNricDropdown()">
                                                     @if(count($nricSearchResults) > 0)
                                                         <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl max-h-80 overflow-y-auto">
                                                             @foreach($nricSearchResults as $index => $result)
                                                                 <div 
+                                                                    wire:key="member-{{ $result['id'] }}"
                                                                     wire:click="selectMember({{ $result['id'] }})"
-                                                                    style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s;"
-                                                                    onmouseover="this.style.backgroundColor='#eff6ff'"
-                                                                    onmouseout="this.style.backgroundColor='white'"
+                                                                    class="w-full text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none cursor-pointer member-result-item"
+                                                                    style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s; display: block; background: white;"
                                                                 >
                                                                     <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
                                                                         <div style="flex: 1; min-width: 0;">
@@ -592,7 +706,7 @@
                                             Full Name <span class="text-red-500">*</span>
                                         </label>
                                         <div class="flex gap-2">
-                                            <select wire:model.defer="title" class="w-24 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                            <select wire:model.live="title" class="w-24 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                                 <option>Mr</option>
                                                 <option>Mrs</option>
                                                 <option>Ms</option>
@@ -600,7 +714,7 @@
                                             </select>
                                             <input 
                                                 type="text" 
-                                                wire:model.defer="fullName"
+                                                wire:model.live="fullName"
                                                 placeholder="Full Name"
                                                 class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                             />
@@ -614,12 +728,12 @@
                                         <div class="relative">
                                             <input 
                                                 type="date" 
-                                                wire:model.defer="dateOfBirth"
+                                                wire:model.live="dateOfBirth"
                                                 placeholder="05/12/2025"
                                                 class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                 onclick="this.showPicker()"
                                             />
-                                            <svg class="w-5 h-5 absolute right-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-5 h-5 absolute right-3 top-2.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                             </svg>
                                         </div>
@@ -629,10 +743,32 @@
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Gender <span class="text-red-500">*</span>
                                         </label>
-                                        <select wire:model.defer="gender" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                        <select wire:model.live="gender" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                             <option>Male</option>
                                             <option>Female</option>
                                             <option>Other</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Country Code
+                                        </label>
+                                        <select 
+                                            wire:model="mobileCountryCode"
+                                            readonly
+                                            onfocus="this.blur()"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-100 dark:bg-gray-600 dark:border-gray-600 dark:text-white cursor-not-allowed"
+                                            style="background-color: #f3f4f6; cursor: not-allowed; pointer-events: none;"
+                                            tabindex="-1"
+                                        >
+                                            @if(!empty($allowedCountries))
+                                                @foreach($allowedCountries as $country)
+                                                    <option value="{{ $country->phonecode }}" {{ $mobileCountryCode == $country->phonecode ? 'selected' : '' }}>
+                                                        (+{{ $country->phonecode }}) {{ $country->name }}
+                                                    </option>
+                                                @endforeach
+                                            @endif
                                         </select>
                                     </div>
 
@@ -642,7 +778,7 @@
                                         </label>
                                         <input 
                                             type="tel" 
-                                            wire:model.defer="mobileNumber"
+                                            wire:model.live="mobileNumber"
                                             placeholder="Mobile Number"
                                             class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         />
@@ -654,7 +790,7 @@
                                         </label>
                                         <input 
                                             type="email" 
-                                            wire:model.defer="emailAddress"
+                                            wire:model.live="emailAddress"
                                             placeholder="Email Address"
                                             class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         />
@@ -664,10 +800,16 @@
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Nationality <span class="text-red-500">*</span>
                                         </label>
-                                        <select wire:model.defer="nationality" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                            <option value="">Select Nationality</option>
+                                        <select 
+                                            wire:model="nationality" 
+                                            readonly
+                                            onfocus="this.blur()"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded bg-gray-100 dark:bg-gray-600 dark:border-gray-600 dark:text-white cursor-not-allowed"
+                                            style="background-color: #f3f4f6; cursor: not-allowed; pointer-events: none;"
+                                            tabindex="-1"
+                                        >
                                             @foreach($availableNationalities as $nat)
-                                                <option value="{{ $nat }}">{{ $nat }}</option>
+                                                <option value="{{ $nat }}" {{ $nationality == $nat ? 'selected' : '' }}>{{ $nat }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -679,23 +821,26 @@
                                 <div class="flex items-center gap-4 mb-4">
                                     <h3 class="text-lg font-semibold border-b-2 border-orange-500 pb-1">Appointment Details</h3>
                                     <label class="flex items-center gap-2">
-                                        <input type="checkbox" wire:model="isPrivateCustomer" class="w-4 h-4">
+                                        <input type="checkbox" wire:model="isPrivateCustomer" wire:key="private-customer-checkbox-{{ $isPrivateCustomer ? 'checked' : 'unchecked' }}" class="w-4 h-4">
                                         <span class="text-sm">Private Customer</span>
                                     </label>
                                 </div>
 
                                 <div class="space-y-4">
+                                    @if(!$isPrivateCustomer)
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Company Name
                                         </label>
                                         <input 
                                             type="text" 
-                                            wire:model.defer="companyName"
+                                            wire:model.live="companyName"
                                             placeholder="Company Name"
                                             class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            readonly
                                         />
                                     </div>
+                                    @endif
                                     
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -714,7 +859,7 @@
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Location <span class="text-red-500">*</span>
                                         </label>
-                                        <select wire:model.defer="locationId" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                        <select wire:model.live="locationId" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                             <option value="">Select Location</option>
                                             @foreach($availableLocations as $loc)
                                                 <option value="{{ $loc['id'] }}">{{ $loc['location_name'] }}</option>
@@ -875,45 +1020,50 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr>
-                                        <td class="px-4 py-3 text-sm text-gray-900">1</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">04/12/2025 06:59PM</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">Mr. Jin David</td>
-                                        <td class="px-4 py-3 text-sm">
-                                            <span class="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">Reserved</span>
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $nricFinPassport }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $fullName }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $gender }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $dateOfBirth }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $selectedAppointmentType }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $package }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $dateTime }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $dateTime ? str_replace('9:30AM', '10:00AM', $dateTime) : '' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-4 py-3 text-sm text-gray-900">2</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">04/12/2025 06:59PM</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">Mr. Jin David</td>
-                                        <td class="px-4 py-3 text-sm">
-                                            <span class="px-2 py-1 rounded text-xs bg-purple-100 text-purple-800">SMSCalled</span>
-                                        </td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $nricFinPassport }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $fullName }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $gender }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $dateOfBirth }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $selectedAppointmentType }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $package }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $dateTime }}</td>
-                                        <td class="px-4 py-3 text-sm text-gray-900">{{ $dateTime ? str_replace('9:30AM', '10:00AM', $dateTime) : '' }}</td>
-                                    </tr>
+                                    @if(count($auditTrailLogs) > 0)
+                                        @foreach($auditTrailLogs as $index => $log)
+                                            <tr>
+                                                <td class="px-4 py-3 text-sm text-gray-900">{{ $index + 1 }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-900">{{ $log['modified_at'] }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-900">{{ $log['modified_by'] }}</td>
+                                                <td class="px-4 py-3 text-sm">
+                                                    @php
+                                                        $statusClass = 'bg-gray-100 text-gray-800';
+                                                        if ($log['status'] === 'Reserved') {
+                                                            $statusClass = 'bg-blue-100 text-blue-800';
+                                                        } elseif ($log['status'] === 'SMSCalled') {
+                                                            $statusClass = 'bg-purple-100 text-purple-800';
+                                                        } elseif ($log['status'] === 'Arrived') {
+                                                            $statusClass = 'bg-yellow-100 text-yellow-800';
+                                                        } elseif ($log['status'] === 'Completed') {
+                                                            $statusClass = 'bg-green-100 text-green-800';
+                                                        } elseif ($log['status'] === 'Cancelled') {
+                                                            $statusClass = 'bg-gray-100 text-gray-800';
+                                                        } elseif ($log['status'] === 'NoShow') {
+                                                            $statusClass = 'bg-red-100 text-red-800';
+                                                        }
+                                                    @endphp
+                                                    <span class="px-2 py-1 rounded text-xs {{ $statusClass }}">{{ $log['status'] }}</span>
+                                                </td>
+                                                <td class="px-4 py-3 text-sm text-gray-900">{{ $log['nric'] }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-900">{{ $log['name'] }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-900">{{ $log['gender'] }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-900">{{ $log['dob'] }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-900">{{ $log['appointment_type'] }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-900">{{ $log['package'] }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-900">{{ $log['start_date_time'] }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-900">{{ $log['end_date_time'] }}</td>
+                                            </tr>
+                                        @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="12" class="px-4 py-8 text-center text-sm text-gray-500">
+                                                No audit trail logs found for this appointment.
+                                            </td>
+                                        </tr>
+                                    @endif
                                 </tbody>
                             </table>
-                        </div>
-                    @elseif($activeTab === 'tester-testing')
-                        <!-- Tester Testing Content -->
-                        <div class="text-center text-gray-500 py-8">
-                            Tester Testing content will be displayed here
                         </div>
                     @endif
                 </div>
@@ -957,6 +1107,289 @@
                 document.webkitExitFullscreen();
             }
         }
+    }
+    
+    // Handle click outside to close NRIC dropdown
+    document.addEventListener('click', function(event) {
+        const nricInput = document.querySelector('input[wire\\:model\\.live\\.debounce\\.500ms="nricFinPassport"]');
+        const dropdown = nricInput?.nextElementSibling;
+        
+        if (nricInput && dropdown && !nricInput.contains(event.target) && !dropdown.contains(event.target)) {
+            // Click is outside the input and dropdown
+            Livewire.dispatch('closeNricDropdown');
+        }
+    });
+    
+    // Listen for member selected event
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('member-selected', (data) => {
+            // In Livewire 3, event data is passed as first element of array
+            const eventData = Array.isArray(data) ? data[0] : data;
+            
+            // Show a brief success notification
+            console.log('✅ Member selected successfully:', eventData);
+            console.log('Member data:', eventData?.memberData);
+            console.log('Member name:', eventData?.memberName);
+            
+            // Directly update input values as fallback
+            if (eventData?.memberData) {
+                const memberData = eventData.memberData;
+                
+                // Update form fields directly
+                setTimeout(() => {
+                    // Mobile Number
+                    const mobileInput = document.querySelector('input[wire\\:model\\.live="mobileNumber"]');
+                    if (mobileInput && memberData.mobile) {
+                        mobileInput.value = memberData.mobile;
+                        mobileInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                    
+                    // Email Address
+                    const emailInput = document.querySelector('input[wire\\:model\\.live="emailAddress"]');
+                    if (emailInput && memberData.email) {
+                        emailInput.value = memberData.email;
+                        emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                    
+                    // Full Name
+                    const nameInput = document.querySelector('input[wire\\:model\\.live="fullName"]');
+                    if (nameInput && memberData.name) {
+                        nameInput.value = memberData.name;
+                        nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                    
+                    // Company Name
+                    const companyInput = document.querySelector('input[wire\\:model\\.live="companyName"]');
+                    if (companyInput && memberData.company) {
+                        companyInput.value = memberData.company;
+                        companyInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                    
+                    // NRIC
+                    const nricInput = document.querySelector('input[wire\\:model\\.live\\.debounce\\.500ms="nricFinPassport"]');
+                    if (nricInput && memberData.nric) {
+                        nricInput.value = memberData.nric;
+                    }
+                    
+                    // Date of Birth
+                    const dobInput = document.querySelector('input[wire\\:model\\.live="dateOfBirth"]');
+                    if (dobInput && memberData.dateOfBirth) {
+                        dobInput.value = memberData.dateOfBirth;
+                        dobInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                    
+                    // Title/Salutation
+                    const titleSelect = document.querySelector('select[wire\\:model\\.live="title"]');
+                    if (titleSelect && memberData.salutation) {
+                        titleSelect.value = memberData.salutation;
+                        titleSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    
+                    // Gender
+                    const genderSelect = document.querySelector('select[wire\\:model\\.live="gender"]');
+                    if (genderSelect && memberData.gender) {
+                        genderSelect.value = memberData.gender;
+                        genderSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    
+                    // Mobile Country Code (readonly field - update via Livewire)
+                    const mobileCountryCodeSelect = document.querySelector('select[wire\\:model="mobileCountryCode"]');
+                    if (mobileCountryCodeSelect) {
+                        const countryCode = memberData.mobileCountryCode || memberData.mobile_country_code || '65';
+                        // Temporarily allow pointer events to set value
+                        mobileCountryCodeSelect.style.pointerEvents = 'auto';
+                        mobileCountryCodeSelect.value = countryCode;
+                        mobileCountryCodeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                        // Re-disable pointer events to keep readonly
+                        mobileCountryCodeSelect.style.pointerEvents = 'none';
+                    }
+                    
+                    // Nationality (readonly field - update via Livewire)
+                    const nationalitySelect = document.querySelector('select[wire\\:model="nationality"]');
+                    if (nationalitySelect) {
+                        const nationality = memberData.nationality || 'Singaporean';
+                        // Temporarily allow pointer events to set value
+                        nationalitySelect.style.pointerEvents = 'auto';
+                        nationalitySelect.value = nationality;
+                        nationalitySelect.dispatchEvent(new Event('change', { bubbles: true }));
+                        // Re-disable pointer events to keep readonly
+                        nationalitySelect.style.pointerEvents = 'none';
+                    }
+                    
+                    console.log('✅ Form fields updated via JavaScript fallback');
+                }, 100);
+            }
+            
+            // Show a brief visual feedback
+            const nricInput = document.querySelector('input[wire\\:model\\.live\\.debounce\\.500ms="nricFinPassport"]');
+            if (nricInput) {
+                nricInput.style.borderColor = '#22c55e';
+                nricInput.style.borderWidth = '2px';
+                setTimeout(() => {
+                    nricInput.style.borderColor = '';
+                    nricInput.style.borderWidth = '';
+                }, 1500);
+            }
+        });
+    });
+    
+    // Handle ESC key to close modal
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            Livewire.dispatch('closeBookingModal');
+        }
+    });
+    
+    // Custom Calendar Picker
+    @php
+        $monthNum = Carbon\Carbon::createFromFormat('M', $selectedMonth)->month - 1;
+    @endphp
+    let currentCalendarDate = new Date({{ $selectedYear }}, {{ $monthNum }}, {{ $selectedDay }});
+    let calendarVisible = false;
+    const selectedYearValue = {{ $selectedYear }};
+    const selectedMonthValue = {{ $monthNum }};
+    const selectedDayValue = {{ $selectedDay }};
+    
+    function toggleDatePicker() {
+        const picker = document.getElementById('custom-date-picker');
+        if (!picker) return;
+        
+        calendarVisible = !calendarVisible;
+        picker.style.display = calendarVisible ? 'block' : 'none';
+        
+        if (calendarVisible) {
+            renderCalendar();
+        }
+    }
+    
+    function renderCalendar() {
+        const container = document.getElementById('calendar-container');
+        if (!container) return;
+        
+        const year = currentCalendarDate.getFullYear();
+        const month = currentCalendarDate.getMonth();
+        
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        
+        // Get current selected date
+        const selectedDate = new Date(selectedYearValue, selectedMonthValue, selectedDayValue);
+        
+        let html = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <button type="button" onclick="changeMonth(-1)" style="background: none; border: none; cursor: pointer; padding: 4px 8px; font-size: 18px; color: #374151;">&lt;</button>
+                <div style="font-weight: 600; font-size: 16px; color: #111827;">${monthNames[month]} ${year}</div>
+                <button type="button" onclick="changeMonth(1)" style="background: none; border: none; cursor: pointer; padding: 4px 8px; font-size: 18px; color: #374151;">&gt;</button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 8px;">
+        `;
+        
+        // Day headers
+        dayNames.forEach(day => {
+            html += `<div style="text-align: center; font-weight: 600; font-size: 12px; color: #6b7280; padding: 8px;">${day}</div>`;
+        });
+        
+        // Empty cells for days before month starts
+        for (let i = 0; i < firstDay; i++) {
+            html += `<div style="padding: 8px;"></div>`;
+        }
+        
+        // Days of the month
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const isSelected = date.toDateString() === selectedDate.toDateString();
+            const isToday = date.toDateString() === new Date().toDateString();
+            
+            html += `
+                <button 
+                    type="button"
+                    onclick="selectDate(${year}, ${month + 1}, ${day})"
+                    style="
+                        border: ${isSelected ? '2px solid #3b82f6' : '1px solid #e5e7eb'};
+                        background: ${isSelected ? '#dbeafe' : isToday ? '#fef3c7' : 'white'};
+                        color: ${isSelected ? '#1e40af' : '#374151'};
+                        padding: 8px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-weight: ${isSelected || isToday ? '600' : '400'};
+                        transition: all 0.2s;
+                    "
+                    onmouseover="this.style.backgroundColor='${isSelected ? '#dbeafe' : '#f3f4f6'}'; this.style.borderColor='#3b82f6';"
+                    onmouseout="this.style.backgroundColor='${isSelected ? '#dbeafe' : isToday ? '#fef3c7' : 'white'}'; this.style.borderColor='${isSelected ? '#3b82f6' : '#e5e7eb'}';"
+                >
+                    ${day}
+                </button>
+            `;
+        }
+        
+        html += `</div>`;
+        container.innerHTML = html;
+    }
+    
+    function changeMonth(direction) {
+        currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+        renderCalendar();
+    }
+    
+    function selectDate(year, month, day) {
+        // Update Livewire component
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const date = new Date(year, month - 1, day);
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+        
+        // Format date for Livewire
+        const formattedDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        
+        // Update via Livewire
+        @this.set('selectedDate', formattedDate);
+        @this.set('selectedDay', day);
+        @this.set('selectedMonth', monthNames[month - 1]);
+        @this.set('selectedYear', year);
+        @this.set('selectedDayName', dayName);
+        
+        // Hide calendar
+        toggleDatePicker();
+    }
+    
+    // Close calendar when clicking outside
+    document.addEventListener('click', function(event) {
+        const picker = document.getElementById('custom-date-picker');
+        const dateButtons = event.target.closest('[onclick*="toggleDatePicker"]');
+        
+        if (picker && calendarVisible && !picker.contains(event.target) && !dateButtons) {
+            calendarVisible = false;
+            picker.style.display = 'none';
+        }
+    });
+    
+    // Make functions globally accessible
+    window.toggleDatePicker = toggleDatePicker;
+    window.changeMonth = changeMonth;
+    window.selectDate = selectDate;
+    
+    // Listen for date changes and ensure Livewire updates
+    document.addEventListener('livewire:init', () => {
+        const datePicker = document.getElementById('appointment-date-picker');
+        if (datePicker) {
+            datePicker.addEventListener('change', function(e) {
+                // The wire:model.live will handle the update automatically
+                console.log('Date changed to:', e.target.value);
+            });
+        }
+    });
+    
+    // Also initialize on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            const datePicker = document.getElementById('appointment-date-picker');
+            if (datePicker) {
+                datePicker.addEventListener('change', function(e) {
+                    console.log('Date changed to:', e.target.value);
+                });
+            }
+        });
     }
 </script>
 @endpush
