@@ -237,7 +237,7 @@ Route::middleware([
         // Route::get('register',[AuthController::class, 'register'])->name('register');
         // Route::post('register',[AuthController::class, 'registerstore'])->name('registerstore');
 
-        Route::prefix('public')->group(function () {
+        Route::prefix('user')->group(function () {
             Route::get('/register', PatientRegister::class)->name('patient.register');
             Route::get('/login', \App\Livewire\PatientLogin::class)->name('patient.login');
             Route::get('/dashboard', \App\Livewire\PatientDashboard::class)->name('patient.dashboard');

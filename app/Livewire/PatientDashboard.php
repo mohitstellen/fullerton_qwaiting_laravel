@@ -34,7 +34,7 @@ class PatientDashboard extends Component
 
         if (!$this->member) {
             Session::forget(['patient_member_id', 'patient_member', 'patient_customer_type']);
-            return redirect()->route('patient.login')->with('error', 'Session expired. Please login again.');
+            return redirect()->route('tenant.patient.login')->with('error', 'Session expired. Please login again.');
         }
 
         // Get logo
@@ -45,7 +45,7 @@ class PatientDashboard extends Component
     {
         Session::forget(['patient_member_id', 'patient_member', 'patient_customer_type']);
         Session::regenerate();
-        return redirect()->route('patient.login');
+        return redirect()->route('tenant.patient.login');
     }
 
     public function render()

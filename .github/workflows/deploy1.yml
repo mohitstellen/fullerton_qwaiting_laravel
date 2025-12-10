@@ -65,9 +65,6 @@ jobs:
 
           git pull origin main
 
-          php artisan migrate --path=database/migrations/2025_12_10_115643_add_passport_to_members_table.php --force
-          php artisan migrate --path=database/migrations/2025_12_10_124204_add_customer_type_to_members_table.php --force
-
           # Clear all caches
           php artisan o:clear
           
