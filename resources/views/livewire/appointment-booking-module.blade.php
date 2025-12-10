@@ -15,7 +15,7 @@
         <!-- Top Header (Same style as Calls page) -->
         <div style="background-color: white; display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
             <!-- Logo -->
-            <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
                 @php
                     $url = request()->url();
                     $headerPage = App\Models\SiteDetail::FIELD_BUSINESS_LOGO;
@@ -24,7 +24,17 @@
                     }
                     $logo = App\Models\SiteDetail::viewImage($headerPage);
                 @endphp
-                <img src="{{ url($logo) }}" alt="Logo" style="max-height: 60px; max-width: 110px;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2218%22 fill=%22%233b82f6%22/%3E%3Ctext x=%2220%22 y=%2225%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2216%22 font-weight=%22bold%22%3EW%3C/text%3E%3C/svg%3E'">
+                <a href="{{ route('tenant.dashboard') }}" style="display: flex; align-items: center; gap: 8px; text-decoration: none; cursor: pointer;">
+                    <img src="{{ url($logo) }}" alt="Logo" style="max-height: 60px; max-width: 110px;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2218%22 fill=%22%233b82f6%22/%3E%3Ctext x=%2220%22 y=%2225%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2216%22 font-weight=%22bold%22%3EW%3C/text%3E%3C/svg%3E'">
+                </a>
+                
+                <!-- Dashboard Button -->
+                <a href="{{ route('tenant.dashboard') }}" style="background-color: #2563eb; color: white; padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 16px; height: 16px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
             </div>
             
             <!-- Sign Out Button -->
@@ -42,17 +52,17 @@
         <!-- Main Content -->
         <div style="display: flex; gap: 12px; height: calc(100vh - 120px);">
         <!-- Left Sidebar -->
-        <aside style="background-color: #1e293b; width: 320px; padding: 20px; border-radius: 8px; overflow-y: auto; max-height: calc(100vh - 100px);">
+        <aside style="background-color: #1e293b; width: 280px; padding: 16px; border-radius: 8px; overflow-y: auto; max-height: calc(100vh - 100px); flex-shrink: 0;">
             <!-- Clinics Section -->
             <div style="margin-bottom: 24px;">
-                <h2 style="color: white; font-size: 16px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                <h2 style="color: white; font-size: 18px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
                     <span style="display: flex; align-items: center; gap: 8px;">
-                        <svg style="width: 16px; height: 16px; color: #60a5fa;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg style="width: 18px; height: 18px; color: #60a5fa;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                         </svg>
                         {{ __('sidebar.Clinics') }}
                     </span>
-                    <span style="color: #60a5fa; font-size: 11px; font-weight: normal;">({{ count($availableClinics) }} total)</span>
+                    <span style="color: #60a5fa; font-size: 13px; font-weight: normal;">({{ count($availableClinics) }} total)</span>
                 </h2>
                 <div class="space-y-2">
                     @php
@@ -69,7 +79,7 @@
                     @endif
                     @foreach($selectedClinicsData as $clinic)
                         <div style="background-color: #2563eb; padding: 10px; border-radius: 6px; margin-bottom: 8px;" class="flex items-center justify-between">
-                            <span style="color: white; font-size: 13px; font-weight: 600;" class="flex-1">{{ $clinic['name'] }}</span>
+                            <span style="color: white; font-size: 15px; font-weight: 600;" class="flex-1">{{ $clinic['name'] }}</span>
                                 <button 
                                 wire:click="removeClinic({{ $clinic['id'] }})"
                                 style="color: white; background-color: rgba(239, 68, 68, 0.3); padding: 4px; border-radius: 50%;"
@@ -87,12 +97,13 @@
                     @endphp
                     @if(count($availableClinicsForDropdown) > 0)
                         <select 
+                            id="clinic-select-dropdown"
                             wire:change="addClinic($event.target.value)"
-                            style="background-color: #374151; color: white; padding: 8px; border-radius: 6px; border: 1px solid #4b5563; font-size: 13px; font-weight: 600; width: 100%;"
+                            style="background-color: #374151; color:rgb(255, 255, 255); padding: 10px; border-radius: 6px; border: 1px solid #4b5563; font-size: 15px; font-weight: 600; width: 100%;"
                         >
-                            <option value="">Select Clinics...</option>
+                            <option value="" style="color: rgb(255, 255, 255);">Select Clinics...</option>
                             @foreach($availableClinicsForDropdown as $clinic)
-                                <option value="{{ $clinic['id'] }}">{{ $clinic['name'] }}</option>
+                                <option value="{{ $clinic['id'] }}" style="color: rgb(255, 255, 255);">{{ $clinic['name'] }}</option>
                             @endforeach
                         </select>
                     @endif
@@ -101,8 +112,8 @@
 
             <!-- Appointment Types Section -->
             <div>
-                <h2 style="color: white; font-size: 16px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                    <svg style="width: 16px; height: 16px; color: #c084fc;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h2 style="color: white; font-size: 18px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <svg style="width: 18px; height: 18px; color: #c084fc;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
                     </svg>
                     {{ __('sidebar.Appointment Type') }}
@@ -114,7 +125,7 @@
                                 $isSelected = in_array($type, $selectedAppointmentTypes);
                             @endphp
                             <div class="flex items-center justify-between py-2 px-3 bg-gray-700 rounded border border-gray-600 mb-2">
-                                <span class="text-sm text-white font-medium">{{ $type }}</span>
+                                <span class="text-base text-white font-medium" style="font-size: 15px;">{{ $type }}</span>
                                 <div class="flex gap-2 ml-2">
                                     @if($isSelected)
                                         <button 
@@ -163,13 +174,13 @@
         </aside>
 
         <!-- Main Content Area -->
-        <main style="flex: 1; background-color: white; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); padding: 24px; overflow-y: auto;">
+        <main style="flex: 1; background-color: white; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); padding: 24px; overflow-y: auto; min-width: 0;">
             <!-- Top Control Bar -->
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px;">
                 <!-- Search Button -->
                 <button 
                     wire:click="toggleSearchFilters"
-                    style="background-color: #f97316; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 13px; white-space: nowrap; flex-shrink: 0;"
+                    style="background-color: #f97316; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 15px; white-space: nowrap; flex-shrink: 0;"
                 >
                     Appointment Search
                 </button>
@@ -230,7 +241,7 @@
                             <div id="calendar-container"></div>
                         </div>
                     </div>
-                    <div style="font-size: 13px; font-weight: 600; color: #374151; padding: 0 8px; white-space: nowrap;">{{ $selectedDayName }}</div>
+                    <div style="font-size: 15px; font-weight: 600; color: #374151; padding: 0 8px; white-space: nowrap;">{{ $selectedDayName }}</div>
                     <button wire:click="nextDay" style="color: #4b5563; padding: 4px; background: transparent; border: none; cursor: pointer;">
                         <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -246,13 +257,13 @@
                     @endphp
                     <button 
                         wire:click="toggleViewMode"
-                        style="background-color: {{ $calendarBg }}; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 13px; white-space: nowrap;"
+                        style="background-color: {{ $calendarBg }}; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 15px; white-space: nowrap;"
                     >
                         CALENDAR
                     </button>
                     <button 
                         wire:click="toggleViewMode"
-                        style="background-color: {{ $timelineBg }}; color: white; padding: 6px 12px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 13px; white-space: nowrap;"
+                        style="background-color: {{ $timelineBg }}; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 15px; white-space: nowrap;"
                     >
                         TIMELINE
                     </button>
@@ -337,10 +348,10 @@
                     @foreach($timelineAppointments as $group)
                         <!-- Clinic Name and Appointment Type Header -->
                         <div style="margin-bottom: 24px;">
-                            <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #111827;">
+                            <h2 style="font-size: 22px; font-weight: 600; margin-bottom: 8px; color: #111827;">
                                 {{ $group['location_name'] }}
                             </h2>
-                            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #374151;">
+                            <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 16px; color: #374151;">
                                 {{ $group['appointment_type'] }}
                             </h3>
                             
@@ -366,14 +377,14 @@
                                                     wire:click="openBookingModal({{ $appointment['id'] }})"
                                                     class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                                                 >
-                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['time'] }}</td>
-                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['gender'] }}</td>
-                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['name'] }}</td>
-                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['created_on'] }}</td>
-                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['company_package'] }}</td>
-                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['national_id'] }}</td>
-                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['phone'] }}</td>
-                                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['remarks'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['time'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['gender'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['name'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['created_on'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['company_package'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['national_id'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['phone'] }}</td>
+                                                    <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['remarks'] }}</td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
@@ -415,14 +426,14 @@
                                         wire:click="openBookingModal({{ $appointment['id'] }})"
                                         class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                                     >
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['time'] }}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['gender'] }}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['name'] }}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['created_on'] }}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['company_package'] }}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['national_id'] }}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['phone'] }}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ $appointment['location'] }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['time'] }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['gender'] }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['name'] }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['created_on'] }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['company_package'] }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['national_id'] }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['phone'] }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['location'] }}</td>
                                     </tr>
                                 @empty
                                     <tr>
@@ -443,13 +454,13 @@
                 @if(count($timeSlotsData) > 0)
                     @foreach($timeSlotsData as $slotData)
                         <div style="background-color: white; border-radius: 8px; border-left: 4px solid #60a5fa; box-shadow: 0 1px 2px rgba(0,0,0,0.05); padding: 24px; margin-bottom: 24px;">
-                            <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #111827;">{{ $slotData['clinic_name'] }}</h3>
-                            <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #374151;">{{ $slotData['appointment_type'] }}</h4>
+                            <h3 style="font-size: 22px; font-weight: 600; margin-bottom: 8px; color: #111827;">{{ $slotData['clinic_name'] }}</h3>
+                            <h4 style="font-size: 20px; font-weight: 600; margin-bottom: 16px; color: #374151;">{{ $slotData['appointment_type'] }}</h4>
                             
                             <div>
                                 @foreach($slotData['time_slots'] as $time => $slotInfo)
                                     <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
-                                        <span style="color: #374151; font-weight: 500; min-width: 100px; font-size: 14px;">{{ $time }}</span>
+                                        <span style="color: #374151; font-weight: 500; min-width: 100px; font-size: 16px;">{{ $time }}</span>
                                         
                                         @if(is_array($slotInfo) && isset($slotInfo['status']) && $slotInfo['status'] !== 'empty')
                                             {{-- Booked slot - show booking info --}}
@@ -466,15 +477,15 @@
                                                 @endif"
                                             >
                                                 <div style="display: flex; flex-direction: column; gap: 2px;">
-                                                    <div style="font-weight: 600;">{{ $slotInfo['patient_name'] ?? 'N/A' }}</div>
-                                                    <div style="font-size: 11px; opacity: 0.8;">NRIC: {{ $slotInfo['nric'] ?? 'N/A' }} | Status: {{ $slotInfo['status'] }}</div>
+                                                    <div style="font-weight: 600; font-size: 15px;">{{ $slotInfo['patient_name'] ?? 'N/A' }}</div>
+                                                    <div style="font-size: 13px; opacity: 0.8;">NRIC: {{ $slotInfo['nric'] ?? 'N/A' }} | Status: {{ $slotInfo['status'] }}</div>
                                                 </div>
                                             </button>
                                         @else
                                             {{-- Empty slot - allow booking --}}
                                             <button 
                                                 wire:click="bookAppointment({{ $slotData['clinic_id'] }}, '{{ $slotData['appointment_type'] }}', '{{ $time }}')"
-                                                style="background-color:rgb(255, 255, 255); color: white; padding: 8px 16px; border-radius: 6px; min-width: 150px; text-align: left; border: none; cursor: pointer; font-weight: 500; font-size: 14px; border: rgb(0,0,0) solid; color: rgb(0, 0, 0);"
+                                                style="background-color:rgb(255, 255, 255); color: white; padding: 8px 16px; border-radius: 6px; min-width: 150px; text-align: left; border: none; cursor: pointer; font-weight: 500; font-size: 16px; border: rgb(0,0,0) solid; color: rgb(0, 0, 0);"
                                             >
                                                 Empty
                                             </button>
@@ -486,45 +497,45 @@
                     @endforeach
                 @else
                     <div style="background-color: white; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 1px 2px rgba(0,0,0,0.05); padding: 32px; text-align: center;">
-                        <p style="color: #6b7280;">Please select at least one clinic and one appointment type to view available slots.</p>
+                        <p style="color: #6b7280; font-size: 16px;">Please select at least one clinic and one appointment type to view available slots.</p>
                     </div>
                 @endif
             @endif
         </main>
 
         <!-- Right Sidebar -->
-        <aside style="background-color: white; width: 224px; padding: 16px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <aside style="background-color: white; width: 200px; padding: 16px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex-shrink: 0;">
             <div>
-                <h3 style="font-size: 16px; font-weight: bold; color: #1f2937; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                    <svg style="width: 16px; height: 16px; color: #6366f1;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h3 style="font-size: 18px; font-weight: bold; color: #1f2937; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <svg style="width: 18px; height: 18px; color: #6366f1;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     STATUS
                 </h3>
                 <div>
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 6px; margin-bottom: 4px;">
-                        <div style="width: 16px; height: 16px; border-radius: 50%; background-color: #3b82f6;"></div>
-                        <span style="font-size: 12px; font-weight: 600; color: #374151;">Reserved</span>
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 4px;">
+                        <div style="width: 18px; height: 18px; border-radius: 50%; background-color: #3b82f6;"></div>
+                        <span style="font-size: 14px; font-weight: 600; color: #374151;">Reserved</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 6px; margin-bottom: 4px;">
-                        <div style="width: 16px; height: 16px; border-radius: 50%; background-color: #a855f7;"></div>
-                        <span style="font-size: 12px; font-weight: 600; color: #374151;">SMSCalled</span>
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 4px;">
+                        <div style="width: 18px; height: 18px; border-radius: 50%; background-color: #a855f7;"></div>
+                        <span style="font-size: 14px; font-weight: 600; color: #374151;">SMSCalled</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 6px; margin-bottom: 4px;">
-                        <div style="width: 16px; height: 16px; border-radius: 50%; background-color: #eab308;"></div>
-                        <span style="font-size: 12px; font-weight: 600; color: #374151;">Arrived</span>
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 4px;">
+                        <div style="width: 18px; height: 18px; border-radius: 50%; background-color: #eab308;"></div>
+                        <span style="font-size: 14px; font-weight: 600; color: #374151;">Arrived</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 6px; margin-bottom: 4px;">
-                        <div style="width: 16px; height: 16px; border-radius: 50%; background-color: #6b7280;"></div>
-                        <span style="font-size: 12px; font-weight: 600; color: #374151;">Cancelled</span>
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 4px;">
+                        <div style="width: 18px; height: 18px; border-radius: 50%; background-color: #6b7280;"></div>
+                        <span style="font-size: 14px; font-weight: 600; color: #374151;">Cancelled</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 6px; margin-bottom: 4px;">
-                        <div style="width: 16px; height: 16px; border-radius: 50%; background-color: #dc2626;"></div>
-                        <span style="font-size: 12px; font-weight: 600; color: #374151;">NoShow</span>
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 4px;">
+                        <div style="width: 18px; height: 18px; border-radius: 50%; background-color: #dc2626;"></div>
+                        <span style="font-size: 14px; font-weight: 600; color: #374151;">NoShow</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 6px; margin-bottom: 4px;">
-                        <div style="width: 16px; height: 16px; border-radius: 50%; background-color: #22c55e;"></div>
-                        <span style="font-size: 12px; font-weight: 600; color: #374151;">Completed</span>
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 4px;">
+                        <div style="width: 18px; height: 18px; border-radius: 50%; background-color: #22c55e;"></div>
+                        <span style="font-size: 14px; font-weight: 600; color: #374151;">Completed</span>
                     </div>
                 </div>
             </div>
@@ -631,9 +642,10 @@
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             NRIC / FIN / Passport <span class="text-red-500">*</span>
                                         </label>
-                                        <div class="relative">
+                                        <div class="relative" id="nric-search-container">
                                             <input 
                                                 type="text" 
+                                                id="nric-search-input"
                                                 wire:model.live.debounce.500ms="nricFinPassport"
                                                 placeholder="Search Nric / Name / Mobile Number"
                                                 class="w-full px-10 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -645,7 +657,7 @@
                                             
                                             <!-- Autocomplete Dropdown -->
                                             @if($showNricDropdown)
-                                                <div class="absolute z-[9999] w-full mt-1" x-data @click.outside="$wire.closeNricDropdown()">
+                                                <div id="nric-dropdown" class="absolute z-[9999] w-full mt-1" x-data wire:click.outside="$wire.closeNricDropdown()">
                                                     @if(count($nricSearchResults) > 0)
                                                         <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl max-h-80 overflow-y-auto">
                                                             @foreach($nricSearchResults as $index => $result)
@@ -821,14 +833,14 @@
                                 <div class="flex items-center gap-4 mb-4">
                                     <h3 class="text-lg font-semibold border-b-2 border-orange-500 pb-1">Appointment Details</h3>
                                     <label class="flex items-center gap-2">
-                                        <input type="checkbox" wire:model="isPrivateCustomer" wire:key="private-customer-checkbox-{{ $isPrivateCustomer ? 'checked' : 'unchecked' }}" class="w-4 h-4">
+                                        <input type="checkbox" wire:model.live="isPrivateCustomer" wire:key="private-customer-checkbox-{{ $isPrivateCustomer ? 'checked' : 'unchecked' }}" class="w-4 h-4">
                                         <span class="text-sm">Private Customer</span>
                                     </label>
                                 </div>
 
                                 <div class="space-y-4">
-                                    @if(!$isPrivateCustomer)
-                                    <div>
+                                    @if(!$isPrivateCustomer && $memberSelectedFromSearch)
+                                    <div wire:key="company-name-field-{{ $isPrivateCustomer ? 'hidden' : 'visible' }}-{{ $memberSelectedFromSearch ? 'selected' : 'not-selected' }}">
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Company Name
                                         </label>
@@ -1110,15 +1122,54 @@
     }
     
     // Handle click outside to close NRIC dropdown
-    document.addEventListener('click', function(event) {
-        const nricInput = document.querySelector('input[wire\\:model\\.live\\.debounce\\.500ms="nricFinPassport"]');
-        const dropdown = nricInput?.nextElementSibling;
+    function handleClickOutside(event) {
+        const container = document.getElementById('nric-search-container');
+        const dropdown = document.getElementById('nric-dropdown');
         
-        if (nricInput && dropdown && !nricInput.contains(event.target) && !dropdown.contains(event.target)) {
-            // Click is outside the input and dropdown
-            Livewire.dispatch('closeNricDropdown');
+        // Only proceed if container exists
+        if (!container) return;
+        
+        // Check if click is outside the container
+        // Also check if dropdown is visible (exists in DOM)
+        if (!container.contains(event.target)) {
+            // Click is outside - close the dropdown
+            if (typeof Livewire !== 'undefined') {
+                // Try to find the Livewire component and call method directly
+                const wireElement = container.closest('[wire\\:id]');
+                if (wireElement) {
+                    const wireId = wireElement.getAttribute('wire:id');
+                    if (wireId) {
+                        const component = Livewire.find(wireId);
+                        if (component) {
+                            component.call('closeNricDropdown');
+                            return;
+                        }
+                    }
+                }
+                // Fallback: dispatch event
+                Livewire.dispatch('closeNricDropdown');
+            }
         }
+    }
+    
+    // Setup click outside handler after Livewire is ready
+    document.addEventListener('livewire:init', function() {
+        document.addEventListener('click', handleClickOutside);
     });
+    
+    // Also setup immediately if Livewire is already loaded
+    if (typeof Livewire !== 'undefined' && Livewire.all().length > 0) {
+        document.addEventListener('click', handleClickOutside);
+    } else {
+        // Fallback: setup on DOM ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                document.addEventListener('click', handleClickOutside);
+            });
+        } else {
+            document.addEventListener('click', handleClickOutside);
+        }
+    }
     
     // Listen for member selected event
     document.addEventListener('livewire:init', () => {
@@ -1378,6 +1429,14 @@
                 console.log('Date changed to:', e.target.value);
             });
         }
+        
+        // Listen for clinic selection to reset dropdown
+        Livewire.on('clinic-selected', () => {
+            const clinicDropdown = document.getElementById('clinic-select-dropdown');
+            if (clinicDropdown) {
+                clinicDropdown.value = '';
+            }
+        });
     });
     
     // Also initialize on DOM ready

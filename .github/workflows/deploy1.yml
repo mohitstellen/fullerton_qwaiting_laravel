@@ -65,9 +65,8 @@ jobs:
 
           git pull origin main
 
-          # Run specific migrations for appointment booking module
-          php artisan migrate --path=database/migrations/2025_12_08_113242_add_additional_fields_to_bookings_table.php --force
-          php artisan migrate --path=database/migrations/2025_12_08_182730_update_bookings_status_enum.php --force
+          php artisan migrate --path=database/migrations/2025_12_10_115643_add_passport_to_members_table.php --force
+          php artisan migrate --path=database/migrations/2025_12_10_124204_add_customer_type_to_members_table.php --force
 
           # Clear all caches
           php artisan o:clear

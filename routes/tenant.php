@@ -60,6 +60,7 @@ use App\Livewire\EditBooking;
 use App\Livewire\BookingRescheduled;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use App\Livewire\StaffListComponent;
@@ -178,6 +179,7 @@ use App\Livewire\RfCardList;
 use App\Livewire\ImportMemberDetails;
 use App\Livewire\PublicUserList;
 use App\Livewire\PublicUserForm;
+use App\Livewire\PatientRegister;
 
 /*
 |--------------------------------------------------------------------------
@@ -234,7 +236,23 @@ Route::middleware([
         Route::post('/password/update', [PasswordResetLinkController::class, 'updatePassword'])->name('password.update');
         // Route::get('register',[AuthController::class, 'register'])->name('register');
         // Route::post('register',[AuthController::class, 'registerstore'])->name('registerstore');
+
+        Route::prefix('public')->group(function () {
+            Route::get('/register', PatientRegister::class)->name('patient.register');
+            Route::get('/login', \App\Livewire\PatientLogin::class)->name('patient.login');
+            Route::get('/dashboard', \App\Livewire\PatientDashboard::class)->name('patient.dashboard');
+            Route::post('/logout', function () {
+                Session::forget(['patient_member_id', 'patient_member', 'patient_customer_type']);
+                Session::regenerate();
+                return redirect()->route('tenant.patient.login');
+            })->name('patient.logout');
+        });
+
+
         Route::get('/authenticate', [AuthController::class, 'authenticate'])->name('tenant.authenticate');
+    });
+
+    Route::middleware([TenantGuestMiddleware::class])->name('tenant.')->group(function () {
         Route::get('send-reminder-email/{id}', [TestController::class, 'sendReminderEmail']);
 
         // JumpCloud SSO (SAML 2.0) endpoints

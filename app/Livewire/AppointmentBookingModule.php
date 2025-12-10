@@ -28,51 +28,51 @@ class AppointmentBookingModule extends Component
 {
     // Selected clinics
     public $selectedClinics = []; // Array of clinic IDs
-    
+
     // Clinics with time slots data
     public $clinics = [];
-    
+
     // All available clinics for dropdown
     public $availableClinics = [];
-    
+
     // Appointment types based on selected clinics
     public $appointmentTypes = [];
-    
+
     // Selected appointment types (array of appointment type names)
     public $selectedAppointmentTypes = [];
-    
+
     // Date navigation
     public $selectedDay = 5;
     public $selectedMonth = 'Dec';
     public $selectedYear = 2025;
     public $selectedDayName = 'Friday';
     public $selectedDate = '';
-    
+
     // View mode
     public $viewMode = 'calendar'; // 'calendar' or 'timeline'
-    
+
     // Timeline filter
     public $timelineGender = 'All'; // 'All', 'Male', 'Female', 'Unisex'
-    
+
     // Search filters form
     public $showSearchFilters = false;
     public $searchNric = '';
     public $searchMobile = '';
     public $searchEmail = '';
     public $searchCompany = '';
-    
+
     // Timeline appointments
     public $timelineAppointments = [];
-    
+
     // Sample appointments data
     public $appointments = [];
-    
+
     // Modal state
     public $showBookingModal = false;
     public $selectedAppointment = null;
     public $selectedAppointmentType = 'Doctor Review Consult';
     public $auditTrailLogs = [];
-    
+
     // Form fields for booking modal
     public $identificationType = 'NRIC / FIN';
     public $nricFinPassport = '';
@@ -93,41 +93,42 @@ class AppointmentBookingModule extends Component
     public $isPrivateCustomer = false;
     public $companyName = '';
     public $companyId = null;
-    
+
     // Available options
     public $availableLocations = [];
     public $availableNationalities = [];
-    
+
     // Country Code options
     public $allowedCountries = []; // Collection of AllowedCountry models
     public $countryPhoneMode = 1; // 1 = Single country mode, 2 = Multiple countries mode
-    
+
     // NRIC Search Results
     public $nricSearchResults = [];
     public $showNricDropdown = false;
     public $skipNricSearch = false; // Flag to skip search when programmatically setting value
-    
+    public $memberSelectedFromSearch = false; // Flag to track if member was selected from search
+
     // Modal tabs
     public $activeTab = 'booking-details'; // 'booking-details', 'audit-trail', 'tester-testing'
-    
+
     // Booking status
     public $bookingStatus = 'Reserved';
-    
+
     // Team ID
     public $teamId = null;
-    
+
     public function mount()
     {
         // Get team ID from authenticated user
         $user = Auth::user();
         $this->teamId = $user->team_id ?? null;
-        
+
         // If team_id is not found, try getting from domain slug
         if (!$this->teamId) {
             $domainSlug = Team::getSlug();
             $this->teamId = Team::getTeamId($domainSlug);
         }
-        
+
         // Initialize with current date
         $today = Carbon::now();
         $this->selectedDay = $today->day;
@@ -136,54 +137,54 @@ class AppointmentBookingModule extends Component
         $this->selectedDayName = $today->format('l');
         $this->selectedDate = $today->format('Y-m-d');
         $this->selectedDate = $today->format('Y-m-d');
-        
+
         // Load available locations for the form
         $this->loadAvailableLocations();
-        
+
         // Load nationalities from config
         $this->availableNationalities = config('nationalities', []);
-        
+
         // Load country codes
         $this->loadCountryCodes();
-        
+
         // Initialize clinics with time slots
         $this->loadClinics();
-        
+
         // Don't load appointments initially - only load when search is performed
         // $this->loadAppointments();
     }
-    
+
     public function loadCountryCodes()
     {
         // Load ALL countries from Country model (not just allowed countries)
         $this->allowedCountries = Country::select('id', 'name', 'phonecode')
             ->orderBy('name')
             ->get();
-        
+
         // Always set default country code to 65 (Singapore)
         $this->mobileCountryCode = '65';
     }
-    
+
     public function updatedLocationId($value)
     {
         // Reload country codes when location changes
         $this->loadCountryCodes();
     }
-    
+
     public function loadAvailableLocations()
     {
         if (!$this->teamId) {
             $this->availableLocations = [];
             return;
         }
-        
+
         $this->availableLocations = Location::where('team_id', $this->teamId)
             ->where('status', 1)
             ->orderBy('location_name')
             ->get(['id', 'location_name'])
             ->toArray();
     }
-    
+
     public function loadClinics()
     {
         // If no team ID, return empty
@@ -191,17 +192,17 @@ class AppointmentBookingModule extends Component
             $this->availableClinics = [];
             return;
         }
-        
+
         // Get all active locations from database
         $locations = Location::where('team_id', $this->teamId)
             ->where('status', 1)
             ->get(['id', 'location_name']);
-        
+
         // Get level 1 categories (appointment types)
         $firstLevel = Level::getFirstRecord();
-        
+
         $this->availableClinics = [];
-        
+
         foreach ($locations as $location) {
             // Get categories for this location
             $categories = Category::where('team_id', $this->teamId)
@@ -214,43 +215,53 @@ class AppointmentBookingModule extends Component
                 ])
                 ->whereJsonContains('category_locations', (string)$location->id)
                 ->get(['id', 'name']);
-            
+
             $appointmentTypes = [];
-            
+
             // Store appointment types (slots will be generated dynamically in getTimeSlotsForDisplay)
             foreach ($categories as $category) {
                 $appointmentTypes[$category->name] = []; // Empty array, slots generated on demand
             }
-            
+
             $this->availableClinics[] = [
                 'id' => $location->id,
                 'name' => $location->location_name,
                 'appointmentTypes' => $appointmentTypes
             ];
         }
-     
+
         // Load appointment types based on selected clinics
         $this->loadAppointmentTypes();
     }
-    
+
     public function loadAppointmentTypes()
     {
-        // Get all unique appointment types from selected clinics
+        // Get all unique appointment types from ALL selected clinics
+        // When multiple clinics are selected, show all appointment types from all selected clinics
         $appointmentTypes = [];
-        
+
+        // If no clinics are selected, clear appointment types
+        if (empty($this->selectedClinics)) {
+            $this->appointmentTypes = [];
+            return;
+        }
+
+        // Collect appointment types from all selected clinics
         foreach ($this->availableClinics as $clinic) {
             if (in_array($clinic['id'], $this->selectedClinics)) {
+                // Add all appointment types from this clinic
                 foreach ($clinic['appointmentTypes'] as $type => $slots) {
+                    // Use type name as key to ensure uniqueness across all clinics
                     if (!isset($appointmentTypes[$type])) {
                         $appointmentTypes[$type] = true;
                     }
                 }
             }
         }
-        
+
         $this->appointmentTypes = $appointmentTypes;
     }
-    
+
     public function loadAppointments()
     {
         // If no team ID, return empty
@@ -258,44 +269,44 @@ class AppointmentBookingModule extends Component
             $this->appointments = [];
             return;
         }
-        
+
         // Query bookings from database
         $query = Booking::where('team_id', $this->teamId);
-        
+
         // Apply search filters
         if (!empty($this->searchNric)) {
-            $query->where(function($q) {
+            $query->where(function ($q) {
                 $q->where('refID', 'like', '%' . $this->searchNric . '%')
-                  ->orWhereJsonContains('json->nric', $this->searchNric)
-                  ->orWhereJsonContains('json->passport', $this->searchNric);
+                    ->orWhereJsonContains('json->nric', $this->searchNric)
+                    ->orWhereJsonContains('json->passport', $this->searchNric);
             });
         }
-        
+
         if (!empty($this->searchMobile)) {
             $query->where('phone', 'like', '%' . $this->searchMobile . '%');
         }
-        
+
         if (!empty($this->searchEmail)) {
             $query->where('email', 'like', '%' . $this->searchEmail . '%');
         }
-        
+
         if (!empty($this->searchCompany)) {
-            $query->whereHas('categories.company', function($q) {
+            $query->whereHas('categories.company', function ($q) {
                 $q->where('name', 'like', '%' . $this->searchCompany . '%');
             });
         }
-        
+
         // Get bookings with relationships
         $bookings = $query->with(['location', 'categories'])
             ->orderBy('booking_date', 'desc')
             ->orderBy('start_time', 'desc')
             ->limit(100)
             ->get();
-        
+
         // Transform to match the expected format
-        $this->appointments = $bookings->map(function($booking) {
+        $this->appointments = $bookings->map(function ($booking) {
             $jsonData = json_decode($booking->json, true);
-            
+
             return [
                 'id' => $booking->id,
                 'time' => Carbon::parse($booking->booking_date . ' ' . $booking->start_time)->format('d/m/Y h:iA'),
@@ -311,19 +322,19 @@ class AppointmentBookingModule extends Component
             ];
         })->toArray();
     }
-    
+
     public function toggleSearchFilters()
     {
         $this->showSearchFilters = !$this->showSearchFilters;
     }
-    
+
     public function searchAppointments()
     {
         // Filter appointments based on search criteria
         // This will be implemented with actual database query later
         $this->loadAppointments();
     }
-    
+
     public function clearSearch()
     {
         $this->searchNric = '';
@@ -333,16 +344,16 @@ class AppointmentBookingModule extends Component
         // Clear appointments when clearing search - don't load all
         $this->appointments = [];
     }
-    
+
     public function openBookingModal($appointmentId)
     {
         // Fetch the actual booking from database directly
         $booking = Booking::with(['location', 'categories', 'categories.company', 'company'])->find($appointmentId);
-        
+
         if ($booking) {
             // Prepare appointment data
             $jsonData = json_decode($booking->json, true);
-            
+
             $this->selectedAppointment = [
                 'id' => $booking->id,
                 'time' => Carbon::parse($booking->booking_date . ' ' . $booking->start_time)->format('d/m/Y h:iA'),
@@ -356,7 +367,7 @@ class AppointmentBookingModule extends Component
                 'location_id' => $booking->location_id,
                 'status' => $booking->status ?? 'Pending',
             ];
-            
+
             // Populate form fields from booking data
             $this->nricFinPassport = $booking->refID ?? '';
             $this->fullName = $booking->name ?? '';
@@ -374,25 +385,30 @@ class AppointmentBookingModule extends Component
             // Ensure boolean values for checkboxes - check both database value and JSON
             $this->isVip = (bool)($jsonData['is_vip'] ?? $booking->is_vip ?? false);
             $this->isPrivateCustomer = (bool)($jsonData['is_private_customer'] ?? $booking->is_private_customer ?? false);
-            
+
             // Get company name only if NOT a private customer
             if (!$this->isPrivateCustomer) {
                 if ($booking->company) {
                     $this->companyName = $booking->company->company_name ?? '';
                     $this->companyId = $booking->company_id;
+                    // If booking has company, mark as selected from search (for display purposes)
+                    $this->memberSelectedFromSearch = !empty($this->companyName);
                 } else {
                     // Fallback to category's company if booking doesn't have direct company
                     $this->companyName = $booking->categories?->company?->company_name ?? '';
                     $this->companyId = $booking->company_id ?? null;
+                    // If booking has company, mark as selected from search (for display purposes)
+                    $this->memberSelectedFromSearch = !empty($this->companyName);
                 }
             } else {
                 // Private customer - no company name
                 $this->companyName = '';
                 $this->companyId = null;
+                $this->memberSelectedFromSearch = false;
             }
             $this->additionalComments = $booking->additional_comments ?? '';
             $this->paymentStatus = $booking->payment_status ?? 'Pending';
-            
+
             // Log for debugging
             Log::info('Edit form populated', [
                 'is_vip' => $this->isVip,
@@ -406,23 +422,23 @@ class AppointmentBookingModule extends Component
             $this->bookingStatus = $booking->status;
             $this->selectedAppointmentType = $booking->categories?->name ?? 'Doctor Review Consult';
             $this->package = $this->selectedAppointment['company_package'] ?? '';
-            
+
             $this->showBookingModal = true;
             $this->activeTab = 'booking-details';
-            
+
             // Force Livewire to refresh the view to update checkboxes
             $this->dispatch('$refresh');
-            
+
             // Load audit trail logs for this appointment
             $this->loadAuditTrailLogs($booking->id);
         }
     }
-    
+
     public function loadAuditTrailLogs($bookingId)
     {
         // Load the booking to get current data
         $booking = Booking::with(['categories', 'categories.company'])->find($bookingId);
-        
+
         // Load activity logs for this appointment booking
         $logs = ActivityLog::where('team_id', $this->teamId)
             ->where('call_book_id', $bookingId)
@@ -430,17 +446,17 @@ class AppointmentBookingModule extends Component
             ->with('createdBy')
             ->orderBy('created_at', 'desc')
             ->get();
-        
-        $this->auditTrailLogs = $logs->map(function($log) use ($booking) {
+
+        $this->auditTrailLogs = $logs->map(function ($log) use ($booking) {
             $userDetails = json_decode($log->user_details, true);
             $userName = $userDetails['name'] ?? ($log->createdBy->name ?? 'System');
-            
+
             // Parse the log text to extract information
             $logText = $log->text ?? '';
-            
+
             // Parse remark to extract booking details
             $remark = $log->remark ?? '';
-            
+
             // Default values - try to get from booking first, then parse from log
             $status = $booking->status ?? 'N/A';
             $nric = $booking->refID ?? '';
@@ -451,22 +467,22 @@ class AppointmentBookingModule extends Component
             $package = ($booking->categories?->company?->name ?? '') . ($booking->categories?->company?->name && $booking->categories?->name ? ' - ' : '') . ($booking->categories?->name ?? '');
             $startDateTime = $booking ? Carbon::parse($booking->booking_date . ' ' . $booking->start_time)->format('d/m/Y h:iA') : 'N/A';
             $endDateTime = $booking ? Carbon::parse($booking->booking_date . ' ' . $booking->end_time)->format('d/m/Y h:iA') : 'N/A';
-            
+
             // Extract status from remark if available
             if (preg_match('/Status:\s*([^,|]+)/', $remark, $matches)) {
                 $status = trim($matches[1]);
             }
-            
+
             // Extract data from log text if not available from booking
             if (empty($name) && preg_match('/Patient:\s*([^(]+)\s*\(NRIC:\s*([^)]+)\)/', $logText, $matches)) {
                 $name = trim($matches[1]);
                 $nric = trim($matches[2]);
             }
-            
+
             if (empty($appointmentType) && preg_match('/Appointment Type:\s*([^,]+)/', $logText, $matches)) {
                 $appointmentType = trim($matches[1]);
             }
-            
+
             if ($startDateTime === 'N/A' && preg_match('/Date\/Time:\s*([^,]+)/', $logText, $matches)) {
                 $startDateTime = trim($matches[1]);
                 // Calculate end time (assuming 30 min slot, adjust if needed)
@@ -477,19 +493,19 @@ class AppointmentBookingModule extends Component
                     $endDateTime = 'N/A';
                 }
             }
-            
+
             if ($gender === 'N/A' && preg_match('/Gender:\s*([^,|]+)/', $remark, $matches)) {
                 $gender = trim($matches[1]);
             }
-            
+
             if ($dob === 'N/A' && preg_match('/DOB:\s*([^,|]+)/', $remark, $matches)) {
                 $dob = trim($matches[1]);
             }
-            
+
             if (empty($package) && preg_match('/Company:\s*([^,|]+)/', $remark, $matches)) {
                 $package = trim($matches[1]);
             }
-            
+
             return [
                 'id' => $log->id,
                 'modified_at' => Carbon::parse($log->created_at)->format('d/m/Y h:iA'),
@@ -508,48 +524,66 @@ class AppointmentBookingModule extends Component
             ];
         })->toArray();
     }
-    
+
     public function removeClinic($clinicId)
     {
-        $this->selectedClinics = array_values(array_filter($this->selectedClinics, function($id) use ($clinicId) {
+        $this->selectedClinics = array_values(array_filter($this->selectedClinics, function ($id) use ($clinicId) {
             return $id != $clinicId;
         }));
-        
+
         // Reload appointment types based on remaining selected clinics
         $this->loadAppointmentTypes();
-        
+
         // Filter out selected appointment types that are no longer available
         $availableTypes = array_keys($this->appointmentTypes);
-        $this->selectedAppointmentTypes = array_values(array_filter($this->selectedAppointmentTypes, function($type) use ($availableTypes) {
+        $this->selectedAppointmentTypes = array_values(array_filter($this->selectedAppointmentTypes, function ($type) use ($availableTypes) {
             return in_array($type, $availableTypes);
         }));
+
+        // Reload timeline appointments if in timeline view
+        if ($this->viewMode === 'timeline') {
+            $this->loadTimelineAppointments();
+        }
     }
-    
+
     public function addClinic($clinicId)
     {
         if (!in_array($clinicId, $this->selectedClinics)) {
             $this->selectedClinics[] = $clinicId;
             $this->loadAppointmentTypes();
         }
+
+        // Dispatch event to reset dropdown
+        $this->dispatch('clinic-selected');
+
+        // Reload timeline appointments if in timeline view
+        if ($this->viewMode === 'timeline') {
+            $this->loadTimelineAppointments();
+        }
     }
-    
+
     public function toggleAppointmentType($type)
     {
         if (in_array($type, $this->selectedAppointmentTypes)) {
             // Remove from selected
-            $this->selectedAppointmentTypes = array_values(array_filter($this->selectedAppointmentTypes, function($t) use ($type) {
+            $this->selectedAppointmentTypes = array_values(array_filter($this->selectedAppointmentTypes, function ($t) use ($type) {
                 return $t != $type;
             }));
         } else {
             // Add to selected
             $this->selectedAppointmentTypes[] = $type;
         }
-        
+
+        // Reload timeline appointments if in timeline view
+        if ($this->viewMode === 'timeline') {
+            $this->loadTimelineAppointments();
+        }
+
         // Force Livewire to refresh the view to update time slots
         $this->dispatch('$refresh');
     }
-    
-    
+
+
     #[On('closeBookingModal')]
     public function closeBookingModal()
     {
@@ -558,27 +592,27 @@ class AppointmentBookingModule extends Component
         $this->auditTrailLogs = [];
         $this->resetForm();
     }
-    
+
     public function setActiveTab($tab)
     {
         $this->activeTab = $tab;
     }
-    
+
     public function setBookingStatus($status)
     {
         $this->bookingStatus = $status;
     }
-    
+
     public function toggleViewMode()
     {
         $this->viewMode = $this->viewMode === 'calendar' ? 'timeline' : 'calendar';
-        
+
         // Load timeline appointments when switching to timeline view
         if ($this->viewMode === 'timeline') {
             $this->loadTimelineAppointments();
         }
     }
-    
+
     public function loadTimelineAppointments()
     {
         // If no team ID, return empty
@@ -586,41 +620,59 @@ class AppointmentBookingModule extends Component
             $this->timelineAppointments = [];
             return;
         }
-        
+
         // Create date string from selected date
         $dateStr = $this->selectedYear . '-' . Carbon::createFromFormat('M', $this->selectedMonth)->format('m') . '-' . sprintf('%02d', $this->selectedDay);
-        
+
         // Query bookings from database for the selected date
         $query = Booking::where('team_id', $this->teamId)
             ->where('booking_date', $dateStr);
-        
+
+        // Filter by selected clinics if any are selected
+        if (!empty($this->selectedClinics)) {
+            $query->whereIn('location_id', $this->selectedClinics);
+        }
+
+        // Filter by selected appointment types if any are selected
+        if (!empty($this->selectedAppointmentTypes)) {
+            // Get category IDs for selected appointment types
+            $categoryIds = Category::where('team_id', $this->teamId)
+                ->whereIn('name', $this->selectedAppointmentTypes)
+                ->pluck('id')
+                ->toArray();
+            
+            if (!empty($categoryIds)) {
+                $query->whereIn('category_id', $categoryIds);
+            }
+        }
+
         // Filter by gender if not 'All'
         if ($this->timelineGender !== 'All') {
-            $query->where(function($q) {
+            $query->where(function ($q) {
                 $q->where('gender', $this->timelineGender)
-                  ->orWhereJsonContains('json->gender', $this->timelineGender);
+                    ->orWhereJsonContains('json->gender', $this->timelineGender);
             });
         }
-        
+
         // Get bookings with relationships
         $bookings = $query->with(['location', 'categories', 'categories.company'])
             ->orderBy('start_time', 'asc')
             ->get();
-        
+
         // Get all unique location IDs to fetch locations in bulk
         $locationIds = $bookings->pluck('location_id')->filter()->unique()->toArray();
         $locations = Location::whereIn('id', $locationIds)
             ->pluck('location_name', 'id')
             ->toArray();
-        
+
         // Group appointments by appointment type (category) and location
         $groupedAppointments = [];
-        
+
         foreach ($bookings as $booking) {
             $jsonData = json_decode($booking->json, true);
             $categoryName = $booking->categories?->name ?? 'Other';
             $locationId = $booking->location_id;
-            
+
             // Get location name from relationship or from bulk fetch
             if ($booking->location && $booking->location->location_name) {
                 $locationName = $booking->location->location_name;
@@ -633,10 +685,10 @@ class AppointmentBookingModule extends Component
             } else {
                 $locationName = 'Unknown Location';
             }
-            
+
             // Create a key for grouping by location and category
             $groupKey = $locationId . '_' . ($booking->categories?->id ?? 'other');
-            
+
             if (!isset($groupedAppointments[$groupKey])) {
                 $groupedAppointments[$groupKey] = [
                     'location_name' => $locationName,
@@ -645,7 +697,7 @@ class AppointmentBookingModule extends Component
                     'appointments' => []
                 ];
             }
-            
+
             $groupedAppointments[$groupKey]['appointments'][] = [
                 'id' => $booking->id,
                 'time' => Carbon::parse($booking->booking_date . ' ' . $booking->start_time)->format('d/m/Y h:iA'),
@@ -661,13 +713,13 @@ class AppointmentBookingModule extends Component
                 'remarks' => $booking->additional_comments ?? '',
             ];
         }
-        
+
         // Convert to array and sort by location name, then appointment type
-        $this->timelineAppointments = collect($groupedAppointments)->values()->sortBy(function($group) {
+        $this->timelineAppointments = collect($groupedAppointments)->values()->sortBy(function ($group) {
             return $group['location_name'] . '_' . $group['appointment_type'];
         })->toArray();
     }
-    
+
     public function updatedTimelineGender()
     {
         // Reload timeline appointments when gender filter changes
@@ -675,41 +727,41 @@ class AppointmentBookingModule extends Component
             $this->loadTimelineAppointments();
         }
     }
-    
+
     public function previousDay()
     {
         $currentDate = Carbon::createFromFormat('d M Y', $this->selectedDay . ' ' . $this->selectedMonth . ' ' . $this->selectedYear);
         $previousDate = $currentDate->subDay();
-        
+
         $this->selectedDay = $previousDate->day;
         $this->selectedMonth = $previousDate->format('M');
         $this->selectedYear = $previousDate->year;
         $this->selectedDayName = $previousDate->format('l');
         $this->selectedDate = $previousDate->format('Y-m-d');
-        
+
         // Reload timeline appointments if in timeline view
         if ($this->viewMode === 'timeline') {
             $this->loadTimelineAppointments();
         }
     }
-    
+
     public function nextDay()
     {
         $currentDate = Carbon::createFromFormat('d M Y', $this->selectedDay . ' ' . $this->selectedMonth . ' ' . $this->selectedYear);
         $nextDate = $currentDate->addDay();
-        
+
         $this->selectedDay = $nextDate->day;
         $this->selectedMonth = $nextDate->format('M');
         $this->selectedYear = $nextDate->year;
         $this->selectedDayName = $nextDate->format('l');
         $this->selectedDate = $nextDate->format('Y-m-d');
-        
+
         // Reload timeline appointments if in timeline view
         if ($this->viewMode === 'timeline') {
             $this->loadTimelineAppointments();
         }
     }
-    
+
     public function updatedSelectedDate($value)
     {
         if ($value) {
@@ -723,13 +775,13 @@ class AppointmentBookingModule extends Component
                 // Handle error if date parsing fails
             }
         }
-        
+
         // Reload timeline appointments when date changes
         if ($this->viewMode === 'timeline') {
             $this->loadTimelineAppointments();
         }
     }
-    
+
     public function updatedNricFinPassport()
     {
         // Skip search if we're programmatically setting the value after member selection
@@ -737,7 +789,12 @@ class AppointmentBookingModule extends Component
             $this->skipNricSearch = false;
             return;
         }
-        
+
+        // If user manually changes NRIC, reset the member selected flag
+        $this->memberSelectedFromSearch = false;
+        $this->companyName = '';
+        $this->companyId = null;
+
         // Show dropdown and search as user types
         if (strlen($this->nricFinPassport) >= 2) {
             $this->searchMembers();
@@ -747,7 +804,7 @@ class AppointmentBookingModule extends Component
             $this->showNricDropdown = false;
         }
     }
-    
+
     public function updatedIsPrivateCustomer($value)
     {
         // If private customer is checked, clear company name
@@ -756,7 +813,7 @@ class AppointmentBookingModule extends Component
             $this->companyId = null;
         }
     }
-    
+
     public function searchMembers()
     {
         if (empty($this->nricFinPassport) || !$this->teamId) {
@@ -764,20 +821,20 @@ class AppointmentBookingModule extends Component
             $this->showNricDropdown = false;
             return;
         }
-        
+
         $searchTerm = trim($this->nricFinPassport);
-        
+
         // Search members table by NRIC, mobile number, or name
         $this->nricSearchResults = Member::where('team_id', $this->teamId)
-            ->where(function($query) use ($searchTerm) {
+            ->where(function ($query) use ($searchTerm) {
                 $query->where('nric_fin', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('mobile_number', 'like', '%' . $searchTerm . '%')
-                      ->orWhere('full_name', 'like', '%' . $searchTerm . '%');
+                    ->orWhere('mobile_number', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('full_name', 'like', '%' . $searchTerm . '%');
             })
             ->with('company')
             ->limit(10)
             ->get()
-            ->map(function($member) {
+            ->map(function ($member) {
                 return [
                     'id' => $member->id,
                     'nric_fin' => $member->nric_fin,
@@ -795,10 +852,10 @@ class AppointmentBookingModule extends Component
                 ];
             })
             ->toArray();
-        
+
         // Show dropdown if we have results
         $this->showNricDropdown = count($this->nricSearchResults) > 0;
-        
+
         // Log for debugging
         Log::info('Member search results', [
             'search_term' => $searchTerm,
@@ -806,12 +863,12 @@ class AppointmentBookingModule extends Component
             'results_count' => count($this->nricSearchResults),
         ]);
     }
-    
+
     public function selectMember($memberId)
     {
         // Re-fetch the member from database to ensure fresh data
         $member = Member::with('company')->find($memberId);
-        
+
         if ($member) {
             // Log for debugging
             Log::info('Selecting member', [
@@ -823,10 +880,12 @@ class AppointmentBookingModule extends Component
                 'company_id' => $member->company_id,
                 'company_name' => $member->company?->company_name,
             ]);
-            
+
             // Set flag to skip the search when we set nricFinPassport
             $this->skipNricSearch = true;
-            
+            // Mark that a member was selected from search
+            $this->memberSelectedFromSearch = true;
+
             // Fill all form fields with member data
             $this->nricFinPassport = $member->nric_fin ?? '';
             $this->fullName = $member->full_name ?? '';
@@ -836,7 +895,7 @@ class AppointmentBookingModule extends Component
             $this->mobileNumber = $member->mobile_number ?? '';
             $this->emailAddress = $member->email ?? '';
             $this->title = $member->salutation ?? 'Mr';
-            
+
             // Format date of birth properly for HTML5 date input (Y-m-d format)
             if ($member->date_of_birth) {
                 try {
@@ -848,23 +907,23 @@ class AppointmentBookingModule extends Component
             } else {
                 $this->dateOfBirth = '';
             }
-            
+
             $this->gender = $member->gender ?? 'Male';
             $this->nationality = $member->nationality ?? 'Singaporean';
-            
+
             // Safe null check for company relationship
             $this->companyName = $member->company?->company_name ?? '';
             $this->companyId = $member->company_id;
-            
+
             // Set location if member has one
             if ($member->location_id) {
                 $this->locationId = $member->location_id;
             }
-            
+
             // Hide dropdown after selection
             $this->showNricDropdown = false;
             $this->nricSearchResults = [];
-            
+
             // Log the values that were set
             Log::info('Form fields populated', [
                 'nricFinPassport' => $this->nricFinPassport,
@@ -875,7 +934,7 @@ class AppointmentBookingModule extends Component
                 'dateOfBirth' => $this->dateOfBirth,
                 'companyName' => $this->companyName,
             ]);
-            
+
             // Dispatch browser event to notify that fields have been updated
             $this->dispatch('member-selected', [
                 'memberName' => $this->fullName,
@@ -893,20 +952,20 @@ class AppointmentBookingModule extends Component
                     'mobile_country_code' => $this->mobileCountryCode,
                 ]
             ]);
-            
+
             // Force component to re-render and update DOM
             $this->dispatch('$refresh');
         } else {
             Log::warning('Member not found', ['member_id' => $memberId]);
         }
     }
-    
+
     #[On('closeNricDropdown')]
     public function closeNricDropdown()
     {
         $this->showNricDropdown = false;
     }
-    
+
     public function getStatusListProperty()
     {
         return [
@@ -942,12 +1001,12 @@ class AppointmentBookingModule extends Component
             ],
         ];
     }
-    
+
     public function bookAppointment($clinicId, $appointmentType, $timeSlot)
     {
         // Open booking modal for new appointment
         $clinic = collect($this->availableClinics)->firstWhere('id', $clinicId);
-        
+
         if ($clinic) {
             $this->selectedAppointment = null;
             $this->selectedAppointmentType = $appointmentType;
@@ -955,7 +1014,7 @@ class AppointmentBookingModule extends Component
             $this->dateTime = $this->selectedDay . '/' . $this->selectedMonth . '/' . $this->selectedYear . ' ' . $timeSlot;
             $this->showBookingModal = true;
             $this->activeTab = 'booking-details';
-            
+
             // Reset form fields for new booking
             $this->nricFinPassport = '';
             $this->fullName = '';
@@ -971,38 +1030,39 @@ class AppointmentBookingModule extends Component
             $this->isPrivateCustomer = false;
             $this->companyName = '';
             $this->companyId = null;
+            $this->memberSelectedFromSearch = false;
         }
     }
-    
+
     public function getSelectedClinicsData()
     {
         return collect($this->availableClinics)->whereIn('id', $this->selectedClinics)->values()->toArray();
     }
-    
+
     public function getAvailableClinicsForDropdown()
     {
         return collect($this->availableClinics)->whereNotIn('id', $this->selectedClinics)->values()->toArray();
     }
-    
+
     public function getTimeSlotsForDisplay()
     {
         $result = [];
-        
+
         // Return empty if no clinics or appointment types selected
         if (empty($this->selectedClinics) || empty($this->selectedAppointmentTypes)) {
             return $result;
         }
-        
+
         // Create date string for querying bookings
         $dateStr = $this->selectedYear . '-' . Carbon::createFromFormat('M', $this->selectedMonth)->format('m') . '-' . sprintf('%02d', $this->selectedDay);
-        
+
         // Create Carbon date for selected date
         $selectedDate = Carbon::createFromDate($this->selectedYear, Carbon::createFromFormat('M', $this->selectedMonth)->month, $this->selectedDay);
         $dayOfWeek = $selectedDate->format('l'); // e.g., 'Monday', 'Tuesday' (capitalized)
-        
+
         foreach ($this->selectedClinics as $clinicId) {
             $clinic = collect($this->availableClinics)->firstWhere('id', $clinicId);
-            
+
             if ($clinic) {
                 // Only process appointment types that are turned ON (in selectedAppointmentTypes)
                 foreach ($this->selectedAppointmentTypes as $appointmentType) {
@@ -1010,25 +1070,25 @@ class AppointmentBookingModule extends Component
                     $category = Category::where('team_id', $this->teamId)
                         ->where('name', $appointmentType)
                         ->first();
-                    
+
                     // Get account settings for location slots for this location
                     $accountSetting = AccountSetting::where('team_id', $this->teamId)
                         ->where('location_id', $clinicId)
                         ->where('slot_type', AccountSetting::LOCATION_SLOT)
                         ->first();
-                    
+
                     // Get slot period from account settings (default to 30 minutes)
                     $slotPeriod = $accountSetting->slot_period ?? 30;
-                    
+
                     // Get business hours from account settings
                     $businessHours = [];
                     if ($accountSetting && $accountSetting->business_hours) {
                         $businessHours = json_decode($accountSetting->business_hours, true);
                     }
-                    
+
                     // Generate time slots based on selected date's day of week
                     $timeSlots = [];
-                    
+
                     if (!empty($businessHours)) {
                         // Find business hours for the selected day of week
                         $dayBusinessHours = null;
@@ -1039,14 +1099,14 @@ class AppointmentBookingModule extends Component
                                 break;
                             }
                         }
-                        
+
                         // Check if day is open (is_closed can be 0, "open", or "closed")
                         $isOpen = false;
                         if ($dayBusinessHours && isset($dayBusinessHours['is_closed'])) {
                             $isClosedValue = $dayBusinessHours['is_closed'];
                             $isOpen = ($isClosedValue === 0 || $isClosedValue === 'open' || $isClosedValue === '0');
                         }
-                        
+
                         // If business hours found and not closed, generate slots
                         if ($dayBusinessHours && $isOpen) {
                             // Generate slots for main business hours
@@ -1055,7 +1115,7 @@ class AppointmentBookingModule extends Component
                                 $dayBusinessHours['end_time'],
                                 $slotPeriod
                             );
-                            
+
                             // Convert slot format from "09:00 AM-09:30 AM" to "9:00AM" for matching
                             foreach ($mainSlots as $slotRange => $slotValue) {
                                 // Extract start time from range (e.g., "09:00 AM-09:30 AM" -> "09:00 AM")
@@ -1070,7 +1130,7 @@ class AppointmentBookingModule extends Component
                                     continue;
                                 }
                             }
-                            
+
                             // Generate slots for day intervals if any
                             if (!empty($dayBusinessHours['day_interval'])) {
                                 foreach ($dayBusinessHours['day_interval'] as $interval) {
@@ -1098,13 +1158,13 @@ class AppointmentBookingModule extends Component
                         // Fallback to default 9AM-5PM with configured slot period
                         $startTime = Carbon::createFromTime(9, 0);
                         $endTime = Carbon::createFromTime(17, 0);
-                        
+
                         while ($startTime < $endTime) {
                             $timeSlots[$startTime->format('g:iA')] = 'empty';
                             $startTime->addMinutes($slotPeriod);
                         }
                     }
-                    
+
                     // Fetch bookings for this location, category, and date
                     $bookings = [];
                     if ($category && !empty($timeSlots)) {
@@ -1113,11 +1173,11 @@ class AppointmentBookingModule extends Component
                             ->where('category_id', $category->id)
                             ->where('booking_date', $dateStr)
                             ->get()
-                            ->keyBy(function($booking) {
+                            ->keyBy(function ($booking) {
                                 return Carbon::parse($booking->start_time)->format('g:iA');
                             });
                     }
-                    
+
                     // Populate time slots with booking data
                     $finalTimeSlots = [];
                     foreach ($timeSlots as $time => $status) {
@@ -1133,7 +1193,7 @@ class AppointmentBookingModule extends Component
                             $finalTimeSlots[$time] = ['status' => 'empty'];
                         }
                     }
-                    
+
                     if (!empty($finalTimeSlots)) {
                         $result[] = [
                             'clinic_id' => $clinic['id'],
@@ -1146,10 +1206,10 @@ class AppointmentBookingModule extends Component
                 }
             }
         }
-        
+
         return $result;
     }
-    
+
     public function submitAppointment()
     {
         // Validate form data
@@ -1173,7 +1233,7 @@ class AppointmentBookingModule extends Component
             'locationId.required' => 'Location is required',
             'dateTime.required' => 'Date and time is required',
         ]);
-        
+
         try {
             // Parse date and time
             $dateTimeStr = $this->dateTime;
@@ -1181,12 +1241,12 @@ class AppointmentBookingModule extends Component
             $dateTimeParts = explode(' ', $dateTimeStr);
             $datePart = $dateTimeParts[0] ?? '';
             $timePart = $dateTimeParts[1] ?? '';
-            
+
             // Parse the date
             $bookingDate = Carbon::parse(str_replace('/', ' ', $datePart))->format('Y-m-d');
             $startTime = Carbon::parse($timePart)->format('H:i:s');
             $endTime = Carbon::parse($timePart)->addMinutes(30)->format('H:i:s');
-            
+
             // Parse date of birth
             $dob = null;
             if ($this->dateOfBirth) {
@@ -1202,12 +1262,12 @@ class AppointmentBookingModule extends Component
                     $dob = null;
                 }
             }
-            
+
             // Get the category ID for the selected appointment type
             $category = Category::where('team_id', $this->teamId)
                 ->where('name', $this->selectedAppointmentType)
                 ->first();
-            
+
             // Prepare additional data as JSON
             $jsonData = [
                 'nric' => $this->nricFinPassport,
@@ -1217,7 +1277,7 @@ class AppointmentBookingModule extends Component
                 'is_vip' => $this->isVip,
                 'is_private_customer' => $this->isPrivateCustomer,
             ];
-            
+
             // Create the booking
             $booking = Booking::create([
                 'team_id' => $this->teamId,
@@ -1245,42 +1305,42 @@ class AppointmentBookingModule extends Component
                 'json' => json_encode($jsonData),
                 'created_by' => Auth::id(),
             ]);
-            
+
             // Store activity log for appointment booking creation
             $userAuth = Auth::user();
-            
+
             // Get dynamic data from booking and related models
             $location = Location::find($this->locationId);
             $locationName = $location ? $location->location_name : 'N/A';
             $categoryName = $category ? $category->name : ($this->selectedAppointmentType ?? 'N/A');
             $formattedDateTime = Carbon::parse($bookingDate . ' ' . $startTime)->format('d/m/Y h:iA');
             $phoneWithCode = !empty($this->mobileCountryCode) ? "+{$this->mobileCountryCode} {$this->mobileNumber}" : $this->mobileNumber;
-            
+
             // Build comprehensive log text with all dynamic data
             $logText = "Appointment Booking Created - Patient: {$this->fullName} (NRIC: {$this->nricFinPassport}), " .
-                      "Appointment Type: {$categoryName}, " .
-                      "Location: {$locationName}, " .
-                      "Date/Time: {$formattedDateTime}, " .
-                      "Phone: {$phoneWithCode}, " .
-                      "Email: {$this->emailAddress}";
-            
+                "Appointment Type: {$categoryName}, " .
+                "Location: {$locationName}, " .
+                "Date/Time: {$formattedDateTime}, " .
+                "Phone: {$phoneWithCode}, " .
+                "Email: {$this->emailAddress}";
+
             // Build detailed remark with all dynamic fields
             $remark = "Status: " . ($this->bookingStatus ?? Booking::STATUS_RESERVED) . ", " .
-                     "VIP: " . ($this->isVip ? 'Yes' : 'No') . ", " .
-                     "Private Customer: " . ($this->isPrivateCustomer ? 'Yes' : 'No') . ", " .
-                     "Gender: {$this->gender}, " .
-                     "Nationality: {$this->nationality}, " .
-                     "DOB: " . ($dob ? Carbon::parse($dob)->format('d/m/Y') : 'N/A') . ", " .
-                     "Title: {$this->title}";
-            
+                "VIP: " . ($this->isVip ? 'Yes' : 'No') . ", " .
+                "Private Customer: " . ($this->isPrivateCustomer ? 'Yes' : 'No') . ", " .
+                "Gender: {$this->gender}, " .
+                "Nationality: {$this->nationality}, " .
+                "DOB: " . ($dob ? Carbon::parse($dob)->format('d/m/Y') : 'N/A') . ", " .
+                "Title: {$this->title}";
+
             if ($this->companyName) {
                 $remark .= ", Company: {$this->companyName}";
             }
-            
+
             if ($this->additionalComments) {
                 $remark .= ", Comments: {$this->additionalComments}";
             }
-            
+
             ActivityLog::storeLog(
                 $this->teamId,
                 Auth::id(),
@@ -1293,23 +1353,22 @@ class AppointmentBookingModule extends Component
                 $userAuth, // user details
                 null // country_id
             );
-            
+
             // Show success message
             session()->flash('success', 'Appointment booked successfully!');
-            
+
             // Close modal and reset form
             $this->closeBookingModal();
             $this->resetForm();
-            
+
             // Reload appointments
             $this->loadAppointments();
-            
         } catch (\Exception $e) {
             // Show error message
             session()->flash('error', 'Failed to book appointment: ' . $e->getMessage());
         }
     }
-    
+
     public function updateAppointment()
     {
         // Similar validation
@@ -1323,29 +1382,29 @@ class AppointmentBookingModule extends Component
             'nationality' => 'required|string',
             'locationId' => 'required|integer|exists:locations,id',
         ]);
-        
+
         try {
             if ($this->selectedAppointment) {
                 // Find and update the booking with relationships
                 $booking = Booking::with('categories')->find($this->selectedAppointment['id']);
-                
+
                 if ($booking) {
-                // Parse date of birth
-                $dob = null;
-                if ($this->dateOfBirth) {
-                    try {
-                        // Try Y-m-d format first (from date input)
-                        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->dateOfBirth)) {
-                            $dob = $this->dateOfBirth;
-                        } else {
-                            // Try d/m/Y format
-                            $dob = Carbon::createFromFormat('d/m/Y', $this->dateOfBirth)->format('Y-m-d');
+                    // Parse date of birth
+                    $dob = null;
+                    if ($this->dateOfBirth) {
+                        try {
+                            // Try Y-m-d format first (from date input)
+                            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->dateOfBirth)) {
+                                $dob = $this->dateOfBirth;
+                            } else {
+                                // Try d/m/Y format
+                                $dob = Carbon::createFromFormat('d/m/Y', $this->dateOfBirth)->format('Y-m-d');
+                            }
+                        } catch (\Exception $e) {
+                            $dob = $booking->date_of_birth;
                         }
-                    } catch (\Exception $e) {
-                        $dob = $booking->date_of_birth;
                     }
-                }
-                    
+
                     // Prepare JSON data
                     $existingJson = json_decode($booking->json, true) ?? [];
                     $jsonData = array_merge($existingJson, [
@@ -1356,7 +1415,7 @@ class AppointmentBookingModule extends Component
                         'is_vip' => $this->isVip,
                         'is_private_customer' => $this->isPrivateCustomer,
                     ]);
-                    
+
                     // Update the booking
                     $booking->update([
                         'refID' => $this->nricFinPassport,
@@ -1377,49 +1436,49 @@ class AppointmentBookingModule extends Component
                         'status' => $this->bookingStatus,
                         'json' => json_encode($jsonData),
                     ]);
-                    
+
                     // Store activity log for appointment booking update
                     $userAuth = Auth::user();
-                    
+
                     // Get dynamic data from booking and related models
                     $location = Location::find($this->locationId);
                     $locationName = $location ? $location->location_name : 'N/A';
                     $categoryName = $booking->categories ? $booking->categories->name : 'N/A';
                     $bookingDateTime = Carbon::parse($booking->booking_date . ' ' . $booking->start_time)->format('d/m/Y h:iA');
                     $phoneWithCode = !empty($this->mobileCountryCode) ? "+{$this->mobileCountryCode} {$this->mobileNumber}" : $this->mobileNumber;
-                    
+
                     // Get old values for comparison (if needed)
                     $oldName = $booking->getOriginal('name') ?? $booking->name;
                     $oldStatus = $booking->getOriginal('status') ?? $booking->status;
                     $oldPhone = $booking->getOriginal('phone') ?? $booking->phone;
                     $oldEmail = $booking->getOriginal('email') ?? $booking->email;
-                    
+
                     // Build comprehensive log text with all dynamic data
                     $logText = "Appointment Booking Updated - Patient: {$this->fullName} (NRIC: {$this->nricFinPassport}), " .
-                              "Appointment Type: {$categoryName}, " .
-                              "Location: {$locationName}, " .
-                              "Date/Time: {$bookingDateTime}, " .
-                              "Phone: {$phoneWithCode}, " .
-                              "Email: {$this->emailAddress}";
-                    
+                        "Appointment Type: {$categoryName}, " .
+                        "Location: {$locationName}, " .
+                        "Date/Time: {$bookingDateTime}, " .
+                        "Phone: {$phoneWithCode}, " .
+                        "Email: {$this->emailAddress}";
+
                     // Build detailed remark with all dynamic fields and changes
-                    $remark = "Status: {$this->bookingStatus}" . 
-                             ($oldStatus != $this->bookingStatus ? " (Changed from: {$oldStatus})" : "") . ", " .
-                             "VIP: " . ($this->isVip ? 'Yes' : 'No') . ", " .
-                             "Private Customer: " . ($this->isPrivateCustomer ? 'Yes' : 'No') . ", " .
-                             "Gender: {$this->gender}, " .
-                             "Nationality: {$this->nationality}, " .
-                             "DOB: " . ($dob ? Carbon::parse($dob)->format('d/m/Y') : ($booking->date_of_birth ? Carbon::parse($booking->date_of_birth)->format('d/m/Y') : 'N/A')) . ", " .
-                             "Title: {$this->title}";
-                    
+                    $remark = "Status: {$this->bookingStatus}" .
+                        ($oldStatus != $this->bookingStatus ? " (Changed from: {$oldStatus})" : "") . ", " .
+                        "VIP: " . ($this->isVip ? 'Yes' : 'No') . ", " .
+                        "Private Customer: " . ($this->isPrivateCustomer ? 'Yes' : 'No') . ", " .
+                        "Gender: {$this->gender}, " .
+                        "Nationality: {$this->nationality}, " .
+                        "DOB: " . ($dob ? Carbon::parse($dob)->format('d/m/Y') : ($booking->date_of_birth ? Carbon::parse($booking->date_of_birth)->format('d/m/Y') : 'N/A')) . ", " .
+                        "Title: {$this->title}";
+
                     if ($this->companyName) {
                         $remark .= ", Company: {$this->companyName}";
                     }
-                    
+
                     if ($this->additionalComments) {
                         $remark .= ", Comments: {$this->additionalComments}";
                     }
-                    
+
                     // Add change indicators if values changed
                     $changes = [];
                     if ($oldName != $this->fullName) {
@@ -1431,11 +1490,11 @@ class AppointmentBookingModule extends Component
                     if ($oldEmail != $this->emailAddress) {
                         $changes[] = "Email: {$oldEmail} → {$this->emailAddress}";
                     }
-                    
+
                     if (!empty($changes)) {
                         $remark .= " | Changes: " . implode(", ", $changes);
                     }
-                    
+
                     ActivityLog::storeLog(
                         $this->teamId,
                         Auth::id(),
@@ -1448,9 +1507,9 @@ class AppointmentBookingModule extends Component
                         $userAuth, // user details
                         null // country_id
                     );
-                    
+
                     session()->flash('success', 'Appointment updated successfully!');
-                    
+
                     // Close modal and reload
                     $this->closeBookingModal();
                     $this->resetForm();
@@ -1461,7 +1520,7 @@ class AppointmentBookingModule extends Component
             session()->flash('error', 'Failed to update appointment: ' . $e->getMessage());
         }
     }
-    
+
     public function resetForm()
     {
         $this->nricFinPassport = '';
@@ -1477,13 +1536,14 @@ class AppointmentBookingModule extends Component
         $this->locationId = null;
         $this->companyName = '';
         $this->companyId = null;
+        $this->memberSelectedFromSearch = false;
         $this->additionalComments = '';
         $this->paymentStatus = 'Pending';
         $this->isVip = false;
         $this->isPrivateCustomer = false;
         $this->bookingStatus = 'Reserved';
     }
-    
+
     public function render()
     {
         return view('livewire.appointment-booking-module');
