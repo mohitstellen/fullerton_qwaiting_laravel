@@ -80,6 +80,7 @@ class PatientLogin extends Component
                 ->where('is_active', 1)
                 ->where('status', 'active');
 
+                
             // Try to find by full mobile number first (with country code)
             $member = $mobileQuery->where(function($query) use ($cleanMobileNumber) {
                 $query->whereRaw("CONCAT(mobile_country_code, mobile_number) = ?", [$cleanMobileNumber]);
@@ -89,7 +90,6 @@ class PatientLogin extends Component
             if (!$member) {
                 $member = $mobileQuery->where('mobile_number', $cleanMobileNumber)->first();
             }
-
             // Check if member exists and password is correct
             if (!$member || !Hash::check($this->password, $member->password)) {
                 session()->flash('error', 'Invalid mobile number or password.');
@@ -110,6 +110,7 @@ class PatientLogin extends Component
             // Regenerate session for security
             Session::regenerate();
 
+            // Always redirect to dashboard - dashboard will check for temporary password
             return redirect()->route('tenant.patient.dashboard');
 
         } catch (\Exception $e) {

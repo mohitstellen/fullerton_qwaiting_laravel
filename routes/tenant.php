@@ -240,6 +240,8 @@ Route::middleware([
         Route::prefix('user')->group(function () {
             Route::get('/register', PatientRegister::class)->name('patient.register');
             Route::get('/login', \App\Livewire\PatientLogin::class)->name('patient.login');
+            Route::get('/forgot-password', \App\Livewire\PatientForgotPassword::class)->name('patient.forgot-password');
+            Route::get('/change-password', \App\Livewire\PatientChangePassword::class)->name('patient.change-password');
             Route::get('/dashboard', \App\Livewire\PatientDashboard::class)->name('patient.dashboard');
             Route::post('/logout', function () {
                 Session::forget(['patient_member_id', 'patient_member', 'patient_customer_type']);

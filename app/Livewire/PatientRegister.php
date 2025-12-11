@@ -172,8 +172,8 @@ class PatientRegister extends Component
                 'nationality' => $this->nationality,
                 'company_id' => $this->company_id,
                 'password' => $password,
-                'status' => 'inactive', // New registrations are inactive until approved
-                'is_active' => 0, // Requires admin approval
+                'status' => 'active', // New registrations are inactive until approved
+                'is_active' => 1, // Requires admin approval
             ];
 
             $member = Member::create($data);

@@ -29,7 +29,10 @@ class Member extends Model
         'nationality',
         'company_id',
         'customer_type',
+        'relationship',
+        'primary_id',
         'password',
+        'is_temporary_password',
         'created_by',
         'approved_by',
         'approved_at',
@@ -45,6 +48,7 @@ class Member extends Model
         'date_of_birth' => 'date',
         'approved_at' => 'datetime',
         'is_active' => 'boolean',
+        'is_temporary_password' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

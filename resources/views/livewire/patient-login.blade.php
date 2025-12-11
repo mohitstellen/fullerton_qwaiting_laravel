@@ -129,7 +129,7 @@
                     <a href="{{ route('tenant.patient.register') }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400">
                         Sign Up
                     </a>
-                    <a href="#" class="text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                    <a href="{{ route('tenant.patient.forgot-password') }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400">
                         Forgot Login ID / Password
                     </a>
                 </div>

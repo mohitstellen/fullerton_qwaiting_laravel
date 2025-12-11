@@ -548,7 +548,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto mx-auto" @click.stop>
                 <!-- Modal Header -->
                 <div class="bg-blue-600 text-white px-6 py-4 flex items-center justify-between rounded-t-lg sticky top-0 z-10">
-                    <h2 class="text-xl font-semibold">{{ $selectedAppointmentType ?? 'Doctor Review Consult' }}</h2>
+                    <h2 class="text-xl font-semibold">{{ $selectedAppointmentType }}</h2>
                     <button 
                         wire:click="closeBookingModal" 
                         type="button"
@@ -648,16 +648,27 @@
                                                 id="nric-search-input"
                                                 wire:model.live.debounce.500ms="nricFinPassport"
                                                 placeholder="Search Nric / Name / Mobile Number"
-                                                class="w-full px-10 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                class="w-full px-10 pr-12 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                 autocomplete="off"
                                             />
                                             <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                             </svg>
+                                            <button 
+                                                type="button"
+                                                wire:click="openRegisterModal"
+                                                class="absolute right-2 top-1.5 p-1.5 rounded border-2 border-red-500 bg-blue-500 hover:bg-blue-600 text-white transition-colors"
+                                                title="Register New Member"
+                                                style="background-color: #2563eb;"
+                                            >
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                </svg>
+                                            </button>
                                             
                                             <!-- Autocomplete Dropdown -->
                                             @if($showNricDropdown)
-                                                <div id="nric-dropdown" class="absolute z-[9999] w-full mt-1" x-data wire:click.outside="$wire.closeNricDropdown()">
+                                                <div id="nric-dropdown" class="absolute z-[9999] w-full mt-1" wire:click.outside="$wire.closeNricDropdown()">
                                                     @if(count($nricSearchResults) > 0)
                                                         <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl max-h-80 overflow-y-auto">
                                                             @foreach($nricSearchResults as $index => $result)
@@ -883,13 +894,78 @@
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Date and time <span class="text-red-500">*</span>
                                         </label>
-                                        <input 
-                                            type="text" 
-                                            wire:model="dateTime"
-                                            placeholder="05/12/2025 9:30AM"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                            onclick="this.showPicker()"
-                                        />
+                                        <div class="relative">
+                                            <input 
+                                                type="text" 
+                                                wire:model="dateTime"
+                                                wire:click="openTimeSlotPicker"
+                                                placeholder="05/12/2025 9:30AM"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-pointer"
+                                                readonly
+                                                id="dateTimeInput"
+                                            />
+                                            
+                                            @if($showTimeSlotPicker)
+                                                <div class="absolute z-50 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4" 
+                                                     style="min-width: 320px; max-width: 400px; left: 0;"
+                                                     wire:click.stop
+                                                     wire:ignore.self>
+                                                    <!-- Date Picker -->
+                                                    <div class="mb-4">
+                                                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Date</label>
+                                                        <input 
+                                                            type="date" 
+                                                            wire:model.live="selectedDateForSlots"
+                                                            class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                            min="{{ date('Y-m-d') }}" onclick="this.showPicker()"
+                                                        />
+                                                    </div>
+                                                    
+                                                    <!-- Time Slots -->
+                                                    @if(!empty($availableTimeSlots))
+                                                        <div>
+                                                            <label class="block text-sm font-medium text-gray-700 mb-2">Available Time Slots</label>
+                                                            <div class="flex flex-wrap gap-2 overflow-y-auto" style="max-height: 200px; padding-right: 8px;">
+                                                                @foreach($availableTimeSlots as $slot)
+                                                                    <button 
+                                                                        type="button"
+                                                                        wire:click="selectTimeSlot('{{ $slot }}')"
+                                                                        style="min-width: 85px; padding: 8px 16px; background-color: #22c55e; border: none; border-radius: 6px; color: white; font-weight: 500; cursor: pointer; transition: background-color 0.2s;"
+                                                                        onmouseover="this.style.backgroundColor='#16a34a'"
+                                                                        onmouseout="this.style.backgroundColor='#22c55e'"
+                                                                    >
+                                                                        {{ $slot }}
+                                                                    </button>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    @elseif($selectedDateForSlots && $locationId)
+                                                        <div class="text-sm text-gray-500 py-2 text-center">
+                                                            No available time slots for this date.
+                                                        </div>
+                                                    @elseif($selectedDateForSlots && !$locationId)
+                                                        <div class="text-sm text-gray-500 py-2 text-center">
+                                                            Please select a location first.
+                                                        </div>
+                                                    @else
+                                                        <div class="text-sm text-gray-500 py-2 text-center">
+                                                            Please select a date to view available time slots.
+                                                        </div>
+                                                    @endif
+                                                    
+                                                    <!-- Close Button -->
+                                                    <div class="mt-4 flex justify-end">
+                                                        <button 
+                                                            type="button"
+                                                            wire:click="$set('showTimeSlotPicker', false)"
+                                                            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded font-medium transition-colors"
+                                                        >
+                                                            Close
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
 
                                     <div>
@@ -1083,6 +1159,295 @@
         </div>
     @endif
 </div>
+
+    <!-- Register Modal -->
+    @if($showRegisterModal)
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-[9998] flex items-center justify-center p-4" wire:click="closeRegisterModal">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" wire:click.stop>
+                <!-- Modal Header -->
+                <div class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center rounded-t-lg">
+                    <h2 class="text-xl font-semibold">{{ $selectedAppointmentType }}</h2>
+                    <button 
+                        wire:click="closeRegisterModal"
+                        type="button"
+                        class="text-white hover:bg-blue-700 transition-colors p-2 rounded-lg flex items-center justify-center" style="background-color: rgba(255, 255, 255, 0.1); min-width: 36px; min-height: 36px;"
+                    >
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Content -->
+                <div class="p-6 dark:bg-gray-800">
+                    <div class="mb-4 border-b border-gray-300 pb-2">
+                        <h3 class="text-lg font-semibold border-b-2 border-orange-500 pb-1 inline-block">Register</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Left Column -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Patient Type
+                                </label>
+                                <select wire:model.live="registerPatientType" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <option value="Self">Self</option>
+                                    <option value="Dependent">Dependent</option>
+                                </select>
+                            </div>
+
+                            @if($registerPatientType === 'Dependent')
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Relationship <span class="text-red-500">*</span>
+                                    </label>
+                                    <select wire:model="registerRelationship" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                        <option value="">Please Select</option>
+                                        <option value="Father">Father</option>
+                                        <option value="Mother">Mother</option>
+                                        <option value="Daughter">Daughter</option>
+                                        <option value="Son">Son</option>
+                                        <option value="Wife">Wife</option>
+                                        <option value="Husband">Husband</option>
+                                        <option value="Others">Others</option>
+                                        <option value="Ambassador">Ambassador</option>
+                                        <option value="Insurance Agent">Insurance Agent</option>
+                                        <option value="SIA Staff">SIA Staff</option>
+                                        <option value="IHP Preventive Heath Screening">IHP Preventive Heath Screening</option>
+                                        <option value="HNW">HNW</option>
+                                        <option value="Siblings">Siblings</option>
+                                        <option value="Grandparents">Grandparents</option>
+                                        <option value="Passenger">Passenger</option>
+                                        <option value="Staff">Staff</option>
+                                    </select>
+                                    @error('registerRelationship') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        Primary ID <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <input 
+                                            type="text" 
+                                            wire:model.live.debounce.300ms="registerPrimaryIdSearch"
+                                            placeholder="Search Service NRIC..."
+                                            class="w-full px-10 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            autocomplete="off"
+                                        />
+                                        <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                        </svg>
+                                        
+                                        <!-- Primary ID Dropdown -->
+                                        @if($showPrimaryIdDropdown)
+                                            <div class="absolute z-[9999] w-full mt-1" wire:click.outside="$wire.closePrimaryIdDropdown()">
+                                                @if(count($registerPrimaryIdResults) > 0)
+                                                    <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                                                        @foreach($registerPrimaryIdResults as $result)
+                                                            <div 
+                                                                wire:key="primary-id-{{ $result['id'] }}"
+                                                                wire:click="selectRegisterPrimaryId({{ $result['id'] }})"
+                                                                class="w-full text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none cursor-pointer"
+                                                                style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s;"
+                                                            >
+                                                                <div style="font-weight: 500; color: #111827; font-size: 14px;">
+                                                                    {{ $result['display'] }}
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </div>
+                                    @error('registerPrimaryId') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                </div>
+                            @endif
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Identification Type
+                                </label>
+                                <select wire:model="registerIdentificationType" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <option>NRIC / FIN</option>
+                                    <option>Passport</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    NRIC / FIN <span class="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    wire:model="registerNricFin"
+                                    placeholder="NRIC / FIN"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                />
+                                @error('registerNricFin') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Full Name <span class="text-red-500">*</span>
+                                </label>
+                                <div class="flex gap-2">
+                                    <select wire:model="registerTitle" class="w-24 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                        <option>Mr</option>
+                                        <option>Mrs</option>
+                                        <option>Ms</option>
+                                        <option>Dr</option>
+                                    </select>
+                                    <input 
+                                        type="text" 
+                                        wire:model="registerFullName"
+                                        placeholder="Full Name"
+                                        class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    />
+                                </div>
+                                @error('registerFullName') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Date of Birth <span class="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    type="date" 
+                                    wire:model="registerDateOfBirth"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" onclick="this.showPicker()"
+                                />
+                                @error('registerDateOfBirth') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Gender <span class="text-red-500">*</span>
+                                </label>
+                                <select wire:model="registerGender" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                </select>
+                                @error('registerGender') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Mobile Number (Login ID) <span class="text-red-500">*</span>
+                                </label>
+                                <div class="flex gap-2">
+                                    <select wire:model="registerMobileCountryCode" class="w-20 px-2 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                        @foreach($allowedCountries as $country)
+                                            <option value="{{ $country->phonecode }}">{{ $country->phonecode }}</option>
+                                        @endforeach
+                                    </select>
+                                    <input 
+                                        type="text" 
+                                        wire:model="registerMobileNumber"
+                                        placeholder="Mobile Number"
+                                        class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    />
+                                </div>
+                                @error('registerMobileNumber') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Email Address <span class="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    type="email" 
+                                    wire:model="registerEmailAddress"
+                                    placeholder="Email Address"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                />
+                                @error('registerEmailAddress') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Nationality <span class="text-red-500">*</span>
+                                </label>
+                                <select wire:model="registerNationality" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    @foreach($availableNationalities as $nationality)
+                                        <option value="{{ $nationality }}">{{ $nationality }}</option>
+                                    @endforeach
+                                </select>
+                                @error('registerNationality') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    Company <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <input 
+                                        type="text" 
+                                        wire:model.live.debounce.300ms="registerCompanySearch"
+                                        placeholder="Mandatory for Corporate Clients"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        autocomplete="off"
+                                    />
+                                    @error('registerCompanyName') 
+                                        <span class="text-red-500 text-xs block mt-1">{{ $message }}</span> 
+                                    @enderror
+                                    
+                                    <!-- Company Dropdown -->
+                                    @if($showCompanyDropdown)
+                                        <div class="absolute z-[9999] w-full mt-1" wire:click.outside="$wire.closeCompanyDropdown()">
+                                            @if(count($registerCompanyResults) > 0)
+                                                <div class="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+                                                    @foreach($registerCompanyResults as $result)
+                                                        <div 
+                                                            wire:key="company-{{ $result['id'] }}"
+                                                            wire:click="selectRegisterCompany({{ $result['id'] }})"
+                                                            class="w-full text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none cursor-pointer"
+                                                            style="padding: 12px 16px; border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s;"
+                                                        >
+                                                            <div style="font-weight: 500; color: #111827; font-size: 14px;">
+                                                                {{ $result['company_name'] }}
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-6 flex gap-3 flex-wrap">
+                        <button 
+                            wire:click="registerNewMember"
+                            type="button"
+                            style="background-color: #2563eb; color: white; padding: 8px 24px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer;"
+                            wire:loading.attr="disabled"
+                            wire:loading.class="opacity-50"
+                        >
+                            <span wire:loading.remove wire:target="registerNewMember">New Register</span>
+                            <span wire:loading wire:target="registerNewMember">Registering...</span>
+                        </button>
+                        <button 
+                            wire:click="closeRegisterModal" 
+                            type="button"
+                            style="background-color: #d1d5db; color: #374151; padding: 8px 24px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer;"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
     </div>
 </div>
 
@@ -1121,17 +1486,33 @@
         }
     }
     
+    // Handle click outside to close time slot picker
+    document.addEventListener('click', function(event) {
+        if (!@this.get('showTimeSlotPicker')) return;
+        
+        const timeSlotContainer = document.querySelector('input[wire\\:model="dateTime"]')?.closest('.relative');
+        if (timeSlotContainer && !timeSlotContainer.contains(event.target)) {
+            @this.set('showTimeSlotPicker', false);
+        }
+    });
+
     // Handle click outside to close NRIC dropdown
-    function handleClickOutside(event) {
+    function handleNricClickOutside(event) {
         const container = document.getElementById('nric-search-container');
         const dropdown = document.getElementById('nric-dropdown');
         
         // Only proceed if container exists
         if (!container) return;
         
-        // Check if click is outside the container
-        // Also check if dropdown is visible (exists in DOM)
-        if (!container.contains(event.target)) {
+        // Check if dropdown exists and is visible
+        const isDropdownVisible = dropdown && dropdown.offsetParent !== null;
+        
+        if (!isDropdownVisible) return; // Dropdown is not visible, no need to handle
+        
+        // Check if click is outside both the container and dropdown
+        const isClickInside = container.contains(event.target) || (dropdown && dropdown.contains(event.target));
+        
+        if (!isClickInside) {
             // Click is outside - close the dropdown
             if (typeof Livewire !== 'undefined') {
                 // Try to find the Livewire component and call method directly
@@ -1140,36 +1521,68 @@
                     const wireId = wireElement.getAttribute('wire:id');
                     if (wireId) {
                         const component = Livewire.find(wireId);
-                        if (component) {
+                        if (component && typeof component.call === 'function') {
                             component.call('closeNricDropdown');
                             return;
                         }
                     }
                 }
-                // Fallback: dispatch event
-                Livewire.dispatch('closeNricDropdown');
             }
         }
     }
     
     // Setup click outside handler after Livewire is ready
     document.addEventListener('livewire:init', function() {
-        document.addEventListener('click', handleClickOutside);
+        // Use capture phase to catch clicks early
+        document.addEventListener('click', handleNricClickOutside, true);
     });
     
     // Also setup immediately if Livewire is already loaded
     if (typeof Livewire !== 'undefined' && Livewire.all().length > 0) {
-        document.addEventListener('click', handleClickOutside);
+        document.addEventListener('click', handleNricClickOutside, true);
     } else {
         // Fallback: setup on DOM ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function() {
-                document.addEventListener('click', handleClickOutside);
+                document.addEventListener('click', handleNricClickOutside, true);
             });
         } else {
-            document.addEventListener('click', handleClickOutside);
+            document.addEventListener('click', handleNricClickOutside, true);
         }
     }
+    
+    // Also handle when modal opens/closes to ensure proper cleanup
+    document.addEventListener('livewire:init', function() {
+        Livewire.hook('morph.updated', ({ el, component }) => {
+            // Re-check if dropdown should be closed when component updates
+            const dropdown = document.getElementById('nric-dropdown');
+            if (dropdown && !dropdown.offsetParent) {
+                // Dropdown is hidden, ensure it's closed in Livewire
+                const container = document.getElementById('nric-search-container');
+                if (container) {
+                    const wireElement = container.closest('[wire\\:id]');
+                    if (wireElement) {
+                        const wireId = wireElement.getAttribute('wire:id');
+                        if (wireId) {
+                            const livewireComponent = Livewire.find(wireId);
+                            if (livewireComponent) {
+                                // Check if dropdown state is out of sync
+                                setTimeout(() => {
+                                    const stillVisible = document.getElementById('nric-dropdown');
+                                    if (!stillVisible || !stillVisible.offsetParent) {
+                                        // Dropdown is not visible, ensure it's closed
+                                        if (typeof livewireComponent.call === 'function') {
+                                            livewireComponent.call('closeNricDropdown');
+                                        }
+                                    }
+                                }, 100);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
     
     // Listen for member selected event
     document.addEventListener('livewire:init', () => {
@@ -1435,6 +1848,16 @@
             const clinicDropdown = document.getElementById('clinic-select-dropdown');
             if (clinicDropdown) {
                 clinicDropdown.value = '';
+            }
+        });
+
+        // Listen for dateTime updates to ensure the field is updated
+        Livewire.on('dateTime-updated', (data) => {
+            const dateTimeInput = document.getElementById('dateTimeInput');
+            if (dateTimeInput && data && data.dateTime) {
+                dateTimeInput.value = data.dateTime;
+                // Trigger input event to ensure Livewire detects the change
+                dateTimeInput.dispatchEvent(new Event('input', { bubbles: true }));
             }
         });
     });

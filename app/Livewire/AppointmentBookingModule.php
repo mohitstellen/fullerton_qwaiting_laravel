@@ -8,6 +8,8 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Config;
 use App\Models\Location;
 use App\Models\Category;
 use App\Models\Level;
@@ -20,6 +22,7 @@ use App\Models\Country;
 use App\Models\SiteDetail;
 use App\Models\AccountSetting;
 use App\Models\ActivityLog;
+use App\Models\SmtpDetails;
 use Carbon\Carbon;
 
 #[Layout('components.layouts.appointment-layout')]
@@ -86,6 +89,7 @@ class AppointmentBookingModule extends Component
     public $nationality = 'Singaporean';
     public $package = '';
     public $locationId = null;
+    public $originalBookingClinicId = null; // Store the original clinic ID when booking from a slot
     public $dateTime = '';
     public $additionalComments = '';
     public $paymentStatus = 'Pending';
@@ -117,6 +121,41 @@ class AppointmentBookingModule extends Component
     // Team ID
     public $teamId = null;
 
+    // Register Modal State
+    public $showRegisterModal = false;
+    public $bookingModalWasOpen = false; // Track if booking modal was open before opening register modal
+    
+    // Register Form Fields
+    public $registerPatientType = 'Self';
+    public $registerRelationship = '';
+    public $registerPrimaryId = '';
+    public $registerPrimaryIdSearch = '';
+    public $registerPrimaryIdResults = [];
+    public $showPrimaryIdDropdown = false;
+    public $registerIdentificationType = 'NRIC / FIN';
+    public $registerNricFin = '';
+    public $registerTitle = 'Mr';
+    public $registerFullName = '';
+    public $registerDateOfBirth = '';
+    public $registerGender = 'Male';
+    public $registerMobileCountryCode = '65';
+    public $registerMobileNumber = '';
+    public $registerEmailAddress = '';
+    public $registerNationality = 'Singaporean';
+    public $registerCompanyName = '';
+    public $registerCompanyId = null;
+    public $registerCompanySearch = '';
+    public $registerCompanyResults = [];
+    public $showCompanyDropdown = false;
+
+    // Available companies for registration
+    public $availableCompanies = [];
+
+    // Available time slots for selected location and date
+    public $availableTimeSlots = [];
+    public $selectedDateForSlots = '';
+    public $showTimeSlotPicker = false;
+
     public function mount()
     {
         // Get team ID from authenticated user
@@ -147,6 +186,9 @@ class AppointmentBookingModule extends Component
         // Load country codes
         $this->loadCountryCodes();
 
+        // Load available companies for registration
+        $this->loadAvailableCompanies();
+
         // Initialize clinics with time slots
         $this->loadClinics();
 
@@ -169,6 +211,14 @@ class AppointmentBookingModule extends Component
     {
         // Reload country codes when location changes
         $this->loadCountryCodes();
+        
+        // Clear time slots when location changes
+        $this->availableTimeSlots = [];
+        
+        // If date is already selected, fetch time slots for new location
+        if ($this->selectedDateForSlots && $value) {
+            $this->fetchTimeSlots();
+        }
     }
 
     public function loadAvailableLocations()
@@ -182,6 +232,20 @@ class AppointmentBookingModule extends Component
             ->where('status', 1)
             ->orderBy('location_name')
             ->get(['id', 'location_name'])
+            ->toArray();
+    }
+
+    public function loadAvailableCompanies()
+    {
+        if (!$this->teamId) {
+            $this->availableCompanies = [];
+            return;
+        }
+
+        $this->availableCompanies = Company::where('team_id', $this->teamId)
+            ->where('status', 1)
+            ->orderBy('company_name')
+            ->get(['id', 'company_name'])
             ->toArray();
     }
 
@@ -345,7 +409,7 @@ class AppointmentBookingModule extends Component
         $this->appointments = [];
     }
 
-    public function openBookingModal($appointmentId)
+    public function openBookingModal($appointmentId = null)
     {
         // Fetch the actual booking from database directly
         $booking = Booking::with(['location', 'categories', 'categories.company', 'company'])->find($appointmentId);
@@ -382,6 +446,10 @@ class AppointmentBookingModule extends Component
             $this->nationality = $booking->nationality ?? 'Singaporean';
             $this->dateTime = $this->selectedAppointment['time'];
             $this->locationId = $booking->location_id ?? null;
+            
+            // Initialize selectedDateForSlots from dateTime
+            $this->initializeDateFromDateTime();
+            $this->originalBookingClinicId = null; // Reset when editing existing appointment
             // Ensure boolean values for checkboxes - check both database value and JSON
             $this->isVip = (bool)($jsonData['is_vip'] ?? $booking->is_vip ?? false);
             $this->isPrivateCustomer = (bool)($jsonData['is_private_customer'] ?? $booking->is_private_customer ?? false);
@@ -590,6 +658,9 @@ class AppointmentBookingModule extends Component
         $this->showBookingModal = false;
         $this->selectedAppointment = null;
         $this->auditTrailLogs = [];
+        $this->showTimeSlotPicker = false;
+        $this->availableTimeSlots = [];
+        $this->selectedDateForSlots = '';
         $this->resetForm();
     }
 
@@ -636,10 +707,20 @@ class AppointmentBookingModule extends Component
         // Filter by selected appointment types if any are selected
         if (!empty($this->selectedAppointmentTypes)) {
             // Get category IDs for selected appointment types
-            $categoryIds = Category::where('team_id', $this->teamId)
-                ->whereIn('name', $this->selectedAppointmentTypes)
-                ->pluck('id')
-                ->toArray();
+            // Filter by selected clinics to ensure we get the correct categories for each location
+            $categoryQuery = Category::where('team_id', $this->teamId)
+                ->whereIn('name', $this->selectedAppointmentTypes);
+            
+            // Filter categories by selected clinics (categories must belong to at least one selected clinic)
+            if (!empty($this->selectedClinics)) {
+                $categoryQuery->where(function ($q) {
+                    foreach ($this->selectedClinics as $clinicId) {
+                        $q->orWhereJsonContains('category_locations', (string)$clinicId);
+                    }
+                });
+            }
+            
+            $categoryIds = $categoryQuery->pluck('id')->toArray();
             
             if (!empty($categoryIds)) {
                 $query->whereIn('category_id', $categoryIds);
@@ -1010,8 +1091,14 @@ class AppointmentBookingModule extends Component
         if ($clinic) {
             $this->selectedAppointment = null;
             $this->selectedAppointmentType = $appointmentType;
+            // Store both the locationId and the original clinic ID to ensure correct location is used
             $this->locationId = $clinic['id'];
+            $this->originalBookingClinicId = $clinic['id']; // Store original clinic ID
             $this->dateTime = $this->selectedDay . '/' . $this->selectedMonth . '/' . $this->selectedYear . ' ' . $timeSlot;
+            
+            // Initialize selectedDateForSlots from dateTime
+            $this->initializeDateFromDateTime();
+            
             $this->showBookingModal = true;
             $this->activeTab = 'booking-details';
 
@@ -1067,8 +1154,10 @@ class AppointmentBookingModule extends Component
                 // Only process appointment types that are turned ON (in selectedAppointmentTypes)
                 foreach ($this->selectedAppointmentTypes as $appointmentType) {
                     // Get the category ID for this appointment type
+                    // Filter by location to ensure we get the correct category for this location
                     $category = Category::where('team_id', $this->teamId)
                         ->where('name', $appointmentType)
+                        ->whereJsonContains('category_locations', (string)$clinicId)
                         ->first();
 
                     // Get account settings for location slots for this location
@@ -1235,6 +1324,33 @@ class AppointmentBookingModule extends Component
         ]);
 
         try {
+            // Ensure we use the correct locationId
+            // If originalBookingClinicId is set (booking from a specific clinic slot), prioritize it
+            // This ensures that when booking from a clinic's time slot, we always use that clinic's location
+            $finalLocationId = $this->locationId;
+            
+            if ($this->originalBookingClinicId) {
+                // If booking was initiated from a specific clinic slot, use that clinic's location
+                // This prevents the location from being incorrectly changed
+                if (in_array($this->originalBookingClinicId, $this->selectedClinics)) {
+                    $finalLocationId = $this->originalBookingClinicId;
+                } elseif (!empty($this->selectedClinics)) {
+                    // If original clinic is no longer selected, use first selected clinic as fallback
+                    $finalLocationId = $this->selectedClinics[0];
+                }
+            }
+            
+            // Validate that finalLocationId is valid and in selected clinics
+            if (empty($finalLocationId)) {
+                session()->flash('error', 'Location is required. Please select a location.');
+                return;
+            }
+            
+            if (!empty($this->selectedClinics) && !in_array($finalLocationId, $this->selectedClinics)) {
+                session()->flash('error', 'Selected location must be one of the selected clinics.');
+                return;
+            }
+
             // Parse date and time
             $dateTimeStr = $this->dateTime;
             // Expected format: "8/Dec/2025 9:00AM"
@@ -1264,8 +1380,10 @@ class AppointmentBookingModule extends Component
             }
 
             // Get the category ID for the selected appointment type
+            // Filter by location to ensure we get the correct category for this location
             $category = Category::where('team_id', $this->teamId)
                 ->where('name', $this->selectedAppointmentType)
+                ->whereJsonContains('category_locations', (string)$finalLocationId)
                 ->first();
 
             // Prepare additional data as JSON
@@ -1294,7 +1412,7 @@ class AppointmentBookingModule extends Component
                 'booking_time' => $startTime,
                 'start_time' => $startTime,
                 'end_time' => $endTime,
-                'location_id' => $this->locationId,
+                'location_id' => $finalLocationId, // Use the validated location ID
                 'category_id' => $category ? $category->id : null,
                 'company_id' => $this->companyId,
                 'additional_comments' => $this->additionalComments,
@@ -1310,7 +1428,7 @@ class AppointmentBookingModule extends Component
             $userAuth = Auth::user();
 
             // Get dynamic data from booking and related models
-            $location = Location::find($this->locationId);
+            $location = Location::find($finalLocationId);
             $locationName = $location ? $location->location_name : 'N/A';
             $categoryName = $category ? $category->name : ($this->selectedAppointmentType ?? 'N/A');
             $formattedDateTime = Carbon::parse($bookingDate . ' ' . $startTime)->format('d/m/Y h:iA');
@@ -1347,7 +1465,7 @@ class AppointmentBookingModule extends Component
                 $booking->id, // call_book_id (using booking ID)
                 null, // queues_storage_id
                 $logText,
-                $this->locationId,
+                $finalLocationId, // Use the validated location ID
                 ActivityLog::APPOINTMENT_BOOKING, // type
                 $remark, // remark with all dynamic details
                 $userAuth, // user details
@@ -1381,6 +1499,16 @@ class AppointmentBookingModule extends Component
             'gender' => 'required|string',
             'nationality' => 'required|string',
             'locationId' => 'required|integer|exists:locations,id',
+            'dateTime' => 'required|string',
+        ], [
+            'nricFinPassport.required' => 'NRIC/FIN/Passport is required',
+            'fullName.required' => 'Full name is required',
+            'mobileNumber.required' => 'Mobile number is required',
+            'emailAddress.required' => 'Email address is required',
+            'emailAddress.email' => 'Please enter a valid email address',
+            'dateOfBirth.required' => 'Date of birth is required',
+            'locationId.required' => 'Location is required',
+            'dateTime.required' => 'Date and time is required',
         ]);
 
         try {
@@ -1405,6 +1533,59 @@ class AppointmentBookingModule extends Component
                         }
                     }
 
+                    // Parse date and time
+                    $dateTimeStr = $this->dateTime;
+                    // Expected format: "8/Dec/2025 9:00AM" or "05/12/2025 9:00AM"
+                    $dateTimeParts = explode(' ', $dateTimeStr);
+                    $datePart = $dateTimeParts[0] ?? '';
+                    $timePart = $dateTimeParts[1] ?? '';
+
+                    // Parse the date - handle both "8/Dec/2025" and "05/12/2025" formats
+                    $bookingDate = null;
+                    $startTime = null;
+                    $endTime = null;
+
+                    if ($datePart && $timePart) {
+                        try {
+                            // Check if month is abbreviation (Dec, Jan, etc.) or numeric
+                            $dateParts = explode('/', $datePart);
+                            if (count($dateParts) === 3) {
+                                $day = $dateParts[0];
+                                $monthPart = $dateParts[1];
+                                $year = $dateParts[2];
+                                
+                                if (strlen($monthPart) <= 3 && !is_numeric($monthPart)) {
+                                    // Month is abbreviation (e.g., "Dec")
+                                    $bookingDate = Carbon::parse(str_replace('/', ' ', $datePart))->format('Y-m-d');
+                                } else {
+                                    // Month is numeric (e.g., "12")
+                                    $day = str_pad($day, 2, '0', STR_PAD_LEFT);
+                                    $month = str_pad($monthPart, 2, '0', STR_PAD_LEFT);
+                                    $bookingDate = $year . '-' . $month . '-' . $day;
+                                }
+                                
+                                // Parse the time
+                                $timeCarbon = Carbon::parse($timePart);
+                                $startTime = $timeCarbon->format('H:i:s');
+                                $endTime = $timeCarbon->copy()->addMinutes(30)->format('H:i:s');
+                            }
+                        } catch (\Exception $e) {
+                            // If parsing fails, keep existing values
+                            Log::error('Error parsing dateTime in updateAppointment', [
+                                'error' => $e->getMessage(),
+                                'dateTime' => $this->dateTime,
+                            ]);
+                            $bookingDate = $booking->booking_date;
+                            $startTime = $booking->start_time;
+                            $endTime = $booking->end_time;
+                        }
+                    } else {
+                        // If dateTime is not properly formatted, keep existing values
+                        $bookingDate = $booking->booking_date;
+                        $startTime = $booking->start_time;
+                        $endTime = $booking->end_time;
+                    }
+
                     // Prepare JSON data
                     $existingJson = json_decode($booking->json, true) ?? [];
                     $jsonData = array_merge($existingJson, [
@@ -1427,6 +1608,10 @@ class AppointmentBookingModule extends Component
                         'date_of_birth' => $dob,
                         'gender' => $this->gender,
                         'nationality' => $this->nationality,
+                        'booking_date' => $bookingDate,
+                        'booking_time' => $startTime . ' - ' . $endTime,
+                        'start_time' => $startTime,
+                        'end_time' => $endTime,
                         'location_id' => $this->locationId,
                         'company_id' => $this->companyId,
                         'additional_comments' => $this->additionalComments,
@@ -1452,6 +1637,11 @@ class AppointmentBookingModule extends Component
                     $oldStatus = $booking->getOriginal('status') ?? $booking->status;
                     $oldPhone = $booking->getOriginal('phone') ?? $booking->phone;
                     $oldEmail = $booking->getOriginal('email') ?? $booking->email;
+                    $oldBookingDate = $booking->getOriginal('booking_date') ?? $booking->booking_date;
+                    $oldStartTime = $booking->getOriginal('start_time') ?? $booking->start_time;
+                    $oldDateTime = $oldBookingDate && $oldStartTime 
+                        ? Carbon::parse($oldBookingDate . ' ' . $oldStartTime)->format('d/m/Y h:iA') 
+                        : 'N/A';
 
                     // Build comprehensive log text with all dynamic data
                     $logText = "Appointment Booking Updated - Patient: {$this->fullName} (NRIC: {$this->nricFinPassport}), " .
@@ -1489,6 +1679,9 @@ class AppointmentBookingModule extends Component
                     }
                     if ($oldEmail != $this->emailAddress) {
                         $changes[] = "Email: {$oldEmail} → {$this->emailAddress}";
+                    }
+                    if ($oldBookingDate != $bookingDate || $oldStartTime != $startTime) {
+                        $changes[] = "Date/Time: {$oldDateTime} → {$bookingDateTime}";
                     }
 
                     if (!empty($changes)) {
@@ -1534,6 +1727,7 @@ class AppointmentBookingModule extends Component
         $this->gender = 'Male';
         $this->nationality = 'Singaporean';
         $this->locationId = null;
+        $this->originalBookingClinicId = null; // Reset original booking clinic ID
         $this->companyName = '';
         $this->companyId = null;
         $this->memberSelectedFromSearch = false;
@@ -1542,6 +1736,764 @@ class AppointmentBookingModule extends Component
         $this->isVip = false;
         $this->isPrivateCustomer = false;
         $this->bookingStatus = 'Reserved';
+        $this->dateTime = '';
+        $this->showTimeSlotPicker = false;
+        $this->availableTimeSlots = [];
+        $this->selectedDateForSlots = '';
+    }
+
+    public function openRegisterModal()
+    {
+        // Remember if booking modal was open
+        $this->bookingModalWasOpen = $this->showBookingModal;
+        // Close the appointment booking modal first
+        $this->showBookingModal = false;
+        // Open the register modal
+        $this->showRegisterModal = true;
+        // Reset register form fields
+        $this->resetRegisterForm();
+    }
+
+    public function closeRegisterModal()
+    {
+        $this->showRegisterModal = false;
+        $this->resetRegisterForm();
+        
+        // Reopen booking modal if it was open before
+        if ($this->bookingModalWasOpen) {
+            $this->showBookingModal = true;
+            $this->activeTab = 'booking-details';
+            $this->bookingModalWasOpen = false;
+        }
+    }
+
+    public function resetRegisterForm()
+    {
+        $this->registerPatientType = 'Self';
+        $this->registerRelationship = '';
+        $this->registerPrimaryId = '';
+        $this->registerPrimaryIdSearch = '';
+        $this->registerPrimaryIdResults = [];
+        $this->showPrimaryIdDropdown = false;
+        $this->registerIdentificationType = 'NRIC / FIN';
+        $this->registerNricFin = '';
+        $this->registerTitle = 'Mr';
+        $this->registerFullName = '';
+        $this->registerDateOfBirth = '';
+        $this->registerGender = 'Male';
+        $this->registerMobileCountryCode = '65';
+        $this->registerMobileNumber = '';
+        $this->registerEmailAddress = '';
+        $this->registerNationality = 'Singaporean';
+        $this->registerCompanyName = '';
+        $this->registerCompanyId = null;
+        $this->registerCompanySearch = '';
+        $this->registerCompanyResults = [];
+        $this->showCompanyDropdown = false;
+    }
+
+    public function updatedRegisterPrimaryIdSearch()
+    {
+        if (empty($this->registerPrimaryIdSearch) || !$this->teamId) {
+            $this->registerPrimaryIdResults = [];
+            $this->showPrimaryIdDropdown = false;
+            return;
+        }
+
+        $searchTerm = trim($this->registerPrimaryIdSearch);
+
+        // Search members by NRIC, name, or mobile number
+        $this->registerPrimaryIdResults = Member::where('team_id', $this->teamId)
+            ->where(function ($query) use ($searchTerm) {
+                $query->where('nric_fin', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('full_name', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('mobile_number', 'like', '%' . $searchTerm . '%');
+            })
+            ->limit(10)
+            ->get()
+            ->map(function ($member) {
+                return [
+                    'id' => $member->id,
+                    'nric_fin' => $member->nric_fin,
+                    'full_name' => $member->full_name,
+                    'mobile_number' => $member->mobile_number,
+                    'display' => $member->nric_fin . ' - ' . $member->full_name . ' - ' . $member->mobile_number,
+                ];
+            })
+            ->toArray();
+
+        $this->showPrimaryIdDropdown = count($this->registerPrimaryIdResults) > 0;
+    }
+
+    public function selectRegisterPrimaryId($memberId)
+    {
+        $member = Member::find($memberId);
+        if ($member) {
+            $this->registerPrimaryId = $member->nric_fin;
+            $this->registerPrimaryIdSearch = $member->nric_fin . ' - ' . $member->full_name . ' - ' . $member->mobile_number;
+            $this->showPrimaryIdDropdown = false;
+            $this->registerPrimaryIdResults = [];
+        }
+    }
+
+    #[On('closePrimaryIdDropdown')]
+    public function closePrimaryIdDropdown()
+    {
+        $this->showPrimaryIdDropdown = false;
+    }
+
+    public function updatedRegisterCompanySearch()
+    {
+        if (empty($this->registerCompanySearch) || !$this->teamId) {
+            $this->registerCompanyResults = [];
+            $this->showCompanyDropdown = false;
+            // Clear company selection if search is cleared
+            if (empty($this->registerCompanySearch)) {
+                $this->registerCompanyId = null;
+                $this->registerCompanyName = '';
+            }
+            return;
+        }
+
+        $searchTerm = trim($this->registerCompanySearch);
+
+        // Check if the search term matches the currently selected company
+        if ($this->registerCompanyId) {
+            $selectedCompany = Company::find($this->registerCompanyId);
+            if ($selectedCompany && $selectedCompany->company_name === $searchTerm) {
+                // Search term matches selected company, don't show dropdown
+                $this->showCompanyDropdown = false;
+                $this->registerCompanyResults = [];
+                return;
+            }
+        }
+
+        // Search companies
+        $this->registerCompanyResults = Company::where('team_id', $this->teamId)
+            ->where('status', 1)
+            ->where('company_name', 'like', '%' . $searchTerm . '%')
+            ->orderBy('company_name')
+            ->limit(10)
+            ->get()
+            ->map(function ($company) {
+                return [
+                    'id' => $company->id,
+                    'company_name' => $company->company_name,
+                    'display' => $company->company_name,
+                ];
+            })
+            ->toArray();
+
+        $this->showCompanyDropdown = count($this->registerCompanyResults) > 0;
+        
+        // If search doesn't match selected company, clear selection
+        if ($this->registerCompanyId && $this->showCompanyDropdown) {
+            $selectedCompany = Company::find($this->registerCompanyId);
+            if (!$selectedCompany || $selectedCompany->company_name !== $searchTerm) {
+                // Check if any result matches the search exactly
+                $exactMatch = collect($this->registerCompanyResults)->firstWhere('company_name', $searchTerm);
+                if (!$exactMatch) {
+                    $this->registerCompanyId = null;
+                    $this->registerCompanyName = '';
+                }
+            }
+        }
+    }
+
+    public function selectRegisterCompany($companyId)
+    {
+        $company = Company::find($companyId);
+        if ($company) {
+            $this->registerCompanyId = $company->id;
+            $this->registerCompanyName = $company->company_name;
+            // Set the search field to the company name so it displays correctly
+            $this->registerCompanySearch = $company->company_name;
+            $this->showCompanyDropdown = false;
+            $this->registerCompanyResults = [];
+            // Force update to ensure the input field shows the selected company name
+            $this->dispatch('$refresh');
+        }
+    }
+
+    #[On('closeCompanyDropdown')]
+    public function closeCompanyDropdown()
+    {
+        $this->showCompanyDropdown = false;
+    }
+
+    public function registerNewMember()
+    {
+        // Build validation rules
+        $rules = [
+            'registerNricFin' => 'required|string|max:50',
+            'registerFullName' => 'required|string|max:255',
+            'registerMobileNumber' => 'required|string|max:20',
+            'registerEmailAddress' => 'required|email|max:255',
+            'registerDateOfBirth' => 'required|string',
+            'registerGender' => 'required|string',
+            'registerNationality' => 'required|string',
+        ];
+
+        $messages = [
+            'registerNricFin.required' => 'NRIC/FIN/Passport is required',
+            'registerFullName.required' => 'Full name is required',
+            'registerMobileNumber.required' => 'Mobile number is required',
+            'registerEmailAddress.required' => 'Email address is required',
+            'registerEmailAddress.email' => 'Please enter a valid email address',
+            'registerDateOfBirth.required' => 'Date of birth is required',
+            'registerNationality.required' => 'Nationality is required',
+        ];
+
+        // If patient type is Dependent, require relationship and primary ID
+        if ($this->registerPatientType === 'Dependent') {
+            $rules['registerRelationship'] = 'required|string';
+            $rules['registerPrimaryId'] = 'required|string';
+            $messages['registerRelationship.required'] = 'Relationship is required';
+            $messages['registerPrimaryId.required'] = 'Primary ID is required';
+        }
+
+        // Validate form data
+        $this->validate($rules, $messages);
+
+        // Validate company if provided (must be from dropdown)
+        // Only validate if user has entered text but hasn't selected from dropdown
+        if (!empty($this->registerCompanySearch)) {
+            // Check if the search text matches the selected company name
+            $isValidSelection = false;
+            if ($this->registerCompanyId) {
+                $selectedCompany = Company::find($this->registerCompanyId);
+                if ($selectedCompany && $selectedCompany->company_name === $this->registerCompanySearch) {
+                    $isValidSelection = true;
+                }
+            }
+            
+            if (!$isValidSelection) {
+                $this->addError('registerCompanyName', 'Free text not allowed in company. Please select from the drop down list.');
+                return;
+            }
+        }
+
+        try {
+            // Check if member already exists
+            $existingMember = Member::where('team_id', $this->teamId)
+                ->where('nric_fin', $this->registerNricFin)
+                ->first();
+
+            if ($existingMember) {
+                session()->flash('error', 'A member with this NRIC/FIN already exists.');
+                return;
+            }
+
+            // Parse date of birth
+            $dob = null;
+            if ($this->registerDateOfBirth) {
+                try {
+                    // Try Y-m-d format first (from date input)
+                    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->registerDateOfBirth)) {
+                        $dob = $this->registerDateOfBirth;
+                    } else {
+                        // Try d/m/Y format
+                        $dob = Carbon::createFromFormat('d/m/Y', $this->registerDateOfBirth)->format('Y-m-d');
+                    }
+                } catch (\Exception $e) {
+                    $this->addError('registerDateOfBirth', 'Invalid date format');
+                    return;
+                }
+            }
+
+            // Generate a random password for the patient
+            $password = $this->generateRandomPassword();
+
+            // Create new member
+            // Convert identification_type to match database enum values
+            // Database enum: ['NRIC', 'FIN', 'Passport']
+            // Form value 'NRIC / FIN' should be converted to 'NRIC'
+            $identificationType = 'NRIC'; // Default
+            if ($this->registerIdentificationType === 'Passport') {
+                $identificationType = 'Passport';
+            } elseif ($this->registerIdentificationType === 'NRIC / FIN') {
+                $identificationType = 'NRIC';
+            }
+            
+            $member = Member::create([
+                'team_id' => $this->teamId,
+                'identification_type' => $identificationType,
+                'nric_fin' => $this->registerNricFin,
+                'salutation' => $this->registerTitle,
+                'full_name' => $this->registerFullName,
+                'date_of_birth' => $dob,
+                'gender' => $this->registerGender,
+                'mobile_country_code' => $this->registerMobileCountryCode,
+                'mobile_number' => $this->registerMobileNumber,
+                'email' => $this->registerEmailAddress,
+                'nationality' => $this->registerNationality,
+                'company_id' => $this->registerCompanyId,
+                'relationship' => $this->registerPatientType === 'Dependent' ? $this->registerRelationship : null,
+                'primary_id' => $this->registerPatientType === 'Dependent' ? $this->registerPrimaryId : null,
+                'password' => $password,
+                'status' => 'active',
+                'is_active' => true,
+                'created_by' => Auth::id(),
+            ]);
+
+            // Send registration success email with password
+            $this->sendRegistrationEmail($member, $password);
+
+            // Close register modal
+            $this->showRegisterModal = false;
+            $this->resetRegisterForm();
+            $this->bookingModalWasOpen = false; // Reset flag
+
+            // Reopen the appointment booking modal
+            $this->showBookingModal = true;
+            $this->activeTab = 'booking-details';
+
+            // Show success message
+            session()->flash('success', 'Member registered successfully! An email with login credentials has been sent to the registered email address.');
+
+            // Dispatch event to notify that member was registered
+            $this->dispatch('member-registered', [
+                'memberId' => $member->id,
+                'memberName' => $member->full_name,
+            ]);
+
+            // Force Livewire to refresh the view
+            $this->dispatch('$refresh');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to register member: ' . $e->getMessage());
+            Log::error('Member registration error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+        }
+    }
+
+    /**
+     * Generate a random password
+     * 
+     * @return string
+     */
+    protected function generateRandomPassword($length = 8)
+    {
+        // Generate a secure random password with uppercase, lowercase, numbers, and special characters
+        $uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        $numbers = '0123456789';
+        $special = '!@#$%&*';
+        
+        // Ensure at least one character from each set
+        $password = '';
+        $password .= $uppercase[random_int(0, strlen($uppercase) - 1)];
+        $password .= $lowercase[random_int(0, strlen($lowercase) - 1)];
+        $password .= $numbers[random_int(0, strlen($numbers) - 1)];
+        $password .= $special[random_int(0, strlen($special) - 1)];
+        
+        // Fill the rest randomly
+        $allCharacters = $uppercase . $lowercase . $numbers . $special;
+        for ($i = 4; $i < $length; $i++) {
+            $password .= $allCharacters[random_int(0, strlen($allCharacters) - 1)];
+        }
+        
+        // Shuffle the password to randomize character positions
+        return str_shuffle($password);
+    }
+
+    /**
+     * Send registration success email with password
+     * 
+     * @param Member $member
+     * @param string $plainPassword
+     * @return void
+     */
+    protected function sendRegistrationEmail($member, $plainPassword)
+    {
+        try {
+            // Get SMTP details for the team
+            $smtpDetails = SmtpDetails::where('team_id', $this->teamId)->first();
+            
+            if (!$smtpDetails || empty($smtpDetails->hostname)) {
+                Log::warning('SMTP details not configured for team: ' . $this->teamId);
+                return;
+            }
+
+            // Configure mail settings
+            Config::set('mail.mailers.smtp.transport', 'smtp');
+            Config::set('mail.mailers.smtp.host', trim($smtpDetails->hostname));
+            Config::set('mail.mailers.smtp.port', trim($smtpDetails->port));
+            Config::set('mail.mailers.smtp.encryption', trim($smtpDetails->encryption ?? 'ssl'));
+            Config::set('mail.mailers.smtp.username', trim($smtpDetails->username));
+            Config::set('mail.mailers.smtp.password', trim($smtpDetails->password));
+            Config::set('mail.from.address', trim($smtpDetails->from_email));
+            Config::set('mail.from.name', trim($smtpDetails->from_name));
+
+            // Get company name if exists
+            $companyName = null;
+            if (!empty($member->company_id)) {
+                $company = Company::find($member->company_id);
+                $companyName = $company ? $company->company_name : null;
+            }
+
+            // Prepare email data
+            $emailData = [
+                'salutation' => $member->salutation ?? 'Mr',
+                'full_name' => $member->full_name,
+                'email' => $member->email,
+                'mobile_country_code' => $member->mobile_country_code,
+                'mobile_number' => $member->mobile_number,
+                'password' => $plainPassword,
+                'company_name' => $companyName,
+            ];
+
+            // Render email template
+            $templateContent = view('emails.patient-registration-success', ['data' => $emailData])->render();
+            $subject = 'Registration Successful - Your Account Credentials';
+
+            // Send email
+            Mail::html($templateContent, function ($message) use ($member, $subject, $smtpDetails) {
+                $message->from($smtpDetails->from_email, $smtpDetails->from_name);
+                $message->to($member->email)->subject($subject);
+            });
+
+            Log::info('Registration email sent successfully to: ' . $member->email);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to send registration email: ' . $e->getMessage());
+            // Don't throw exception - registration should still succeed even if email fails
+        }
+    }
+
+    public function updatedSelectedDateForSlots($value)
+    {
+        // Auto-update dateTime field when date is selected
+        if ($value) {
+            try {
+                $date = Carbon::parse($value);
+                $day = $date->format('d');
+                $month = $date->format('M'); // Gets "Dec", "Jan", etc.
+                $year = $date->format('Y');
+                
+                // If dateTime already has a time, keep it; otherwise just set the date
+                if ($this->dateTime && strpos($this->dateTime, ' ') !== false) {
+                    // Extract existing time from dateTime
+                    $parts = explode(' ', $this->dateTime);
+                    $existingTime = count($parts) > 1 ? $parts[1] : '';
+                    if ($existingTime) {
+                        $this->dateTime = $day . '/' . $month . '/' . $year . ' ' . $existingTime;
+                    } else {
+                        $this->dateTime = $day . '/' . $month . '/' . $year;
+                    }
+                } else {
+                    // Just update the date part
+                    $this->dateTime = $day . '/' . $month . '/' . $year;
+                }
+                
+                // Force UI refresh to ensure the field updates
+                $this->dispatch('$refresh');
+                
+                // Dispatch a custom event to ensure the field updates in the UI
+                $this->dispatch('dateTime-updated', dateTime: $this->dateTime);
+                
+                Log::info('Date selected and dateTime updated', [
+                    'dateTime' => $this->dateTime,
+                    'selectedDateForSlots' => $value,
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Error updating dateTime from selectedDateForSlots', [
+                    'error' => $e->getMessage(),
+                    'value' => $value,
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
+        }
+        
+        // When date is selected, fetch time slots
+        if ($value && $this->locationId) {
+            $this->fetchTimeSlots();
+        }
+    }
+
+    public function updatedDateTime($value)
+    {
+        // Parse the date from the dateTime string
+        if ($value) {
+            try {
+                // Try to parse formats like "05/12/2025 9:30AM" or "12/12/2025 9:30AM"
+                $parts = explode(' ', $value);
+                if (count($parts) >= 1) {
+                    $datePart = $parts[0];
+                    // Convert date format from d/m/Y to Y-m-d
+                    $dateParts = explode('/', $datePart);
+                    if (count($dateParts) === 3) {
+                        // Handle both d/m/Y and dd/mm/yyyy formats
+                        $day = str_pad($dateParts[0], 2, '0', STR_PAD_LEFT);
+                        $month = str_pad($dateParts[1], 2, '0', STR_PAD_LEFT);
+                        $year = $dateParts[2];
+                        $this->selectedDateForSlots = $year . '-' . $month . '-' . $day;
+                        // Fetch time slots if location is selected
+                        if ($this->locationId) {
+                            $this->fetchTimeSlots();
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                // Ignore parsing errors
+            }
+        }
+    }
+
+    public function fetchTimeSlots()
+    {
+        $this->availableTimeSlots = [];
+        
+        if (!$this->locationId || !$this->selectedDateForSlots) {
+            return;
+        }
+
+        try {
+            $carbonDate = Carbon::parse($this->selectedDateForSlots);
+            $dayOfWeek = $carbonDate->format('l'); // e.g., 'Monday'
+            
+            // Get account settings for location
+            $accountSetting = AccountSetting::where('team_id', $this->teamId)
+                ->where('location_id', $this->locationId)
+                ->where('slot_type', AccountSetting::LOCATION_SLOT)
+                ->first();
+
+            if (!$accountSetting) {
+                return;
+            }
+
+            // Get business hours
+            $businessHours = json_decode($accountSetting->business_hours, true);
+            if (!$businessHours) {
+                return;
+            }
+
+            // Find business hours for the selected day
+            $dayBusinessHours = null;
+            foreach ($businessHours as $dayHours) {
+                if (strtolower($dayHours['day']) === strtolower($dayOfWeek)) {
+                    $dayBusinessHours = $dayHours;
+                    break;
+                }
+            }
+
+            if (!$dayBusinessHours || ($dayBusinessHours['is_closed'] !== 0 && $dayBusinessHours['is_closed'] !== 'open' && $dayBusinessHours['is_closed'] !== '0')) {
+                return;
+            }
+
+            // Get slot period
+            $slotPeriod = $accountSetting->slot_period ?? 30;
+
+            // Generate slots for main business hours
+            $mainSlots = AccountSetting::generateSlots(
+                $dayBusinessHours['start_time'],
+                $dayBusinessHours['end_time'],
+                $slotPeriod
+            );
+
+            $availableSlots = collect($mainSlots);
+
+            // Add interval slots if any
+            if (!empty($dayBusinessHours['day_interval'])) {
+                foreach ($dayBusinessHours['day_interval'] as $interval) {
+                    $intervalSlots = AccountSetting::generateSlots(
+                        $interval['start_time'],
+                        $interval['end_time'],
+                        $slotPeriod
+                    );
+                    $availableSlots = $availableSlots->concat($intervalSlots);
+                }
+            }
+
+            // Get booked slots for this date and location
+            $bookedSlots = Booking::where('team_id', $this->teamId)
+                ->where('location_id', $this->locationId)
+                ->whereDate('booking_date', $carbonDate->format('Y-m-d'))
+                ->whereIn('status', [
+                    Booking::STATUS_RESERVED,
+                    Booking::STATUS_CONFIRMED,
+                    Booking::STATUS_PENDING,
+                    Booking::STATUS_SMSCALLED,
+                    Booking::STATUS_ARRIVED
+                ])
+                ->get();
+
+            // Get req_per_slot to check capacity
+            $reqPerSlot = $accountSetting->req_per_slot ?? 1;
+
+            // Filter out fully booked slots
+            $availableSlots = $availableSlots->filter(function ($slotRange) use ($bookedSlots, $reqPerSlot) {
+                // Extract start time from slot range (e.g., "09:00 AM-09:30 AM" -> "09:00 AM")
+                $startTimeStr = trim(explode('-', $slotRange)[0]);
+                
+                // Count bookings for this time slot
+                $bookingCount = $bookedSlots->filter(function ($booking) use ($startTimeStr) {
+                    $bookingTime = Carbon::parse($booking->start_time)->format('g:i A');
+                    return $bookingTime === Carbon::parse($startTimeStr)->format('g:i A');
+                })->count();
+
+                return $bookingCount < $reqPerSlot;
+            });
+
+            // Filter out past slots if date is today
+            $currentTime = Carbon::now();
+            if ($carbonDate->isToday()) {
+                $availableSlots = $availableSlots->filter(function ($slotRange) use ($currentTime, $carbonDate) {
+                    $startTimeStr = trim(explode('-', $slotRange)[0]);
+                    try {
+                        $slotDateTime = Carbon::createFromFormat('Y-m-d g:i A', $carbonDate->format('Y-m-d') . ' ' . $startTimeStr);
+                        return $slotDateTime->greaterThanOrEqualTo($currentTime);
+                    } catch (\Exception $e) {
+                        return false;
+                    }
+                });
+            }
+
+            // Format slots for display (extract start time and format)
+            $this->availableTimeSlots = $availableSlots->map(function ($slotRange) {
+                $startTimeStr = trim(explode('-', $slotRange)[0]);
+                try {
+                    $time = Carbon::parse($startTimeStr);
+                    return $time->format('g:iA'); // Format: "9:30AM"
+                } catch (\Exception $e) {
+                    return null;
+                }
+            })->filter()->values()->toArray();
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching time slots', [
+                'error' => $e->getMessage(),
+                'location_id' => $this->locationId,
+                'date' => $this->selectedDateForSlots,
+            ]);
+        }
+    }
+
+    public function openTimeSlotPicker()
+    {
+        $this->showTimeSlotPicker = true;
+        
+        // If dateTime already has a value, initialize selectedDateForSlots
+        if ($this->dateTime && !$this->selectedDateForSlots) {
+            $this->initializeDateFromDateTime();
+        }
+        
+        // If we have a date and location, fetch time slots
+        if ($this->selectedDateForSlots && $this->locationId) {
+            $this->fetchTimeSlots();
+        }
+    }
+
+    public function selectTimeSlot($timeSlot)
+    {
+        // Update dateTime with selected time slot
+        if ($this->selectedDateForSlots) {
+            try {
+                $date = Carbon::parse($this->selectedDateForSlots);
+                // Format: "11/Dec/2025 7:30AM" to match the expected format
+                $day = $date->format('d');
+                $month = $date->format('M'); // Gets "Dec", "Jan", etc.
+                $year = $date->format('Y');
+                
+                // Auto-populate dateTime field with selected date and time
+                $this->dateTime = $day . '/' . $month . '/' . $year . ' ' . $timeSlot;
+                
+                // Close the picker
+                $this->showTimeSlotPicker = false;
+                
+                // Force Livewire to refresh to update the UI immediately
+                $this->dispatch('$refresh');
+                
+                // Dispatch a custom event to ensure the field updates in the UI
+                $this->dispatch('dateTime-updated', dateTime: $this->dateTime);
+                
+                // Log for debugging
+                Log::info('Time slot selected and dateTime updated', [
+                    'dateTime' => $this->dateTime,
+                    'selectedDateForSlots' => $this->selectedDateForSlots,
+                    'timeSlot' => $timeSlot,
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Error selecting time slot', [
+                    'error' => $e->getMessage(),
+                    'timeSlot' => $timeSlot,
+                    'selectedDateForSlots' => $this->selectedDateForSlots,
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
+        } else {
+            // If no date selected, use today's date as fallback
+            try {
+                $today = Carbon::today();
+                $day = $today->format('d');
+                $month = $today->format('M');
+                $year = $today->format('Y');
+                $this->dateTime = $day . '/' . $month . '/' . $year . ' ' . $timeSlot;
+                $this->selectedDateForSlots = $today->format('Y-m-d');
+                $this->showTimeSlotPicker = false;
+                
+                // Force refresh
+                $this->dispatch('$refresh');
+                
+                Log::info('Time slot selected with fallback date', [
+                    'dateTime' => $this->dateTime,
+                    'selectedDateForSlots' => $this->selectedDateForSlots,
+                ]);
+            } catch (\Exception $e) {
+                Log::warning('No date selected when selecting time slot', [
+                    'timeSlot' => $timeSlot,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+    }
+
+    public function initializeDateFromDateTime()
+    {
+        // Parse the date from the dateTime string if it exists
+        if ($this->dateTime) {
+            try {
+                $parts = explode(' ', $this->dateTime);
+                if (count($parts) >= 1) {
+                    $datePart = $parts[0];
+                    // Convert date format from d/M/Y (e.g., "11/Dec/2025") or d/m/Y to Y-m-d
+                    $dateParts = explode('/', $datePart);
+                    if (count($dateParts) === 3) {
+                        $day = str_pad($dateParts[0], 2, '0', STR_PAD_LEFT);
+                        $monthPart = $dateParts[1];
+                        $year = $dateParts[2];
+                        
+                        // Check if month is abbreviation (Dec, Jan, etc.) or numeric
+                        if (strlen($monthPart) <= 3 && !is_numeric($monthPart)) {
+                            // Month is abbreviation, parse it
+                            try {
+                                $date = Carbon::createFromFormat('d M Y', $day . ' ' . $monthPart . ' ' . $year);
+                                $this->selectedDateForSlots = $date->format('Y-m-d');
+                            } catch (\Exception $e) {
+                                // Try alternative parsing
+                                $date = Carbon::parse($monthPart . ' ' . $day . ', ' . $year);
+                                $this->selectedDateForSlots = $date->format('Y-m-d');
+                            }
+                        } else {
+                            // Month is numeric
+                            $month = str_pad($monthPart, 2, '0', STR_PAD_LEFT);
+                            $this->selectedDateForSlots = $year . '-' . $month . '-' . $day;
+                        }
+                        
+                        // Fetch time slots if location is selected
+                        if ($this->locationId) {
+                            $this->fetchTimeSlots();
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error('Error initializing date from dateTime', [
+                    'error' => $e->getMessage(),
+                    'dateTime' => $this->dateTime,
+                ]);
+            }
+        }
     }
 
     public function render()

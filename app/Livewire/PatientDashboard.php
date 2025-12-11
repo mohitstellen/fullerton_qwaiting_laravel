@@ -37,6 +37,11 @@ class PatientDashboard extends Component
             return redirect()->route('tenant.patient.login')->with('error', 'Session expired. Please login again.');
         }
 
+        // Check if password is temporary - redirect to change password page
+        if ($this->member->is_temporary_password) {
+            return redirect()->route('tenant.patient.change-password');
+        }
+
         // Get logo
         $this->logo = SiteDetail::viewImage(SiteDetail::FIELD_BUSINESS_LOGO, $this->teamId ?? null, $this->member->location_id ?? null);
     }

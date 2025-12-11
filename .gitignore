@@ -48,3 +48,4 @@ Homestead.yaml
 .env
 
 assets/
+public/.htaccess
