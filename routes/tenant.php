@@ -243,6 +243,9 @@ Route::middleware([
             Route::get('/forgot-password', \App\Livewire\PatientForgotPassword::class)->name('patient.forgot-password');
             Route::get('/change-password', \App\Livewire\PatientChangePassword::class)->name('patient.change-password');
             Route::get('/dashboard', \App\Livewire\PatientDashboard::class)->name('patient.dashboard');
+            Route::get('/book-appointment', \App\Livewire\PatientBookAppointment::class)->name('patient.book-appointment');
+            Route::get('/appointments', \App\Livewire\PatientMyAppointments::class)->name('patient.appointments');
+            Route::get('/dependents', \App\Livewire\PatientDependents::class)->name('patient.dependents');
             Route::post('/logout', function () {
                 Session::forget(['patient_member_id', 'patient_member', 'patient_customer_type']);
                 Session::regenerate();

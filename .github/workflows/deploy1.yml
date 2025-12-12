@@ -65,10 +65,6 @@ jobs:
 
           git pull origin main
 
-          # Run migrations
-          php artisan migrate --path=database/migrations/2025_12_11_132813_add_relationship_and_primary_id_to_members_table.php --force
-          php artisan migrate --path=database/migrations/2025_12_11_164921_add_is_temporary_password_to_members_table.php --force
-
           # Clear all caches
           php artisan o:clear
           

@@ -1399,7 +1399,7 @@ class AppointmentBookingModule extends Component
             // Create the booking
             $booking = Booking::create([
                 'team_id' => $this->teamId,
-                'refID' => $this->nricFinPassport,
+                'refID' => time(),
                 'name' => $this->fullName,
                 'title' => $this->title,
                 'identification_type' => $this->identificationType,
