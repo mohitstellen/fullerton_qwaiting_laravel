@@ -208,7 +208,38 @@ Route::middleware([
         }
     });
 
+    Route::get('/debug-license', function () {
+        $service = app(\App\Services\LicenseService::class);
+        // Removed protected call
+
+        $utc = \Carbon\Carbon::now('UTC');
+        $serverTime = now();
+        $expiresRaw = $service->expiresAt();
+
+        // Manual parse check
+        $parsed = \Carbon\Carbon::parse($expiresRaw);
+
+        return [
+            'isValid' => $service->isValid(),
+            'server_timezone' => config('app.timezone'), // Config timezone
+            'default_timezone' => date_default_timezone_get(), // PHP process timezone
+            'server_now_raw' => $serverTime->format('Y-m-d H:i:s P'),
+            'utc_now' => $utc->format('Y-m-d H:i:s P'),
+            'license_expires_at_raw' => $expiresRaw,
+            'parsed_expires_at' => $parsed->format('Y-m-d H:i:s P'),
+            'is_past' => $parsed->isPast(),
+            'diff_in_seconds' => $parsed->diffInSeconds(now(), false), // Positive if passed? No, diffInSeconds(target)
+            // if we do now()->diffInSeconds($parsed, false), positive means future.
+            'seconds_remaining' => now()->diffInSeconds($parsed, false)
+        ];
+    });
+
     Route::get('/autologin/{id}', [AuthController::class, 'webAutoLogin'])->name('autologin');
+
+    // Public license upload - accessible without authentication (No Livewire temp files)
+    Route::get('/upload-license', [\App\Http\Controllers\LicenseUploadController::class, 'show'])->name('upload-license');
+    Route::post('/upload-license', [\App\Http\Controllers\LicenseUploadController::class, 'upload'])->name('upload-license.store');
+
     Route::get('/403-page', function () {
 
         return view('errors.403');
@@ -279,7 +310,7 @@ Route::middleware([
         Route::get('/locations/{location}/edit', EditLocation::class)->name('edit-location');
     });
 
-    Route::middleware([TenantAuthMiddleware::class, 'location.exists'])->name('tenant.')->group(function () {
+    Route::middleware([TenantAuthMiddleware::class, 'check.license', 'location.exists'])->name('tenant.')->group(function () {
         Route::get('dashboard', Dashboard::class)->name('dashboard');
         Route::get('change-password', ChangePassword::class)->name('change-password');
 
@@ -588,13 +619,13 @@ Route::get('/tts', function () {
     $lang = request('lang', 'ar-SA'); // Default Arabic (Saudi Arabia)
 
     $response = Http::get('https://texttospeech.responsivevoice.org/v1/text:synthesize', [
-        'text'   => $text,
-        'lang'   => $lang,
+        'text' => $text,
+        'lang' => $lang,
         'engine' => 'g1',
-        'pitch'  => 0.5,
-        'rate'   => 0.8,
+        'pitch' => 0.5,
+        'rate' => 0.8,
         'volume' => 1,
-        'key'    => 'Gc5DXRcK', // Your API Key
+        'key' => 'Gc5DXRcK', // Your API Key
         'gender' => 'female',
     ]);
 

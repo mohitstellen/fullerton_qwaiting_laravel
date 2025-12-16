@@ -36,6 +36,12 @@ class AuthenticatedSessionController extends Controller
 
     public function store(LoginRequest $request)
     {
+        // Check license first
+        $licenseService = app(\App\Services\LicenseService::class);
+        if (!$licenseService->isValid()) {
+            return redirect()->back()->withErrors(['email' => 'License has expired. Please contact the vendor.']);
+        }
+
         $credentials = $request->only('email', 'password');
 
         // Attempt to log in
@@ -67,13 +73,13 @@ class AuthenticatedSessionController extends Controller
         ]));
 
 
-    // Logout from central system to prevent dual login
-    Auth::guard('web')->logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
+        // Logout from central system to prevent dual login
+        Auth::guard('web')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-       // Redirect to tenant domain with authentication token
-       return redirect()->away("http://{$tenantDomain}:8000/authenticate?token={$token}");
+        // Redirect to tenant domain with authentication token
+        return redirect()->away("http://{$tenantDomain}:8000/authenticate?token={$token}");
     }
 
     /**
@@ -86,6 +92,10 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
+
+        if ($request->has('expired') && $request->get('expired') == 1) {
+            return redirect('/login')->withErrors(['email' => 'Your license has expired. Please contact the vendor to renew your license.']);
+        }
 
         return redirect('/');
     }
