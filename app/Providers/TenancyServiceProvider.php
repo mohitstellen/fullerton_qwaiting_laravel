@@ -72,11 +72,13 @@ class TenancyServiceProvider extends ServiceProvider
             Events\InitializingTenancy::class => [],
             Events\TenancyInitialized::class => [
                 Listeners\BootstrapTenancy::class,
+                \App\Listeners\ClearLicenseCache::class,
             ],
 
             Events\EndingTenancy::class => [],
             Events\TenancyEnded::class => [
                 Listeners\RevertToCentralContext::class,
+                \App\Listeners\ClearLicenseCache::class,
             ],
 
             Events\BootstrappingTenancy::class => [],

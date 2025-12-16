@@ -15,11 +15,51 @@ class CheckLicense
      */
     public function handle(Request $request, Closure $next): Response
     {
-        \Illuminate\Support\Facades\Log::info('CheckLicense middleware executing for path: ' . $request->path());
+        // Skip license check for login and authentication routes
+        if ($request->routeIs('tenant.login', 'tenant.loginstore', 'tenant.authenticate', 'upload-license', 'upload-license.store')) {
+            return $next($request);
+        }
+
+        $currentTenantId = tenant('id');
+        
+        // If tenant context is not available yet, try to get it from authenticated user
+        if (!$currentTenantId && auth()->check() && auth()->user()->team_id) {
+            $currentTenantId = auth()->user()->team_id;
+        }
+
+        \Illuminate\Support\Facades\Log::info('CheckLicense middleware executing for path: ' . $request->path(), [
+            'tenant_id' => $currentTenantId,
+            'user_id' => auth()->check() ? auth()->id() : null
+        ]);
+
         $licenseService = app(\App\Services\LicenseService::class);
+        
+        // Clear cache if tenant context changed
+        if ($currentTenantId) {
+            $cachedTenantId = $licenseService->tenantId();
+            if ($cachedTenantId && $cachedTenantId !== $currentTenantId) {
+                $licenseService->clearCache();
+                \Illuminate\Support\Facades\Log::info('License cache cleared due to tenant change', [
+                    'old_tenant' => $cachedTenantId,
+                    'new_tenant' => $currentTenantId
+                ]);
+            }
+        }
+
+        // If we still don't have tenant context and user is authenticated, 
+        // allow the request to proceed (tenant context will be ready on next request)
+        if (!$currentTenantId && auth()->check()) {
+            \Illuminate\Support\Facades\Log::warning('CheckLicense: Tenant context not available yet, allowing request to proceed');
+            return $next($request);
+        }
 
         if (!$licenseService->isValid()) {
-            \Illuminate\Support\Facades\Log::info('License check failed in middleware. Auth check: ' . (auth()->check() ? 'true' : 'false'));
+            \Illuminate\Support\Facades\Log::warning('License check failed in middleware', [
+                'path' => $request->path(),
+                'tenant_id' => $currentTenantId,
+                'auth_check' => auth()->check(),
+                'license_tenant_id' => $licenseService->tenantId()
+            ]);
 
             if (auth()->check()) {
                 auth()->logout();
