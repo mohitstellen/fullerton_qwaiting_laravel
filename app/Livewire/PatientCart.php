@@ -12,7 +12,14 @@ use App\Models\Booking;
 use App\Models\Category;
 use App\Models\Location;
 use App\Models\Order;
+use App\Models\PaymentSetting;
+use App\Models\StripeResponse;
 use Carbon\Carbon;
+use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Config;
+use Stripe\Stripe;
+use Stripe\PaymentIntent;
+use Stripe\Exception\InvalidRequestException;
 
 #[Layout('components.layouts.patient-layout')]
 #[Title('Shopping Cart')]
@@ -21,6 +28,18 @@ class PatientCart extends Component
     public $cartItems = [];
     public $member;
     public $teamId;
+    
+    // Payment-related properties
+    public $paymentStep = 0;
+    public $paymentSetting;
+    public $paymentSettingKey;
+    public $paymentSettingSecret;
+    public $paymentMethodId;
+    public $email;
+    public $stripeResponeID;
+    public $isFree = 0;
+    public $successMessage;
+    public $errorMessage;
     
     public function mount()
     {
@@ -47,12 +66,65 @@ class PatientCart extends Component
         
         // Load cart items from session
         $this->loadCartItems();
+        
+        // Initialize payment settings
+        $this->initializePaymentSettings();
+        
+        // Check payment requirement
+        $this->checkPaymentRequirement();
+    }
+    
+    public function initializePaymentSettings()
+    {
+        // Reset payment settings if cart is empty
+        if (empty($this->cartItems)) {
+            $this->paymentSetting = null;
+            $this->paymentSettingKey = null;
+            $this->paymentSettingSecret = null;
+            $this->email = $this->member->email ?? '';
+            $this->stripeResponeID = '';
+            return;
+        }
+        
+        // Get location_id from first cart item
+        $locationId = $this->cartItems[0]['location_id'] ?? null;
+        
+        if ($locationId) {
+            $this->paymentSetting = PaymentSetting::where('team_id', $this->teamId)
+                ->where('location_id', $locationId)
+                ->first();
+            
+            if ($this->paymentSetting) {
+                if (!empty($this->paymentSetting->api_key) && !empty($this->paymentSetting->api_secret)) {
+                    $this->paymentSettingKey = $this->paymentSetting->api_key;
+                    $this->paymentSettingSecret = $this->paymentSetting->api_secret;
+                    
+                    Config::set([
+                        'services.stripe.key' => $this->paymentSetting->api_key,
+                        'services.stripe.secret' => $this->paymentSetting->api_secret,
+                    ]);
+                }
+            }
+        }
+        
+        // Set email from member
+        $this->email = $this->member->email ?? '';
+        $this->stripeResponeID = '';
     }
     
     public function loadCartItems()
     {
         $cart = Session::get('patient_cart', []);
         $this->cartItems = $cart;
+        
+        // Re-initialize payment settings when cart changes
+        if (!empty($this->cartItems)) {
+            $this->initializePaymentSettings();
+            $this->checkPaymentRequirement();
+        } else {
+            $this->isFree = 0;
+            $this->paymentStep = 0;
+        }
     }
     
     public function removeFromCart($itemId)
@@ -67,6 +139,191 @@ class PatientCart extends Component
         $this->loadCartItems();
         
         session()->flash('cart_message', 'Item removed from cart successfully.');
+    }
+    
+    public function showPaymentPage()
+    {
+        if (empty($this->cartItems)) {
+            session()->flash('cart_error', 'Your cart is empty.');
+            return;
+        }
+        
+        // Ensure payment settings are loaded
+        if (empty($this->paymentSetting)) {
+            $this->initializePaymentSettings();
+        }
+        
+        // Re-check payment requirement to ensure settings are up to date
+        // Preserve paymentStep during check since we're about to set it
+        $this->checkPaymentRequirement(true);
+        
+        // If this method is called, it means the button condition passed, so payment should be required
+        // Just verify the essential conditions are still met
+        if ($this->paymentSetting && 
+            $this->paymentSetting->enable_payment == 1 && 
+            $this->grandTotal > 0 &&
+            !empty($this->paymentSetting->api_key) && 
+            !empty($this->paymentSetting->api_secret) &&
+            $this->paymentSetting->stripe_enable == 1) {
+            
+            // Show payment step - this is what we want!
+            $this->paymentStep = 1;
+            $this->isFree = 1;
+            
+            // Set Stripe config to ensure it's current
+            Config::set([
+                'services.stripe.key' => $this->paymentSetting->api_key,
+                'services.stripe.secret' => $this->paymentSetting->api_secret,
+            ]);
+            
+            // Dispatch event to initialize Stripe card element
+            $this->dispatch('cardElement');
+        } else {
+            // Settings changed or invalid - this shouldn't happen if button condition was correct
+            // But handle it gracefully
+            Log::warning('Payment conditions not met in showPaymentPage', [
+                'has_payment_setting' => !empty($this->paymentSetting),
+                'enable_payment' => $this->paymentSetting->enable_payment ?? null,
+                'grand_total' => $this->grandTotal,
+                'has_api_key' => !empty($this->paymentSetting->api_key ?? null),
+                'has_api_secret' => !empty($this->paymentSetting->api_secret ?? null),
+                'stripe_enable' => $this->paymentSetting->stripe_enable ?? null,
+            ]);
+            
+            $this->paymentStep = 0;
+            if ($this->grandTotal <= 0) {
+                // Free order, proceed to checkout
+                $this->checkout();
+            } else {
+                session()->flash('cart_error', 'Payment gateway is not properly configured. Please contact support.');
+            }
+        }
+    }
+    
+    public function checkPaymentRequirement($preservePaymentStep = false)
+    {
+        // Reset to default
+        $this->isFree = 0;
+        if (!$preservePaymentStep) {
+            $this->paymentStep = 0;
+        }
+        
+        // Check if paymentSetting exists
+        if (empty($this->paymentSetting)) {
+            return;
+        }
+        
+        // Check if both API key and secret are set and Stripe is enabled
+        if (empty($this->paymentSetting->api_key) || empty($this->paymentSetting->api_secret) || ($this->paymentSetting->stripe_enable != 1)) {
+            return;
+        }
+        
+        // Set Stripe config
+        Config::set([
+            'services.stripe.key' => $this->paymentSetting->api_key,
+            'services.stripe.secret' => $this->paymentSetting->api_secret,
+        ]);
+        
+        // Check if payment is enabled and grand total > 0
+        if ($this->paymentSetting->enable_payment == 1 && $this->grandTotal > 0) {
+            // Check payment_applicable_to setting
+            $paymentApplicableTo = $this->paymentSetting->payment_applicable_to ?? 'walkin';
+            if ($paymentApplicableTo == 'patient' || $paymentApplicableTo == 'both') {
+                $this->isFree = 1; // Payment required
+            }
+        }
+    }
+    
+    #[On('stripe-payment-method')]
+    public function setPaymentMethod(string $paymentMethodId)
+    {
+        $this->paymentMethodId = $paymentMethodId;
+        $this->handleCheckout();
+    }
+    
+    public function handleCheckout()
+    {
+        try {
+            // Ensure payment settings are loaded
+            if (empty($this->paymentSetting)) {
+                $this->initializePaymentSettings();
+            }
+            
+            // Use the secret key directly from payment setting to ensure it matches the publishable key
+            if (empty($this->paymentSettingSecret)) {
+                throw new \Exception('Payment secret key is not configured.');
+            }
+            
+            // Set the API key directly from payment setting
+            Stripe::setApiKey($this->paymentSettingSecret);
+            
+            // Verify the payment method exists and is valid
+            if (empty($this->paymentMethodId)) {
+                throw new \Exception('Payment method ID is missing.');
+            }
+            
+            Log::info('Creating payment intent', [
+                'team_id' => $this->teamId,
+                'amount' => $this->grandTotal,
+                'payment_method_id' => substr($this->paymentMethodId, 0, 10) . '...',
+                'currency' => $this->paymentSetting->currency ?? 'sgd',
+            ]);
+            
+            $paymentIntent = PaymentIntent::create([
+                'amount' => (int) round($this->grandTotal * 100),
+                'currency' => strtolower($this->paymentSetting->currency) ?? 'sgd',
+                'payment_method' => $this->paymentMethodId,
+                'confirmation_method' => 'manual',
+                'confirm' => true,
+                'receipt_email' => $this->email,
+                'return_url' => route('payment.success'),
+            ]);
+            
+            $locationId = !empty($this->cartItems) ? ($this->cartItems[0]['location_id'] ?? null) : null;
+            
+            $stripeResponse = StripeResponse::create([
+                'team_id' => $this->teamId,
+                'location_id' => $locationId,
+                'category_id' => null, // For cart, we don't have a single category
+                'payment_intent_id' => $paymentIntent->id,
+                'customer_email' => $this->email,
+                'amount' => $paymentIntent->amount,
+                'currency' => $paymentIntent->currency,
+                'status' => $paymentIntent->status,
+                'full_response' => $paymentIntent->toArray(),
+            ]);
+            $this->stripeResponeID = $stripeResponse->id;
+            
+            Log::info("Payment done for cart checkout", [
+                'payment_intent_id' => $paymentIntent->id,
+                'status' => $paymentIntent->status,
+            ]);
+            
+            // Proceed with checkout after successful payment
+            $this->checkout();
+            
+            $this->paymentStep = 0;
+            $this->isFree = 0;
+            $this->email = '';
+            
+            $this->successMessage = 'Payment successful!';
+        } catch (\Stripe\Exception\InvalidRequestException $e) {
+            Log::error('Stripe payment failed: teamID ' . $this->teamId . ' = ' . $e->getMessage(), [
+                'stripe_error_type' => $e->getStripeCode(),
+                'payment_method_id' => substr($this->paymentMethodId ?? '', 0, 10) . '...',
+            ]);
+            $this->errorMessage = 'Payment failed: ' . $e->getMessage();
+            $this->paymentStep = 0;
+            
+            // Show user-friendly error
+            session()->flash('cart_error', 'Payment processing failed. Please try again or use a different payment method.');
+        } catch (\Exception $e) {
+            Log::error('Payment failed: teamID ' . $this->teamId . ' = ' . $e->getMessage());
+            $this->errorMessage = 'Payment failed: Something went Wrong';
+            $this->paymentStep = 0;
+            
+            session()->flash('cart_error', 'Payment processing failed. Please try again.');
+        }
     }
     
     public function checkout()
@@ -109,7 +366,7 @@ class PatientCart extends Component
                 'grand_total' => $grandTotal,
                 'refID' => $refID,
             ]);
-            
+             
             $bookings = [];
             
             // Create INDIVIDUAL bookings (one per cart item) - all linked to the SAME order
@@ -235,6 +492,38 @@ class PatientCart extends Component
     public function getGrandTotalProperty()
     {
         return $this->total + $this->gstAmount;
+    }
+    
+    public function getPaymentRequiredProperty()
+    {
+        // Check if payment is required
+        if (empty($this->paymentSetting)) {
+            return false;
+        }
+        
+        if ($this->paymentSetting->enable_payment != 1) {
+            return false;
+        }
+        
+        if ($this->grandTotal <= 0) {
+            return false;
+        }
+        
+        // $paymentApplicableTo = $this->paymentSetting->payment_applicable_to ?? 'walkin';
+        // if ($paymentApplicableTo != 'patient' && $paymentApplicableTo != 'both') {
+        //     return false;
+        // }
+
+        
+        if (empty($this->paymentSetting->api_key) || empty($this->paymentSetting->api_secret)) {
+            return false;
+        }
+        
+        if ($this->paymentSetting->stripe_enable != 1) {
+            return false;
+        }
+        
+        return true;
     }
     
     public function render()

@@ -138,12 +138,99 @@
             </div>
         </div>
 
+        <!-- Payment Step -->
+        @if($this->paymentStep == 1)
+        <div class="paymentStep mt-8">
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                    <!-- Payment Header -->
+                    <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4">
+                        <h2 class="text-2xl font-bold text-white">{{ __('text.Payment') }}</h2>
+                        <p class="text-indigo-100 text-sm mt-1">Complete your payment securely</p>
+                    </div>
+
+                    <!-- Payment Form -->
+                    <div class="p-6 space-y-6" wire:ignore>
+                        <!-- Email Field -->
+                        <div>
+                            <label for="payment-email" class="block text-sm font-medium text-gray-700 mb-2">
+                                Email Address <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="email"
+                                id="payment-email"
+                                wire:model.defer="email"
+                                placeholder="your.email@example.com"
+                                required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                            <p class="text-xs text-gray-500 mt-1">We'll send your receipt to this email</p>
+                        </div>
+
+                        <!-- Card Details Field -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Card Details <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div id="card-element" class="px-4 py-3 border border-gray-300 rounded-lg bg-white focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500 transition-all">
+                                    <!-- Stripe Elements will mount here -->
+                                </div>
+                                <!-- Error display area for Stripe -->
+                                <div id="card-errors" role="alert" class="mt-2 text-sm text-red-600 hidden"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Your card information is secure and encrypted</p>
+                        </div>
+
+                        <!-- Security Badge -->
+                        <div class="flex items-center justify-center pt-2 pb-4 border-t border-gray-200">
+                            <svg class="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            <span class="text-xs text-gray-600">Secured by Stripe</span>
+                        </div>
+                    </div>
+
+                    <!-- Payment Button -->
+                    <div class="px-6 pb-6">
+                        <button
+                            id="pay-btn"
+                            data-pay-text="{{ __('text.Pay') }}"
+                            data-pay-amount="{{ number_format($this->grandTotal, 2) }}"
+                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span class="button-text">{{ __('text.Pay') }} <span id="pay-amount">${{ number_format($this->grandTotal, 2) }}</span></span>
+                            <svg
+                                id="pay-loader"
+                                class="ml-2 h-5 w-5 text-white animate-spin hidden"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <!-- Action Buttons -->
         <div class="mt-6 flex gap-4">
             <a href="{{ route('tenant.patient.book-appointment') }}" 
                 class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-lg transition text-center">
                 Continue Shopping
             </a>
+            @if($this->paymentStep == 1)
+            {{-- Payment step is active, show payment UI instead of button --}}
+            @elseif($this->paymentRequired)
+            <button 
+                wire:click="showPaymentPage"
+                wire:loading.attr="disabled"
+                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition disabled:opacity-50">
+                <span wire:loading.remove wire:target="showPaymentPage">Checkout</span>
+                <span wire:loading wire:target="showPaymentPage">Processing...</span>
+            </button>
+            @else
             <button 
                 wire:click="checkout"
                 wire:loading.attr="disabled"
@@ -151,6 +238,7 @@
                 <span wire:loading.remove wire:target="checkout">Checkout</span>
                 <span wire:loading wire:target="checkout">Processing...</span>
             </button>
+            @endif
         </div>
     @else
         <!-- Empty Cart -->
@@ -167,4 +255,221 @@
         </div>
     @endif
 </div>
+
+@push('scripts')
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    let stripe;
+    let card;
+
+    // Wait for Stripe to be available
+    function waitForStripe(callback, maxAttempts = 50) {
+        let attempts = 0;
+        const checkStripe = setInterval(() => {
+            attempts++;
+            if (typeof Stripe !== 'undefined') {
+                clearInterval(checkStripe);
+                callback();
+            } else if (attempts >= maxAttempts) {
+                clearInterval(checkStripe);
+                console.error('Stripe library failed to load.');
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Payment Error',
+                        text: 'Stripe payment library failed to load. Please refresh the page.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            }
+        }, 100);
+    }
+
+    Livewire.on('cardElement', () => {
+        waitForStripe(() => {
+            setTimeout(() => {
+                const cardContainer = document.getElementById('card-element');
+
+                if (!cardContainer) {
+                    console.error('Stripe card element not found.');
+                    return;
+                }
+
+                // Check if paymentSettingKey is available
+                const paymentKey = "{{ $this->paymentSettingKey ?? '' }}";
+                if (!paymentKey) {
+                    console.error('Stripe payment key is not configured.');
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Payment Error',
+                            text: 'Payment gateway is not configured.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                    return;
+                }
+
+                try {
+                    // Initialize Stripe
+                    stripe = Stripe(paymentKey);
+                    const elements = stripe.elements({
+                        appearance: {
+                            theme: 'stripe',
+                            variables: {
+                                colorPrimary: '#4f46e5',
+                                colorBackground: '#ffffff',
+                                colorText: '#1f2937',
+                                colorDanger: '#ef4444',
+                                fontFamily: 'system-ui, sans-serif',
+                                spacingUnit: '4px',
+                                borderRadius: '8px',
+                            },
+                        },
+                    });
+                    
+                    // Create card element with custom styling
+                    card = elements.create('card', {
+                        style: {
+                            base: {
+                                fontSize: '16px',
+                                color: '#1f2937',
+                                '::placeholder': {
+                                    color: '#9ca3af',
+                                },
+                            },
+                            invalid: {
+                                color: '#ef4444',
+                                iconColor: '#ef4444',
+                            },
+                        },
+                    });
+
+                    // Mount card
+                    card.mount('#card-element');
+
+                    // Handle real-time validation errors from the card Element
+                    card.on('change', function(event) {
+                        const displayError = document.getElementById('card-errors');
+                        if (event.error) {
+                            displayError.textContent = event.error.message;
+                            displayError.classList.remove('hidden');
+                        } else {
+                            displayError.classList.add('hidden');
+                        }
+                    });
+
+                    console.log('Card mounted.');
+
+                    // ✅ Attach Pay button listener here
+                    const payBtn = document.getElementById('pay-btn');
+                    const loader = document.getElementById('pay-loader');
+                    const buttonText = payBtn ? payBtn.querySelector('.button-text') : null;
+                    
+                    if (payBtn && buttonText) {
+                        // Remove any existing listeners to prevent duplicates
+                        const newPayBtn = payBtn.cloneNode(true);
+                        payBtn.parentNode.replaceChild(newPayBtn, payBtn);
+                        
+                        newPayBtn.addEventListener('click', async () => {
+                            if (!stripe || !card) {
+                                console.log('Card is not ready yet.');
+                                return;
+                            }
+
+                            // Disable button and show loader
+                            newPayBtn.disabled = true;
+                            const btnText = newPayBtn.querySelector('.button-text');
+                            const btnLoader = document.getElementById('pay-loader');
+                            
+                            if (btnText) btnText.textContent = 'Processing...';
+                            if (btnLoader) btnLoader.classList.remove('hidden');
+
+                            try {
+                                const {
+                                    paymentMethod,
+                                    error
+                                } = await stripe.createPaymentMethod({
+                                    type: 'card',
+                                    card: card
+                                });
+
+                                if (error) {
+                                    console.error('Stripe error:', error.message);
+                                    
+                                    // Show error in card-errors div
+                                    const displayError = document.getElementById('card-errors');
+                                    if (displayError) {
+                                        displayError.textContent = error.message || 'Please check your card details.';
+                                        displayError.classList.remove('hidden');
+                                    }
+                                    
+                                    // Re-enable button
+                                    newPayBtn.disabled = false;
+                                    if (btnText) {
+                                        const payText = newPayBtn.getAttribute('data-pay-text') || 'Pay';
+                                        const payAmount = newPayBtn.getAttribute('data-pay-amount') || '0.00';
+                                        const payAmountEl = document.getElementById('pay-amount');
+                                        if (payAmountEl) {
+                                            btnText.innerHTML = payText + ' <span id="pay-amount">$' + payAmount + '</span>';
+                                        } else {
+                                            btnText.textContent = payText + ' $' + payAmount;
+                                        }
+                                    }
+                                    if (btnLoader) btnLoader.classList.add('hidden');
+                                    
+                                    // Scroll to error
+                                    if (displayError) {
+                                        displayError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                    }
+                                } else {
+                                    // Clear any previous errors
+                                    const displayError = document.getElementById('card-errors');
+                                    if (displayError) {
+                                        displayError.classList.add('hidden');
+                                    }
+                                    Livewire.dispatch('stripe-payment-method', {
+                                        paymentMethodId: paymentMethod.id
+                                    });
+                                }
+                            } catch (err) {
+                                console.error('Payment processing error:', err);
+                                newPayBtn.disabled = false;
+                                if (btnText) {
+                                    const payText = newPayBtn.getAttribute('data-pay-text') || 'Pay';
+                                    const payAmount = newPayBtn.getAttribute('data-pay-amount') || '0.00';
+                                    btnText.textContent = payText + ' $' + payAmount;
+                                }
+                                if (btnLoader) btnLoader.classList.add('hidden');
+                                
+                                if (typeof Swal !== 'undefined') {
+                                    Swal.fire({
+                                        title: 'Payment Error',
+                                        text: 'An error occurred while processing payment. Please try again.',
+                                        icon: 'error',
+                                        confirmButtonText: 'OK'
+                                    });
+                                }
+                            }
+                        });
+                    } else {
+                        console.warn('Pay button or button text not found.');
+                    }
+                } catch (err) {
+                    console.error('Error initializing Stripe:', err);
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Payment Error',
+                            text: 'Failed to initialize payment gateway. Please refresh the page.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                }
+            }, 300); // Delay to ensure DOM is ready
+        });
+    });
+</script>
+<script src="{{ asset('js/cdn/sweetalert2.js') }}"></script>
+@endpush
 

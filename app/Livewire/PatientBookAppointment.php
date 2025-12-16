@@ -60,9 +60,7 @@ class PatientBookAppointment extends Component
     
     public function mount()
     {
-
-      
-
+        
         // Check if patient is logged in
         if (!Session::has('patient_member_id')) {
             $this->redirect(route('tenant.patient.login'), navigate: true);
@@ -556,12 +554,7 @@ class PatientBookAppointment extends Component
               
             // Format booking_time in 24-hour format (e.g., "14:30-15:30")
             $bookingTime24h = $startTime . ($endTime !== $startTime ? '-' . $endTime : '');
-            
-            // Get appointment type and package names
-            $appointmentType = Category::find($this->appointmentTypeId);
-            $package = $this->packageId ? Category::find($this->packageId) : null;
-            $location = Location::find($this->locationId);
-            
+                
             // Generate refID
             $refID = time();
             

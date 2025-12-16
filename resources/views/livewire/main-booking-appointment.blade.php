@@ -1043,7 +1043,7 @@ $buttons_background_hover = $colorSetting?->hover_buttons_layout ?? 'rgb(99 102 
 
 
     @if($paymentSetting && $paymentSetting->stripe_enable == 1)
-    <script src="{{ asset('js/cdn/stripe.js') }}"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     @endif
 <script>
      document.addEventListener('livewire:init', () => {
