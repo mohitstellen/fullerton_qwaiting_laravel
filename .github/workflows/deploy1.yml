@@ -68,12 +68,6 @@ jobs:
           # Clear all caches
           php artisan o:clear
           
-          # Run specific database migrations
-          php artisan migrate --path=database/migrations/2025_12_15_162242_create_orders_table.php --force
-          php artisan migrate --path=database/migrations/2025_12_15_162302_add_order_id_to_bookings_table.php --force
-          php artisan migrate --path=database/migrations/2025_12_15_163350_add_appointments_data_to_orders_table.php --force
-          php artisan migrate --path=database/migrations/2025_12_15_171043_remove_appointments_data_and_add_appointment_columns_to_orders_table.php --force
-          php artisan migrate --path=database/migrations/2025_12_16_000001_remove_order_id_from_bookings_and_create_booking_order_table.php --force
-          php artisan migrate --path=database/migrations/2025_12_16_000002_remove_appointment_columns_from_orders_table.php --force
+         
           
       
