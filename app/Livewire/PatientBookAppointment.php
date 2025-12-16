@@ -10,7 +10,8 @@ use App\Models\{
     AccountSetting,
     SiteDetail,
     Member,
-    Level
+    Level,
+    Order
 };
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
@@ -54,8 +55,14 @@ class PatientBookAppointment extends Component
     public $step = 1; // 1: Type & Package, 2: Location & Schedule, 3: Confirmation
     public $successMessage = '';
     
+    // Cart functionality
+    public $isPrivateCustomer = false;
+    
     public function mount()
     {
+
+      
+
         // Check if patient is logged in
         if (!Session::has('patient_member_id')) {
             $this->redirect(route('tenant.patient.login'), navigate: true);
@@ -75,6 +82,15 @@ class PatientBookAppointment extends Component
             Session::forget(['patient_member_id', 'patient_member', 'patient_customer_type']);
             $this->redirect(route('tenant.patient.login'), navigate: true);
             return;
+        }
+
+        // Check if member is private customer
+        // Private customer: customer_type is 'Private' OR company_id is null
+        $this->isPrivateCustomer = Session::get('patient_customer_type') === 'Private';
+        
+        // Store customer type in session for navigation
+        if (!Session::has('patient_customer_type')) {
+            Session::put('patient_customer_type', $this->isPrivateCustomer ? 'Private' : 'Corporate');
         }
 
         // Get appointment types (level 1 categories)
@@ -384,6 +400,120 @@ class PatientBookAppointment extends Component
         }
     }
     
+    public function addToCart()
+    {
+        $this->validate([
+            'locationId' => 'required|exists:locations,id',
+            'appointmentDate' => 'required|date|after_or_equal:today',
+            'appointmentTime' => 'required',
+        ], [
+            'locationId.required' => 'Please select a location.',
+            'appointmentDate.required' => 'Please select a date.',
+            'appointmentDate.after_or_equal' => 'Please select a valid date.',
+            'appointmentTime.required' => 'Please select a time slot.',
+        ]);
+        
+        try {
+            // Parse time slot and convert to 24-hour format
+            $timeParts = explode('-', $this->appointmentTime);
+            $startTime12h = trim($timeParts[0] ?? '');
+            $endTime12h = trim($timeParts[1] ?? $startTime12h);
+            
+            // Convert from 12-hour format (e.g., "2:30PM") to 24-hour format (e.g., "14:30")
+            try {
+                $startTimeCarbon = Carbon::createFromFormat('h:i A', $startTime12h);
+                $startTime = $startTimeCarbon->format('H:i');
+            } catch (\Exception $e) {
+                // Fallback: try without space
+                $startTimeCarbon = Carbon::createFromFormat('h:iA', $startTime12h);
+                $startTime = $startTimeCarbon->format('H:i');
+            }
+            
+            try {
+                $endTimeCarbon = Carbon::createFromFormat('h:i A', $endTime12h);
+                $endTime = $endTimeCarbon->format('H:i');
+            } catch (\Exception $e) {
+                // Fallback: try without space
+                $endTimeCarbon = Carbon::createFromFormat('h:iA', $endTime12h);
+                $endTime = $endTimeCarbon->format('H:i');
+            }
+            
+            // Get appointment type and package names
+            $appointmentType = Category::find($this->appointmentTypeId);
+            $package = $this->packageId ? Category::find($this->packageId) : null;
+            $location = Location::find($this->locationId);
+            
+            // Get package price (use package amount if available, otherwise 0)
+            $packageAmount = $package && isset($package->amount) ? (float) $package->amount : 0.00;
+            
+            // Build service name matching screenshot format: "Appointment Type - Location - Package Name"
+            $serviceName = $appointmentType->name ?? '';
+            if ($location) {
+                $serviceName .= ' - ' . $location->location_name;
+            }
+            if ($package) {
+                $serviceName .= ' - ' . $package->name;
+            }
+            
+            // Format date and time for display
+            $bookingDateTime = Carbon::parse($this->appointmentDate)->format('d/m/Y') . ' ' . Carbon::parse($startTime12h)->format('h:iA');
+            
+            // Prepare cart item
+            $cartItem = [
+                'id' => uniqid('cart_', true),
+                'appointment_type_id' => $this->appointmentTypeId,
+                'appointment_type_name' => $appointmentType->name ?? '',
+                'package_id' => $this->packageId,
+                'package_name' => $package->name ?? '',
+                'package_amount' => $packageAmount,
+                'location_id' => $this->locationId,
+                'location_name' => $location->location_name ?? '',
+                'location_address' => $location->address ?? '',
+                'service_name' => $serviceName,
+                'booking_date' => $this->appointmentDate,
+                'booking_time' => $this->appointmentTime,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'booking_date_time' => $bookingDateTime,
+                'name' => ($this->member->salutation ? $this->member->salutation . ' ' : '') . $this->member->full_name,
+                'date_of_birth' => $this->member->date_of_birth ? Carbon::parse($this->member->date_of_birth)->format('d/m/Y') : '',
+                'nric_fin_passport' => $this->member->nric_fin ?? $this->member->passport ?? '',
+                'gender' => $this->member->gender ?? '',
+                'additional_comments' => $this->additionalComments,
+                'booking_for' => $this->bookingFor,
+                'member_id' => $this->member->id,
+                'created_at' => now()->toDateTimeString(),
+            ];
+            
+            // Get existing cart items
+            $cart = Session::get('patient_cart', []);
+            
+            // Add new item to cart
+            $cart[] = $cartItem;
+            
+            // Store in session
+            Session::put('patient_cart', $cart);
+            
+            // Show success message
+            session()->flash('cart_success', 'Appointment added to cart successfully!');
+            
+            // Reset form and go back to step 1
+            $this->step = 1;
+            $this->locationId = null;
+            $this->appointmentDate = null;
+            $this->appointmentTime = null;
+            $this->availableTimeSlots = [];
+            $this->additionalComments = '';
+            
+            // Redirect to cart page
+            $this->redirect(route('tenant.patient.cart'), navigate: true);
+            
+        } catch (\Exception $e) {
+            Log::error('Error adding to cart: ' . $e->getMessage());
+            $this->addError('cart', 'Failed to add appointment to cart. Please try again.');
+        }
+    }
+    
     public function bookAppointment()
     {
         $this->validate([
@@ -427,7 +557,15 @@ class PatientBookAppointment extends Component
             // Format booking_time in 24-hour format (e.g., "14:30-15:30")
             $bookingTime24h = $startTime . ($endTime !== $startTime ? '-' . $endTime : '');
             
-            // Prepare booking data
+            // Get appointment type and package names
+            $appointmentType = Category::find($this->appointmentTypeId);
+            $package = $this->packageId ? Category::find($this->packageId) : null;
+            $location = Location::find($this->locationId);
+            
+            // Generate refID
+            $refID = time();
+            
+            // Create booking first
             $bookingData = [
                 'team_id' => $this->teamId,
                 'location_id' => $this->locationId,
@@ -437,31 +575,44 @@ class PatientBookAppointment extends Component
                 'end_time' => $endTime,
                 'category_id' => $this->appointmentTypeId,
                 'sub_category_id' => $this->packageId,
-                'refID' => time(),
+                'refID' => $refID,
                 'status' => Booking::STATUS_RESERVED,
+                'is_private_customer' => true,
                 'name' => ($this->member->salutation ? $this->member->salutation . ' ' : '') . $this->member->full_name,
                 'email' => $this->member->email,
                 'phone' => $this->member->mobile_number,
                 'phone_code' => $this->member->mobile_country_code ?? '+65',
                 'date_of_birth' => $this->member->date_of_birth,
-                'gender' => $this->member->gender,
+                'gender' => $this->member->gender ?? '',
                 'nationality' => $this->member->nationality,
                 'identification_type' => $this->member->identification_type,
                 'additional_comments' => $this->additionalComments,
-                'json' => json_encode([
-                    'booking_for' => $this->bookingFor,
-                    'member_id' => $this->member->id,
-                    'nric_fin' => $this->member->nric_fin,
-                    'passport' => $this->member->passport,
-                ]),
             ];
             
-            // Create booking
             $booking = Booking::create($bookingData);
+            
+            // Create one order (appointment data is stored in bookings table)
+            $order = Order::create([
+                'team_id' => $this->teamId,
+                'member_id' => $this->member->id,
+                'order_number' => Order::generateOrderNumber(),
+                'status' => Order::STATUS_PENDING,
+                'total_amount' => 0.00,
+                'gst_amount' => 0.00,
+                'grand_total' => 0.00,
+            ]);
+            
+            // Link booking to order via pivot table (use insertOrIgnore to prevent duplicates)
+            DB::table('booking_order')->insertOrIgnore([
+                'booking_id' => $booking->id,
+                'order_id' => $order->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
             
             DB::commit();
             
-            $this->successMessage = 'Appointment booked successfully! Your order number is ' . time();
+            $this->successMessage = 'Appointment booked successfully! Your order number is ' . $order->order_number;
             $this->step = 3;
             
             // Reset form after 3 seconds and redirect

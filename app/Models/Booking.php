@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Facades\Filament;
@@ -147,6 +149,12 @@ class Booking extends Model
     public function company(): BelongsTo
  {
         return $this->belongsTo( Company::class, 'company_id', 'id' );
+    }
+
+    public function orders()
+    {
+        return $this->belongsToMany(Order::class, 'booking_order', 'booking_id', 'order_id')
+            ->withTimestamps();
     }
 
     public static function checkBooking( $team_id, $appointment_date, $select_time_slot, $location = null )

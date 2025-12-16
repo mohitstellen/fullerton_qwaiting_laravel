@@ -196,7 +196,7 @@ class MainBookingAppointment extends Component
         // Check for route parameter
         if (!Session::has('selectedLocation') && $location_id !== null) {
             $this->locationId = base64_decode($location_id, true);
-            Session::put('selectedLocation', $this->locationId);
+            Session::put('selectedLocation', $this->location);
         } else {
             $this->locationId = Session::get('selectedLocation');
         }

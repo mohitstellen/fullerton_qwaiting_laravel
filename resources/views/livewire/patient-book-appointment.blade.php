@@ -388,10 +388,22 @@
                                 class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg transition">
                                 Go Back
                             </button>
-                            <button type="submit" 
-                                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">
-                                Book Appointment
-                            </button>
+                            @if($isPrivateCustomer)
+                                <button type="button" 
+                                    wire:click="addToCart"
+                                    wire:loading.attr="disabled"
+                                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition disabled:opacity-50">
+                                    <span wire:loading.remove wire:target="addToCart">Add To Cart</span>
+                                    <span wire:loading wire:target="addToCart">Adding...</span>
+                                </button>
+                            @else
+                                <button type="submit" 
+                                    wire:loading.attr="disabled"
+                                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition disabled:opacity-50">
+                                    <span wire:loading.remove wire:target="bookAppointment">Book Appointment</span>
+                                    <span wire:loading wire:target="bookAppointment">Booking...</span>
+                                </button>
+                            @endif
                         </div>
                     </form>
                 </div>

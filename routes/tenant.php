@@ -276,6 +276,8 @@ Route::middleware([
             Route::get('/dashboard', \App\Livewire\PatientDashboard::class)->name('patient.dashboard');
             Route::get('/book-appointment', \App\Livewire\PatientBookAppointment::class)->name('patient.book-appointment');
             Route::get('/appointments', \App\Livewire\PatientMyAppointments::class)->name('patient.appointments');
+            Route::get('/cart', \App\Livewire\PatientCart::class)->name('patient.cart');
+            Route::get('/profile', \App\Livewire\PatientProfile::class)->name('patient.profile');
             Route::get('/dependents', \App\Livewire\PatientDependents::class)->name('patient.dependents');
             Route::post('/logout', function () {
                 Session::forget(['patient_member_id', 'patient_member', 'patient_customer_type']);
