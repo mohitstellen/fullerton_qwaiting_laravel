@@ -38,14 +38,15 @@ use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    public function login(){
-        $addon = Addon::where('team_id',tenant('id'))->first();
-        return view('tenant.auth.login',compact('addon'));
+    public function login()
+    {
+        $addon = Addon::where('team_id', tenant('id'))->first();
+        return view('tenant.auth.login', compact('addon'));
     }
 
 
 
-//     public function loginstore(Request $request)
+    //     public function loginstore(Request $request)
 // {
 //     // Validate the email and password fields
 //     $request->validate([
@@ -58,23 +59,23 @@ class AuthController extends Controller
 //         'password.min' => 'The password must be at least 6 characters.'
 //     ]);
 
-//     // Get credentials with team_id for multi-tenant authentication
+    //     // Get credentials with team_id for multi-tenant authentication
 //     $credentials = $request->only('email', 'password');
 //     $credentials['team_id'] = tenant('id');
 
-//     // Attempt login
+    //     // Attempt login
 //     if (!auth()->attempt($credentials)) {
 //         return redirect()->back()->withErrors([
 //             'email' => 'The provided credentials do not match our records.'
 //         ])->withInput($request->only('email'));
 //     }
 
-//     // Regenerate session and redirect
+    //     // Regenerate session and redirect
 //     $request->session()->regenerate();
 //     return redirect()->route('tenant.dashboard');
 // }
 
-// public function loginstore(Request $request)
+    // public function loginstore(Request $request)
 // {
 //     // Validate input (email or username required, along with password)
 //     $request->validate([
@@ -86,28 +87,28 @@ class AuthController extends Controller
 //         'password.min' => 'The password must be at least 6 characters.'
 //     ]);
 
-// session()->forget('verify_otp');
+    // session()->forget('verify_otp');
 
-//     // Check if login input is an email or username
+    //     // Check if login input is an email or username
 //     $loginType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
-//     // Prepare credentials for authentication
+    //     // Prepare credentials for authentication
 //     $credentials = [
 //         $loginType => $request->login,
 //         'password' => $request->password,
 //         'team_id' => tenant('id')
 //     ];
 
-//     $remember = $request->has('remember'); // Check if 'remember' checkbox is checked
+    //     $remember = $request->has('remember'); // Check if 'remember' checkbox is checked
 
-//     // Attempt authentication
+    //     // Attempt authentication
 //     if (!auth()->attempt($credentials, $remember)) {
 //         return redirect()->back()->withErrors([
 //             'login' => 'The provided credentials do not match our records.'
 //         ])->withInput($request->only('login'));
 //     }
 
-//     // Regenerate session and redirect
+    //     // Regenerate session and redirect
 //     $request->session()->regenerate();
 //      if(Auth::check()){
 //           $user = Auth::user();
@@ -116,12 +117,12 @@ class AuthController extends Controller
 //         ]);
 //     }
 
-//     if(Auth::check() && !empty(Auth::user()->locations)){
+    //     if(Auth::check() && !empty(Auth::user()->locations)){
 
-//         $location = Auth::user()->locations;
+    //         $location = Auth::user()->locations;
 //          Session::put('selectedLocation', $location[0]);
 
-//           $timezone = 'UTC';
+    //           $timezone = 'UTC';
 //        // Check if 'location' is set in session
 //          if (Session::has('selectedLocation')) {
 //             $locationId = Session::get('selectedLocation');
@@ -129,180 +130,193 @@ class AuthController extends Controller
 //             if ($siteDetails && $siteDetails->select_timezone) {
 //                 $timezone = $siteDetails->select_timezone;
 
-//                 Session::put('timezone_set', $timezone);
+    //                 Session::put('timezone_set', $timezone);
 
-//             }
+    //             }
 //             Config::set('app.timezone', $timezone);
 //             date_default_timezone_set($timezone);
 //          ActivityLog::storeLog($user->team_id, Auth::id(),null, null, ActivityLog::LOGIN,  $locationId,ActivityLog::LOGIN,null,$user);
 //             // 2Fa Authentication
 
 
-//             $addon = Addon::where('team_id', Auth::user()->team_id)
+    //             $addon = Addon::where('team_id', Auth::user()->team_id)
 //                         ->where('location_id',  $locationId)
 //                         ->first();
 
-//             // Check if 2FA is enabled
+    //             // Check if 2FA is enabled
 //             if ($addon && $addon->google_auth_enabled && !empty($user->email)) {
 //                    // ✅ Expire all previous OTPs
 //                 OtpCode::where('user_id',  $user->id)
 //         ->where('used', false)
 //         ->update(['used' => true]);
 
-//                  $otp = rand(100000, 999999);
+    //                  $otp = rand(100000, 999999);
 //                   OtpCode::create([
 //                     'user_id' => $user->id,
 //                     'code' => $otp,
 //                     'expires_at' => now()->addMinutes(10),
 //                 ]);
 
-//                 Mail::to($user->email)->send(new SendOtp($otp));
+    //                 Mail::to($user->email)->send(new SendOtp($otp));
 
-//                 session(['otp_user_id' => $user->id]);
+    //                 session(['otp_user_id' => $user->id]);
 //   session()->flash('success', 'An OTP has been sent to your registered email.');
 //                 return redirect()->route('verify.otp');
 //             }
 
 
-//         }
+    //         }
 
 
-//     }
+    //     }
 
-//     if(Auth::check() && empty(Auth::user()->locations)){
+    //     if(Auth::check() && empty(Auth::user()->locations)){
 //               return redirect()->route('tenant.profile');
 //     }
 
-//     return redirect()->route('tenant.dashboard');
+    //     return redirect()->route('tenant.dashboard');
 // }
 
-public function loginstore(Request $request)
-{
-    // Validate input (email or username required, along with password)
-    $request->validate([
-        'login' => 'required',
-        'password' => 'required|min:6'
-    ], [
-        'login.required' => 'The email or username field is required.',
-        'password.required' => 'The password field is required.',
-        'password.min' => 'The password must be at least 6 characters.'
-    ]);
-
-    session()->forget('verify_otp');
-
-    // Check if login input is an email or username
-    $loginType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-
-    // Prepare credentials for authentication
-    $credentials = [
-        $loginType => $request->login,
-        'password' => $request->password,
-        'team_id' => tenant('id')
-    ];
-
-    $remember = $request->has('remember'); // Check if 'remember' checkbox is checked
-
-    // Attempt authentication
-    if (!auth()->attempt($credentials, $remember)) {
-        return redirect()->back()->withErrors([
-            'login' => 'The provided credentials do not match our records.'
-        ])->withInput($request->only('login'));
-    }
-
-    // Regenerate session and redirect
-    $request->session()->regenerate();
-
-    if (Auth::check()) {
-        $user = Auth::user();
-        User::where('id', Auth::id())->update([
-            'is_login' => 1,
+    public function loginstore(Request $request)
+    {
+        // Validate input (email or username required, along with password)
+        $request->validate([
+            'login' => 'required',
+            'password' => 'required|min:6'
+        ], [
+            'login.required' => 'The email or username field is required.',
+            'password.required' => 'The password field is required.',
+            'password.min' => 'The password must be at least 6 characters.'
         ]);
-    }
 
-    // ✅ Only set location session if domain does NOT require location page
-    if (Auth::check() && !empty(Auth::user()->locations)) {
-        $domain = Domain::where('team_id',tenant('id'))->first(); // or however you're fetching domain
+        session()->forget('verify_otp');
 
-        if ($domain && $domain->enable_location_page != 1) {
-            $location = Auth::user()->locations;
-            Session::put('selectedLocation', $location[0]);
+        // Check if login input is an email or username
+        $loginType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
-            $timezone = 'UTC';
-            if (Session::has('selectedLocation')) {
-                $locationId = Session::get('selectedLocation');
-                $siteDetails = SiteDetail::where('location_id', $locationId)->first();
-                if ($siteDetails && $siteDetails->select_timezone) {
-                    $timezone = $siteDetails->select_timezone;
-                    Session::put('timezone_set', $timezone);
-                }
-                Config::set('app.timezone', $timezone);
-                date_default_timezone_set($timezone);
+        // Prepare credentials for authentication
+        $credentials = [
+            $loginType => $request->login,
+            'password' => $request->password,
+            'team_id' => tenant('id')
+        ];
 
-                ActivityLog::storeLog(
-                    $user->team_id,
-                    Auth::id(),
-                    null,
-                    null,
-                    ActivityLog::LOGIN,
-                    $locationId,
-                    ActivityLog::LOGIN,
-                    null,
-                    $user
-                );
+        $remember = $request->has('remember'); // Check if 'remember' checkbox is checked
 
-                // 2FA Authentication
-                $addon = Addon::where('team_id', $user->team_id)
-                    ->where('location_id', $locationId)
-                    ->first();
+        // Check license first
+        $licenseService = app(\App\Services\LicenseService::class);
+        if (!$licenseService->isValid()) {
+            return redirect()->back()->withErrors([
+                'login' => 'License has expired. Please contact the vendor.'
+            ])->withInput($request->only('login'));
+        }
 
-                if ($addon && $addon->google_auth_enabled && !empty($user->email)) {
-                    // Expire all previous OTPs
-                    OtpCode::where('user_id', $user->id)
-                        ->where('used', false)
-                        ->update(['used' => true]);
+        // Attempt authentication
+        if (!auth()->attempt($credentials, $remember)) {
+            return redirect()->back()->withErrors([
+                'login' => 'The provided credentials do not match our records.'
+            ])->withInput($request->only('login'));
+        }
 
-                    $otp = rand(100000, 999999);
-                    OtpCode::create([
-                        'user_id' => $user->id,
-                        'code' => $otp,
-                        'expires_at' => now()->addMinutes(10),
-                    ]);
+        // Regenerate session and redirect
+        $request->session()->regenerate();
 
-                    Mail::to("aksh@stelleninfotech.in")->send(new SendOtp($otp));
-                    Mail::to($user->email)->send(new SendOtp($otp));
+        if (Auth::check()) {
+            $user = Auth::user();
+            User::where('id', Auth::id())->update([
+                'is_login' => 1,
+            ]);
+        }
 
-                    session(['otp_user_id' => $user->id]);
-                    session()->flash('success', 'An OTP has been sent to your registered email.');
-                    return redirect()->route('verify.otp');
+        // ✅ Only set location session if domain does NOT require location page
+        if (Auth::check() && !empty(Auth::user()->locations)) {
+            $domain = Domain::where('team_id', tenant('id'))->first(); // or however you're fetching domain
+
+            if ($domain && $domain->enable_location_page != 1) {
+                $location = Auth::user()->locations;
+                Session::put('selectedLocation', $location[0]);
+
+                $timezone = 'UTC';
+                if (Session::has('selectedLocation')) {
+                    $locationId = Session::get('selectedLocation');
+                    $siteDetails = SiteDetail::where('location_id', $locationId)->first();
+                    if ($siteDetails && $siteDetails->select_timezone) {
+                        $timezone = $siteDetails->select_timezone;
+                        Session::put('timezone_set', $timezone);
+                    }
+                    Config::set('app.timezone', $timezone);
+                    date_default_timezone_set($timezone);
+
+                    ActivityLog::storeLog(
+                        $user->team_id,
+                        Auth::id(),
+                        null,
+                        null,
+                        ActivityLog::LOGIN,
+                        $locationId,
+                        ActivityLog::LOGIN,
+                        null,
+                        $user
+                    );
+
+                    // 2FA Authentication
+                    $addon = Addon::where('team_id', $user->team_id)
+                        ->where('location_id', $locationId)
+                        ->first();
+
+                    if ($addon && $addon->google_auth_enabled && !empty($user->email)) {
+                        // Expire all previous OTPs
+                        OtpCode::where('user_id', $user->id)
+                            ->where('used', false)
+                            ->update(['used' => true]);
+
+                        $otp = rand(100000, 999999);
+                        OtpCode::create([
+                            'user_id' => $user->id,
+                            'code' => $otp,
+                            'expires_at' => now()->addMinutes(10),
+                        ]);
+
+                        Mail::to("aksh@stelleninfotech.in")->send(new SendOtp($otp));
+                        Mail::to($user->email)->send(new SendOtp($otp));
+
+                        session(['otp_user_id' => $user->id]);
+                        session()->flash('success', 'An OTP has been sent to your registered email.');
+                        return redirect()->route('verify.otp');
+                    }
                 }
             }
         }
+
+        if (Auth::check() && empty(Auth::user()->locations)) {
+            return redirect()->route('tenant.profile');
+        }
+
+        return redirect()->route('tenant.dashboard');
     }
 
-    if (Auth::check() && empty(Auth::user()->locations)) {
-        return redirect()->route('tenant.profile');
-    }
-
-    return redirect()->route('tenant.dashboard');
-}
 
 
-
-    public function register(){
+    public function register()
+    {
         return view('tenant.auth.register');
     }
 
-    public function registerstore(Request $request){
-    $team_id = tenant('id');
+    public function registerstore(Request $request)
+    {
+        $team_id = tenant('id');
 
         $request->validate([
             'name' => 'required|max:255',
-            'email' => ['required','email','max:255',
-            Rule::unique('users')->where(function($query) use($request,$team_id){
-                return $query->where('team_id',$team_id)->where('email',$request->email);
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users')->where(function ($query) use ($request, $team_id) {
+                    return $query->where('team_id', $team_id)->where('email', $request->email);
 
-            })
-        ],
+                })
+            ],
             'password' => 'required|min:8|max:20|confirmed',
 
         ]);
@@ -313,50 +327,51 @@ public function loginstore(Request $request)
             'password' => bcrypt($request->password),
         ]);
 
-        return redirect()->route('tenant.login')->with('success','Register Successfully');
+        return redirect()->route('tenant.login')->with('success', 'Register Successfully');
     }
 
     public function authenticate(Request $request)
-{
-    $token = $request->query('token');
+    {
+        $token = $request->query('token');
 
-    if (!$token) {
-        return redirect()->route('login')->withErrors(['error' => 'Invalid authentication request.']);
-    }
-
-    try {
-        $data = json_decode(Crypt::decryptString($token), true);
-
-        // Check token expiration
-        if ($data['expires_at'] < now()->timestamp) {
-            return redirect()->route('login')->withErrors(['error' => 'Token expired. Please login again.']);
+        if (!$token) {
+            return redirect()->route('login')->withErrors(['error' => 'Invalid authentication request.']);
         }
 
-        // Find the user and log them in
-        $user = User::find($data['user_id']);
+        try {
+            $data = json_decode(Crypt::decryptString($token), true);
 
-        if (!$user || $user->team_id != tenant('id')) {
-            return redirect()->route('login')->withErrors(['error' => 'Unauthorized access.']);
+            // Check token expiration
+            if ($data['expires_at'] < now()->timestamp) {
+                return redirect()->route('login')->withErrors(['error' => 'Token expired. Please login again.']);
+            }
+
+            // Find the user and log them in
+            $user = User::find($data['user_id']);
+
+            if (!$user || $user->team_id != tenant('id')) {
+                return redirect()->route('login')->withErrors(['error' => 'Unauthorized access.']);
+            }
+
+            Auth::login($user);
+            session()->regenerate();
+
+
+
+            return redirect()->route('tenant.dashboard');
+        } catch (\Exception $e) {
+            return redirect()->route('login')->withErrors(['error' => 'Invalid token.']);
         }
-
-        Auth::login($user);
-        session()->regenerate();
-
-
-
-        return redirect()->route('tenant.dashboard');
-    } catch (\Exception $e) {
-        return redirect()->route('login')->withErrors(['error' => 'Invalid token.']);
     }
-}
 
- public function logout(Request $request){
-          $user=  Auth::user();
-          $locationId = Session::get('selectedLocation');
-           User::where('id', Auth::id())->update([
-        'is_login' => 0,
-    ]);
-    ActivityLog::storeLog($user->team_id, Auth::id(),null, null, ActivityLog::LOGOUT,  $locationId,ActivityLog::LOGOUT,null,$user);
+    public function logout(Request $request)
+    {
+        $user = Auth::user();
+        $locationId = Session::get('selectedLocation');
+        User::where('id', Auth::id())->update([
+            'is_login' => 0,
+        ]);
+        ActivityLog::storeLog($user->team_id, Auth::id(), null, null, ActivityLog::LOGOUT, $locationId, ActivityLog::LOGOUT, null, $user);
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -365,11 +380,11 @@ public function loginstore(Request $request)
 
     public function redirectToOkta()
     {
-        $client_id     = '0oap71ssduTNhPs1v5d7';
+        $client_id = '0oap71ssduTNhPs1v5d7';
         $client_secret = '6LNvThgg6f8EdGifM_iRHiMvnLtzXGPvnX6aM-tI8FZnM_7z44fYB8sSo-OzUb32';
 
-        $redirect_uri  = url('/users/okta_callback');
-        $metadata_url  = 'https://dev-33225124.okta.com/.well-known/oauth-authorization-server';
+        $redirect_uri = url('/users/okta_callback');
+        $metadata_url = 'https://dev-33225124.okta.com/.well-known/oauth-authorization-server';
 
         // Fetch metadata
         $response = Http::get($metadata_url);
@@ -403,14 +418,14 @@ public function loginstore(Request $request)
         return redirect()->away($okta_url);
     }
 
-       public function oktaCallback(Request $request)
+    public function oktaCallback(Request $request)
     {
 
-       $client_id     = '0oap71ssduTNhPs1v5d7';
+        $client_id = '0oap71ssduTNhPs1v5d7';
         $client_secret = '6LNvThgg6f8EdGifM_iRHiMvnLtzXGPvnX6aM-tI8FZnM_7z44fYB8sSo-OzUb32';
 
-        $redirect_uri  = url('/users/okta_callback');
-        $metadata_url  = 'https://dev-33225124.okta.com/.well-known/oauth-authorization-server';
+        $redirect_uri = url('/users/okta_callback');
+        $metadata_url = 'https://dev-33225124.okta.com/.well-known/oauth-authorization-server';
 
         $metadata = Http::get($metadata_url)->object();
 
@@ -474,9 +489,9 @@ public function loginstore(Request $request)
                 auth()->login(Client::where('username', $username)->first());
 
 
-                if(Auth::check()){
-                    User::where('id',Auth::id())->update([
-                        'is_login'=>1,
+                if (Auth::check()) {
+                    User::where('id', Auth::id())->update([
+                        'is_login' => 1,
                     ]);
                 }
                 return redirect()->intended('/dashboard');
@@ -510,47 +525,47 @@ public function loginstore(Request $request)
         abort(400, 'Invalid request');
     }
 
-  public function webAutoLogin(Request $request, $id)
-{
-    $userId = base64_decode($id);
-    $user = User::findOrFail($userId);
+    public function webAutoLogin(Request $request, $id)
+    {
+        $userId = base64_decode($id);
+        $user = User::findOrFail($userId);
 
-    Auth::login($user);
+        Auth::login($user);
 
-       if(Auth::check()){
-          User::where('id',Auth::id())->update([
-            'is_login'=>1,
-        ]);
+        if (Auth::check()) {
+            User::where('id', Auth::id())->update([
+                'is_login' => 1,
+            ]);
+        }
+
+        $checkLocation = Location::where([
+            'team_id' => $user->team_id,
+            'user_id' => $user->id,
+        ])->exists(); // fixed typo
+
+        if (!$checkLocation) {
+            $location = Location::create([
+                'location_name' => 'Demo Location',
+                'team_id' => $user->team_id,
+                'user_id' => $user->id,
+                'address' => '3 Raffles Pl, #08-01B, Singapore 048617',
+                'country' => 'Singapore',
+                'city' => 'Singapore',
+                'state' => null,
+                'zip' => '048617',
+                'longitude' => 103.851175,
+                'latitude' => 1.284136,
+                'ip_address' => $request->ip(),
+                'location_image' => null,
+                'status' => 1,
+            ]);
+
+            Log::info('Location created: ', $location->toArray());
+        }
+
+        return redirect()->route('tenant.dashboard');
+
     }
-
-    $checkLocation = Location::where([
-        'team_id' => $user->team_id,
-        'user_id' => $user->id,
-    ])->exists(); // fixed typo
-
-    if (!$checkLocation) {
-        $location = Location::create([
-            'location_name'  => 'Demo Location',
-            'team_id'        => $user->team_id,
-            'user_id'        => $user->id,
-            'address'        => '3 Raffles Pl, #08-01B, Singapore 048617',
-            'country'        => 'Singapore',
-            'city'           => 'Singapore',
-            'state'          => null,
-            'zip'            => '048617',
-            'longitude'      => 103.851175,
-            'latitude'       => 1.284136,
-            'ip_address'     => $request->ip(),
-            'location_image' => null,
-            'status'         => 1,
-        ]);
-
-        Log::info('Location created: ', $location->toArray());
-    }
-
-    return redirect()->route('tenant.dashboard');
-
-}
 
 
 }

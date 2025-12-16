@@ -22,20 +22,20 @@ class EnsureLocationExists
      */
     public function handle(Request $request, Closure $next): Response
     {
-          // Check if the user is logged in and has any locations
+        // Check if the user is logged in and has any locations
 
-    //  if(Auth::check()){
+        //  if(Auth::check()){
 
-    //       if (Location::where('team_id',tenant('id'))->where('status',1)->count() == 0) {
-    //         // return redirect()->route('tenant.locations')->with('error', 'Please create a location first.');
-    //         if (!$request->is('locations', 'locations/*')) {
-    //             return redirect()->route('tenant.locations')->with('error', 'Please create a location first.');
-    //         }
+        //       if (Location::where('team_id',tenant('id'))->where('status',1)->count() == 0) {
+        //         // return redirect()->route('tenant.locations')->with('error', 'Please create a location first.');
+        //         if (!$request->is('locations', 'locations/*')) {
+        //             return redirect()->route('tenant.locations')->with('error', 'Please create a location first.');
+        //         }
 
-    //         if(empty(User::getDefaultLocation())){
-    //             return redirect()->route('tenant.locations')->with('error', 'Please create a location first.');
-    //         }
-    //     }
+        //         if(empty(User::getDefaultLocation())){
+        //             return redirect()->route('tenant.locations')->with('error', 'Please create a location first.');
+        //         }
+        //     }
 
         //    $location = Session::get('selectedLocation');
 
@@ -84,15 +84,25 @@ class EnsureLocationExists
         //     }
         // }
 
-    // }
+        // }
 
-    //     return $next($request);
+        //     return $next($request);
 
-     if (Auth::check()) {
+        if (Auth::check()) {
+            // Check license validity before any location logic
+            $licenseService = app(\App\Services\LicenseService::class);
+            // dd($licenseService->isValid());
+            if (!$licenseService->isValid()) {
+                // If the license is invalid, we should not be enforcing location selection
+                // The CheckLicense middleware (which should run before this) handles the redirect.
+                // However, to be safe and prevent this middleware from overriding the behavior:
+                return $next($request);
+            }
+
             $teamId = tenant('id') ?? Auth::user()->team_id;
 
             // Get current domain settings
-            $domain = Domain::where('team_id',$teamId)->first();
+            $domain = Domain::where('team_id', $teamId)->first();
 
             // Count active locations for this team
             $activeLocationsCount = Location::where('team_id', $teamId)
