@@ -76,8 +76,7 @@
                                                     Reschedule
                                                 </button>
                                                 <button 
-                                                    wire:click.stop="cancelAppointment({{ $appointment['id'] }})"
-                                                    wire:confirm="Are you sure you want to cancel this appointment? This action cannot be undone."
+                                                    wire:click.stop="confirmCancelAppointment({{ $appointment['id'] }})"
                                                     class="text-gray-600 hover:text-gray-900 dark:text-gray-400 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition">
                                                     Cancel
                                                 </button>
@@ -521,4 +520,111 @@
         </div>
     @endif
 </div>
+
+<script>
+    function setupCancelAppointmentListener() {
+        Livewire.on('show-cancel-confirmation', (data) => {
+            console.log('Cancel confirmation event received:', data);
+            
+            // Extract bookingId from event data
+            // Livewire 3 passes data as first parameter, which could be array or object
+            let bookingId = null;
+            if (Array.isArray(data)) {
+                bookingId = data[0]?.bookingId || data[0];
+            } else if (data && typeof data === 'object') {
+                bookingId = data.bookingId;
+            } else {
+                bookingId = data;
+            }
+            
+            console.log('Extracted bookingId:', bookingId);
+            
+            if (!bookingId) {
+                console.error('Booking ID not found in event:', data);
+                return;
+            }
+            
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Are you sure you want to cancel this appointment? This action cannot be undone.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, cancel it!',
+                    cancelButtonText: 'No, keep it'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        console.log('User confirmed cancellation for bookingId:', bookingId);
+                        // Dispatch event to confirm cancellation
+                        console.log('Dispatching confirmed-cancel-appointment event with bookingId:', bookingId);
+                        Livewire.dispatch('confirmed-cancel-appointment', { bookingId: bookingId });
+                    }
+                });
+            } else {
+                // Fallback to browser confirm if SweetAlert is not loaded
+                if (confirm('Are you sure you want to cancel this appointment? This action cannot be undone.')) {
+                    Livewire.dispatch('confirmed-cancel-appointment', { bookingId: bookingId });
+                }
+            }
+        });
+    }
+
+    // Setup listener when Livewire initializes
+    document.addEventListener('livewire:init', () => {
+        setupCancelAppointmentListener();
+    });
+
+    // Also setup if Livewire is already initialized (for cases where script loads after Livewire)
+    if (window.Livewire && document.readyState === 'complete') {
+        setupCancelAppointmentListener();
+    }
+
+    // Setup listener for reschedule success
+    function setupRescheduleSuccessListener() {
+        Livewire.on('appointment-rescheduled', (data) => {
+            const message = Array.isArray(data) 
+                ? (data[0]?.message || data[0] || 'Appointment has been rescheduled successfully.')
+                : (data?.message || 'Appointment has been rescheduled successfully.');
+            
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Success!',
+                    text: message,
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3085d6'
+                });
+            }
+        });
+
+        // Setup listener for reschedule error
+        Livewire.on('appointment-reschedule-error', (data) => {
+            const message = Array.isArray(data) 
+                ? (data[0]?.message || data[0] || 'Failed to reschedule appointment. Please try again.')
+                : (data?.message || 'Failed to reschedule appointment. Please try again.');
+            
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Error!',
+                    text: message,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#d33'
+                });
+            }
+        });
+    }
+
+    // Setup listener when Livewire initializes
+    document.addEventListener('livewire:init', () => {
+        setupRescheduleSuccessListener();
+    });
+
+    // Also setup if Livewire is already initialized
+    if (window.Livewire && document.readyState === 'complete') {
+        setupRescheduleSuccessListener();
+    }
+</script>
 

@@ -11,7 +11,8 @@ use App\Models\{
     SiteDetail,
     Member,
     Level,
-    Order
+    Order,
+    SmtpDetails
 };
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
@@ -605,11 +606,46 @@ class PatientBookAppointment extends Component
             
             DB::commit();
             
+            // Send appointment confirmation email
+            try {
+                // Get appointment type for email data
+                $appointmentType = Category::find($this->appointmentTypeId);
+                
+                // Prepare email data
+                $emailData = [
+                    'to_mail' => $this->member->email,
+                    'name' => ($this->member->salutation ? $this->member->salutation . ' ' : '') . $this->member->full_name,
+                    'booking_id' => $refID,
+                    'booking_date' => Carbon::parse($this->appointmentDate)->format('d/m/Y'),
+                    'booking_time' => $startTime12h,
+                    'refID' => $refID,
+                    'category_name' => $appointmentType->name ?? '',
+                    'service_name' => $appointmentType->name ?? '',
+                    'locations_id' => $this->locationId,
+                ];
+
+                // Send email
+                SmtpDetails::sendAppointmentConfirmationEmail(
+                    $emailData,
+                    $this->teamId,
+                    $this->locationId,
+                    $this->appointmentTypeId
+                );
+            } catch (\Exception $e) {
+                // Log error but don't fail the booking
+                Log::error('Failed to send appointment confirmation email: ' . $e->getMessage());
+            }
+            
             $this->successMessage = 'Appointment booked successfully! Your order number is ' . $order->order_number;
             $this->step = 3;
             
-            // Reset form after 3 seconds and redirect
-            $this->dispatch('booking-success', ['refID' => time(), 'booking_id' => $booking->id]);
+            // Dispatch success event with order details
+            $this->dispatch('booking-success', [
+                'refID' => time(), 
+                'booking_id' => $booking->id,
+                'order_number' => $order->order_number,
+                'message' => $this->successMessage
+            ]);
             
         } catch (\Exception $e) {
             DB::rollBack();

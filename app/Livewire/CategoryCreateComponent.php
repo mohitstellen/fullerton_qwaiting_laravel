@@ -11,10 +11,12 @@ use App\Models\Location;
 use App\Models\FormField;
 use App\Models\Company;
 use App\Models\NotificationTemplate;
+use App\Models\TemplateVariable;
 use Livewire\WithFileUploads;
 use Auth;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CategoryCreateComponent extends Component
 {
@@ -64,6 +66,16 @@ class CategoryCreateComponent extends Component
     public $cancelTitle = '';
     public $cancelContent = '';
 
+    // Attachments
+    public $attachmentFile = null;
+    public $attachments = [];
+
+    // Variable selection for email templates
+    public $selectedVariableConfirmation = '';
+    public $selectedVariableRescheduling = '';
+    public $selectedVariableCancel = '';
+    public $variables = [];
+
     public function mount($level = null, $categoryId = null)
     {
 
@@ -108,6 +120,9 @@ class CategoryCreateComponent extends Component
             $this->isEdit = true;
             $this->loadCategoryData();
         }
+
+        // Load template variables
+        $this->loadVariables();
 
         if ($level == 2) {
 
@@ -225,6 +240,9 @@ class CategoryCreateComponent extends Component
 
         // Load email templates
         $this->loadEmailTemplates();
+        
+        // Load attachments
+        $this->loadAttachments();
     }
 
     private function loadEmailTemplates()
@@ -252,6 +270,81 @@ class CategoryCreateComponent extends Component
                 $this->cancelContent = $template->appointment_cancel_email['body'] ?? '';
             }
         }
+    }
+
+    private function loadAttachments()
+    {
+        if (!$this->isEdit || !$this->category) {
+            $this->attachments = [];
+            return;
+        }
+
+        $template = NotificationTemplate::where('appointment_type_id', $this->category->id)
+            ->where('team_id', $this->teamId)
+            ->where('location_id', $this->locationId)
+            ->first();
+
+        if ($template && $template->attachments) {
+            $this->attachments = $template->attachments;
+        } else {
+            $this->attachments = [];
+        }
+    }
+
+    public function addAttachment()
+    {
+        $this->validate([
+            'attachmentFile' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,rtf,odt,ods,odp|max:10240', // 10MB max
+        ], [
+            'attachmentFile.required' => 'Please select a file to upload.',
+            'attachmentFile.file' => 'The uploaded file is invalid.',
+            'attachmentFile.mimes' => 'Only document formats are allowed (PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, RTF, ODT, ODS, ODP).',
+            'attachmentFile.max' => 'The file size must not exceed 10MB.',
+        ]);
+
+        if ($this->attachmentFile) {
+            // Store the file
+            $path = $this->attachmentFile->store('notification-attachments', 'public');
+            
+            // Get original filename
+            $originalName = $this->attachmentFile->getClientOriginalName();
+            
+            // Add to attachments array
+            $this->attachments[] = [
+                'path' => $path,
+                'name' => $originalName,
+            ];
+
+            // Reset the file input
+            $this->attachmentFile = null;
+        }
+    }
+
+    public function removeAttachment($index)
+    {
+        if (isset($this->attachments[$index])) {
+            $attachment = $this->attachments[$index];
+            
+            // Delete file from storage if it exists
+            if (isset($attachment['path']) && Storage::disk('public')->exists($attachment['path'])) {
+                Storage::disk('public')->delete($attachment['path']);
+            }
+            
+            // Remove from array
+            unset($this->attachments[$index]);
+            $this->attachments = array_values($this->attachments); // Re-index array
+        }
+    }
+
+    public function viewAttachment($index)
+    {
+        if (isset($this->attachments[$index]) && isset($this->attachments[$index]['path'])) {
+            $path = $this->attachments[$index]['path'];
+            if (Storage::disk('public')->exists($path)) {
+                return Storage::disk('public')->url($path);
+            }
+        }
+        return null;
     }
 
 
@@ -478,6 +571,26 @@ class CategoryCreateComponent extends Component
             ],
         ];
 
+        // Get existing template to preserve old attachments if any
+        $existingTemplate = NotificationTemplate::where('appointment_type_id', $categoryId)
+            ->where('team_id', $this->teamId)
+            ->where('location_id', $this->locationId)
+            ->first();
+
+        // Delete old attachments that are no longer in the list
+        if ($existingTemplate && $existingTemplate->attachments) {
+            $oldAttachments = $existingTemplate->attachments;
+            $currentPaths = array_column($this->attachments, 'path');
+            
+            foreach ($oldAttachments as $oldAttachment) {
+                if (isset($oldAttachment['path']) && !in_array($oldAttachment['path'], $currentPaths)) {
+                    if (Storage::disk('public')->exists($oldAttachment['path'])) {
+                        Storage::disk('public')->delete($oldAttachment['path']);
+                    }
+                }
+            }
+        }
+
         NotificationTemplate::updateOrCreate(
             [
                 'appointment_type_id' => $categoryId,
@@ -488,8 +601,107 @@ class CategoryCreateComponent extends Component
                 'appointment_confirmation_email' => $emailTemplates['appointment_confirmation_email'],
                 'appointment_rescheduling_email' => $emailTemplates['appointment_rescheduling_email'],
                 'appointment_cancel_email' => $emailTemplates['appointment_cancel_email'],
+                'attachments' => $this->attachments,
             ]
         );
+    }
+
+    /**
+     * Load template variables from database
+     */
+    public function loadVariables()
+    {
+        $this->variables = TemplateVariable::pluck('description', 'variable_name')->toArray();
+    }
+
+    /**
+     * Append variable to confirmation subject
+     */
+    public function appendToConfirmationSubject()
+    {
+        if ($this->selectedVariableConfirmation) {
+            $this->confirmationTitle .= ' ' . $this->selectedVariableConfirmation;
+            $this->selectedVariableConfirmation = '';
+        }
+    }
+
+    /**
+     * Append variable to confirmation body
+     */
+    public function appendToConfirmationBody()
+    {
+        if ($this->selectedVariableConfirmation) {
+            // Update Livewire property directly as fallback
+            $this->confirmationContent .= ' ' . $this->selectedVariableConfirmation;
+            
+            // Also dispatch to Quill editor
+            $this->dispatch('append-to-editor', [
+                'editor' => 'confirmation-editor',
+                'text' => ' ' . $this->selectedVariableConfirmation
+            ]);
+            
+            $this->selectedVariableConfirmation = '';
+        }
+    }
+
+    /**
+     * Append variable to rescheduling subject
+     */
+    public function appendToReschedulingSubject()
+    {
+        if ($this->selectedVariableRescheduling) {
+            $this->reschedulingTitle .= ' ' . $this->selectedVariableRescheduling;
+            $this->selectedVariableRescheduling = '';
+        }
+    }
+
+    /**
+     * Append variable to rescheduling body
+     */
+    public function appendToReschedulingBody()
+    {
+        if ($this->selectedVariableRescheduling) {
+            // Update Livewire property directly as fallback
+            $this->reschedulingContent .= ' ' . $this->selectedVariableRescheduling;
+            
+            // Also dispatch to Quill editor
+            $this->dispatch('append-to-editor', [
+                'editor' => 'rescheduling-editor',
+                'text' => ' ' . $this->selectedVariableRescheduling
+            ]);
+            
+            $this->selectedVariableRescheduling = '';
+        }
+    }
+
+    /**
+     * Append variable to cancel subject
+     */
+    public function appendToCancelSubject()
+    {
+        if ($this->selectedVariableCancel) {
+            $this->cancelTitle .= ' ' . $this->selectedVariableCancel;
+            $this->selectedVariableCancel = '';
+        }
+    }
+
+    /**
+     * Append variable to cancel body
+     */
+    public function appendToCancelBody()
+    {
+        if ($this->selectedVariableCancel) {
+            // Update Livewire property directly as fallback
+            $this->cancelContent .= ' ' . $this->selectedVariableCancel;
+            
+            // Also dispatch to Quill editor
+            $this->dispatch('append-to-editor', [
+                'editor' => 'cancel-editor',
+                'text' => ' ' . $this->selectedVariableCancel
+            ]);
+            
+            $this->selectedVariableCancel = '';
+        }
     }
 
     public function render()

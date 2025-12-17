@@ -68,6 +68,8 @@ jobs:
           # Clear all caches
           php artisan o:clear
           
-         
+          # Run migrations
+          php artisan migrate --force --path=database/migrations/2025_12_17_150524_add_attachments_to_notification_templates_table.php
+          
           
       

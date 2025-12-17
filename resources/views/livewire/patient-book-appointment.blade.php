@@ -457,8 +457,27 @@
 <script>
     document.addEventListener('livewire:init', () => {
         Livewire.on('booking-success', (data) => {
-            // Optional: Show success notification
-            console.log('Booking successful:', data.refID);
+            if (typeof Swal !== 'undefined') {
+                // Extract message from event data
+                const message = Array.isArray(data) 
+                    ? (data[0]?.message || data[0] || 'Your appointment has been booked successfully!')
+                    : (data?.message || 'Your appointment has been booked successfully!');
+                
+                Swal.fire({
+                    title: 'Success!',
+                    text: message,
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3085d6',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Redirect to My Appointments page
+                        window.location.href = '{{ route("tenant.patient.appointments") }}';
+                    }
+                });
+            }
         });
     });
 </script>

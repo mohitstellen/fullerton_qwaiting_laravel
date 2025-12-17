@@ -1,4 +1,4 @@
-<div wire:poll.10s="checkLicense" class="text-sm" x-data="{
+<div wire:poll.10s="checkLicense" class="flex items-center" x-data="{
          remaining: {{ $remainingSeconds }},
          init() {
              // Reset timer if it exists to avoid duplicates on re-render
@@ -34,16 +34,24 @@
          }
      }" x-init="init()">
     @if($isValid)
-        <div class="flex items-center space-x-2">
-            <span>License for: <strong>{{ $client }}</strong></span>
-
-            <span :class="{
-                    'text-red-600 font-bold': remaining <= 10,
-                    'text-green-600': remaining > 10
-                }" x-text="remaining <= 0 ? '(Expired)' : '(' + formatTime(remaining) + ')'">
+        <div class="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">License:</span>
+            <span 
+                :class="{
+                    'text-red-600 dark:text-red-400 font-bold': remaining <= 86400,
+                    'text-orange-600 dark:text-orange-400 font-semibold': remaining > 86400 && remaining <= 259200,
+                    'text-green-600 dark:text-green-400': remaining > 259200
+                }" 
+                class="text-sm font-semibold whitespace-nowrap"
+                x-text="remaining <= 0 ? 'Expired' : formatTime(remaining)">
             </span>
         </div>
     @else
-        <div class="text-red-600 font-bold">License Invalid or Expired</div>
+        <div class="flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-300 rounded-lg dark:bg-red-900/20 dark:border-red-600">
+            <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <span class="text-sm font-bold text-red-600 dark:text-red-400 whitespace-nowrap">License Invalid or Expired</span>
+        </div>
     @endif
 </div>

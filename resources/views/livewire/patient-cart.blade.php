@@ -145,8 +145,8 @@
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
                     <!-- Payment Header -->
                     <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4">
-                        <h2 class="text-2xl font-bold text-white">{{ __('text.Payment') }}</h2>
-                        <p class="text-indigo-100 text-sm mt-1">Complete your payment securely</p>
+                        <h2 class="text-2xl font-bold text-slate-950">{{ __('text.Payment') }}</h2>
+                        <p class="text-slate-950 text-sm mt-1">Complete your payment securely</p>
                     </div>
 
                     <!-- Payment Form -->
@@ -431,6 +431,7 @@
                                     Livewire.dispatch('stripe-payment-method', {
                                         paymentMethodId: paymentMethod.id
                                     });
+
                                 }
                             } catch (err) {
                                 console.error('Payment processing error:', err);
@@ -469,6 +470,46 @@
             }, 300); // Delay to ensure DOM is ready
         });
     });
+
+    // Setup listener for payment success
+    function setupPaymentSuccessListener() {
+        Livewire.on('payment-success', (data) => {
+            // Extract message from event data
+            const message = Array.isArray(data) 
+                ? (data[0]?.message || data[0] || 'Payment successful! Your appointments have been booked successfully!')
+                : (data?.message || 'Payment successful! Your appointments have been booked successfully!');
+            
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Success!',
+                    text: message,
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3085d6',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Redirect to My Appointments page
+                        window.location.href = '{{ route("tenant.patient.appointments") }}';
+                    }
+                });
+            } else {
+                // Fallback: redirect directly if SweetAlert is not available
+                window.location.href = '{{ route("tenant.patient.appointments") }}';
+            }
+        });
+    }
+
+    // Setup listener when Livewire initializes
+    document.addEventListener('livewire:init', () => {
+        setupPaymentSuccessListener();
+    });
+
+    // Also setup if Livewire is already initialized
+    if (window.Livewire && document.readyState === 'complete') {
+        setupPaymentSuccessListener();
+    }
 </script>
 <script src="{{ asset('js/cdn/sweetalert2.js') }}"></script>
 @endpush

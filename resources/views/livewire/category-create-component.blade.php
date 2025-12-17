@@ -1,3 +1,7 @@
+@php
+use Illuminate\Support\Facades\Storage;
+@endphp
+
 <div class="p-4">
 
     <h2 class="text-xl font-semibold dark:text-white/90 mb-4">
@@ -558,6 +562,7 @@
                         @endif
 
                         {{-- Email Templates Section --}}
+                        @if($tab == '1')
                         <div class="w-full px-2.5">
                             <h3 class="text-lg font-semibold dark:text-white/90 mb-4 mt-6">{{ __('text.Email Templates') }}</h3>
 
@@ -566,9 +571,42 @@
                                 <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                     {{ __('text.Confirmation Communication') }} <span class="text-red-500">*</span>
                                 </label>
+                                
+                                {{-- Variable Selector for Confirmation --}}
+                                <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                    <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                        {{ __('text.Select Variable') }}
+                                    </label>
+                                    <div class="relative">
+                                        <select 
+                                            wire:model="selectedVariableConfirmation"
+                                            class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                                            <option value="">{{ __('text.Select Variable') }}</option>
+                                            @foreach($variables as $key => $value)
+                                                <option value="{{ $key }}">{{ $value }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mt-2 flex gap-2">
+                                        <button 
+                                            type="button"
+                                            wire:click="appendToConfirmationSubject"
+                                            onclick="this.blur()"
+                                            class="flex-1 px-3 py-2 text-sm font-medium text-white rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            {{ __('text.Append to Subject') }}
+                                        </button>
+                                        <button 
+                                            type="button"
+                                            onclick="this.blur(); var container = this.closest('.mb-3'); var select = container.querySelector('select'); if(select && select.value) { appendVariableToQuill('confirmation-editor', select.value); @this.call('appendToConfirmationBody'); } return false;"
+                                            class="flex-1 px-3 py-2 text-sm font-medium text-white rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            {{ __('text.Append to Body') }}
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <input
                                     type="text"
-                                    wire:model="confirmationTitle"
+                                    wire:model.live="confirmationTitle"
                                     placeholder="{{ __('text.Email Subject') }}"
                                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                                 @error('confirmationTitle') <span class="text-red-500 text-sm mt-1 block mb-3">{{ $message }}</span> @enderror
@@ -585,9 +623,41 @@
                                 <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                     {{ __('text.Rescheduling Communication') }}
                                 </label>
+                                
+                                {{-- Variable Selector for Rescheduling --}}
+                                <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                    <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                        {{ __('text.Select Variable') }}
+                                    </label>
+                                    <div class="relative">
+                                        <select 
+                                            wire:model="selectedVariableRescheduling"
+                                            class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                                            <option value="">{{ __('text.Select Variable') }}</option>
+                                            @foreach($variables as $key => $value)
+                                                <option value="{{ $key }}">{{ $value }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mt-2 flex gap-2">
+                                        <button 
+                                            type="button"
+                                            wire:click="appendToReschedulingSubject"
+                                            class="flex-1 px-3 py-2 text-sm font-medium text-white rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            {{ __('text.Append to Subject') }}
+                                        </button>
+                                        <button 
+                                            type="button"
+                                            onclick="this.blur(); var container = this.closest('.mb-3'); var select = container.querySelector('select'); if(select && select.value) { appendVariableToQuill('rescheduling-editor', select.value); select.value = ''; @this.set('selectedVariableRescheduling', ''); } return false;"
+                                            class="flex-1 px-3 py-2 text-sm font-medium text-white rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            {{ __('text.Append to Body') }}
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <input
                                     type="text"
-                                    wire:model="reschedulingTitle"
+                                    wire:model.live="reschedulingTitle"
                                     placeholder="{{ __('text.Email Subject') }}"
                                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                                 @error('reschedulingTitle') <span class="text-red-500 text-sm mt-1 block mb-3">{{ $message }}</span> @enderror
@@ -604,9 +674,41 @@
                                 <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                     {{ __('text.Cancel Communication') }}
                                 </label>
+                                
+                                {{-- Variable Selector for Cancel --}}
+                                <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                    <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                        {{ __('text.Select Variable') }}
+                                    </label>
+                                    <div class="relative">
+                                        <select 
+                                            wire:model="selectedVariableCancel"
+                                            class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                                            <option value="">{{ __('text.Select Variable') }}</option>
+                                            @foreach($variables as $key => $value)
+                                                <option value="{{ $key }}">{{ $value }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mt-2 flex gap-2">
+                                        <button 
+                                            type="button"
+                                            wire:click="appendToCancelSubject"
+                                            class="flex-1 px-3 py-2 text-sm font-medium text-white rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            {{ __('text.Append to Subject') }}
+                                        </button>
+                                        <button 
+                                            type="button"
+                                            onclick="this.blur(); var container = this.closest('.mb-3'); var select = container.querySelector('select'); if(select && select.value) { appendVariableToQuill('cancel-editor', select.value); select.value = ''; @this.set('selectedVariableCancel', ''); } return false;"
+                                            class="flex-1 px-3 py-2 text-sm font-medium text-white rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            {{ __('text.Append to Body') }}
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <input
                                     type="text"
-                                    wire:model="cancelTitle"
+                                    wire:model.live="cancelTitle"
                                     placeholder="{{ __('text.Email Subject') }}"
                                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                                 @error('cancelTitle') <span class="text-red-500 text-sm mt-1 block mb-3">{{ $message }}</span> @enderror
@@ -618,6 +720,81 @@
                                 </div>
                             </div>
                         </div>
+
+                        {{-- Attachments Section --}}
+                        @if($tab == '1')
+                        <div class="w-full px-2.5">
+                            <h3 class="text-lg font-semibold dark:text-white/90 mb-4 mt-6">{{ __('text.Attachments') }}</h3>
+                            
+                            <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <div class="flex gap-3 items-end">
+                                    <div class="flex-1">
+                                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                            {{ __('text.Select File') }}
+                                        </label>
+                                        <input 
+                                            type="file" 
+                                            wire:model="attachmentFile" 
+                                            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.odt,.ods,.odp"
+                                            class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                                        @error('attachmentFile') 
+                                            <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> 
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <button 
+                                            type="button" 
+                                            wire:click="addAttachment"
+                                            class="px-4 py-2.5 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 transition-colors">
+                                            {{ __('text.Add Attachment') }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {{-- List of Attachments --}}
+                                @if(count($attachments) > 0)
+                                <div class="mt-4 space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
+                                        {{ __('text.Attached Files') }}
+                                    </label>
+                                    @foreach($attachments as $index => $attachment)
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                        <div class="flex items-center gap-3 flex-1">
+                                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ $attachment['name'] ?? 'File' }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            @if(isset($attachment['path']))
+                                            <a 
+                                                href="{{ Storage::disk('public')->url($attachment['path']) }}" 
+                                                target="_blank"
+                                                class="p-2 text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-brand-400 transition-colors"
+                                                title="{{ __('text.View') }}">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                </svg>
+                                            </a>
+                                            @endif
+                                            <button 
+                                                type="button" 
+                                                wire:click="removeAttachment({{ $index }})"
+                                                class="p-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
+                                                title="{{ __('text.Remove') }}">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                        @endif
 
                     </div>
                     <div class="w-full xl:w-1/2 flex gap-3">
@@ -704,18 +881,44 @@
                 quill.root.innerHTML = content;
             }
 
+            // Watch for Livewire property changes and update Quill
+            let lastContent = content;
+            setInterval(() => {
+                let currentContent = @this.get(propertyName) || '';
+                if (currentContent !== lastContent && currentContent !== quill.root.innerHTML) {
+                    // Only update if not programmatically inserting
+                    if (!quill._isProgrammaticInsert) {
+                        quill.root.innerHTML = currentContent;
+                        lastContent = currentContent;
+                    }
+                }
+            }, 200);
+
             // Update Livewire property on content change (with shorter debounce)
+            // Skip sync if this is a programmatic insertion
             let updateTimeout;
-            quill.on('text-change', function() {
+            let isUpdating = false;
+            quill.on('text-change', function(delta, oldDelta, source) {
+                // Skip sync if this is a programmatic insertion or if we're already updating
+                if (quill._isProgrammaticInsert || isUpdating || source === 'api') {
+                    return;
+                }
                 clearTimeout(updateTimeout);
                 updateTimeout = setTimeout(function() {
-                    @this.set(propertyName, quill.root.innerHTML);
+                    if (!quill._isProgrammaticInsert) {
+                        isUpdating = true;
+                        lastContent = quill.root.innerHTML;
+                        @this.set(propertyName, quill.root.innerHTML);
+                        setTimeout(() => { isUpdating = false; }, 50);
+                    }
                 }, 100);
             });
 
-            // Also sync on blur to ensure content is saved
+            // Also sync on blur to ensure content is saved (but skip if programmatic)
             quill.root.addEventListener('blur', function() {
-                @this.set(propertyName, quill.root.innerHTML);
+                if (!quill._isProgrammaticInsert) {
+                    @this.set(propertyName, quill.root.innerHTML);
+                }
             });
         } catch (e) {
             console.error('Error initializing Quill editor for ' + editorId + ':', e);
@@ -746,6 +949,75 @@
     document.addEventListener('livewire:init', function() {
         initQuillEditors();
 
+        // Listen for append-to-editor event (Livewire 3 format)
+        // Remove any existing listener first to prevent duplicates
+        Livewire.off('append-to-editor');
+        
+        Livewire.on('append-to-editor', (data) => {
+            // Handle both array and object formats
+            let editorId, text;
+            if (Array.isArray(data)) {
+                editorId = data[0]?.editor || data.editor;
+                text = data[0]?.text || data.text;
+            } else if (data && typeof data === 'object') {
+                editorId = data.editor;
+                text = data.text;
+            } else {
+                return;
+            }
+            
+            if (!editorId || !text) {
+                return;
+            }
+            
+            // Wait a bit to ensure Quill is ready
+            setTimeout(() => {
+                if (!window.quillInstances || !window.quillInstances[editorId]) {
+                    return;
+                }
+                
+                const quill = window.quillInstances[editorId];
+                
+                // Prevent multiple insertions with a flag
+                if (quill._isAppending) {
+                    return;
+                }
+                quill._isAppending = true;
+                
+                try {
+                    const range = quill.getSelection(true);
+                    const index = range ? range.index : (quill.getLength() > 1 ? quill.getLength() - 1 : 0);
+                    
+                    // Set flag to prevent sync during programmatic insertion
+                    quill._isProgrammaticInsert = true;
+                    
+                    // Insert text at cursor position (only once)
+                    quill.insertText(index, text);
+                    quill.setSelection(index + text.length);
+                    
+                    // Update Livewire property after insertion
+                    setTimeout(() => {
+                        const propertyMap = {
+                            'confirmation-editor': 'confirmationContent',
+                            'rescheduling-editor': 'reschedulingContent',
+                            'cancel-editor': 'cancelContent'
+                        };
+                        const propertyName = propertyMap[editorId];
+                        if (propertyName) {
+                            @this.set(propertyName, quill.root.innerHTML);
+                        }
+                        // Clear flags after update
+                        quill._isProgrammaticInsert = false;
+                        quill._isAppending = false;
+                    }, 150);
+                } catch (e) {
+                    console.error('Error inserting text:', e);
+                    quill._isAppending = false;
+                    quill._isProgrammaticInsert = false;
+                }
+            }, 50);
+        });
+
         Livewire.hook('message.processed', (message, component) => {
             // Reinitialize after Livewire updates
             setTimeout(function() {
@@ -753,6 +1025,60 @@
             }, 100);
         });
     });
+
+    // Function to append variable directly to Quill editor (global function)
+    window.appendVariableToQuill = function(editorId, text) {
+        if (!text || !editorId) {
+            return;
+        }
+        
+        setTimeout(() => {
+            if (!window.quillInstances || !window.quillInstances[editorId]) {
+                console.log('Quill instance not found:', editorId);
+                return;
+            }
+            
+            const quill = window.quillInstances[editorId];
+            
+            // Prevent multiple insertions
+            if (quill._isAppending) {
+                return;
+            }
+            quill._isAppending = true;
+            
+            try {
+                const range = quill.getSelection(true);
+                const index = range ? range.index : (quill.getLength() > 1 ? quill.getLength() - 1 : 0);
+                
+                // Set flag to prevent sync during programmatic insertion
+                quill._isProgrammaticInsert = true;
+                
+                // Insert text at cursor position
+                quill.insertText(index, ' ' + text);
+                quill.setSelection(index + text.length + 1);
+                
+                // Update Livewire property
+                setTimeout(() => {
+                    const propertyMap = {
+                        'confirmation-editor': 'confirmationContent',
+                        'rescheduling-editor': 'reschedulingContent',
+                        'cancel-editor': 'cancelContent'
+                    };
+                    const propertyName = propertyMap[editorId];
+                    if (propertyName) {
+                        @this.set(propertyName, quill.root.innerHTML);
+                    }
+                    // Clear flags
+                    quill._isProgrammaticInsert = false;
+                    quill._isAppending = false;
+                }, 150);
+            } catch (e) {
+                console.error('Error inserting text:', e);
+                quill._isAppending = false;
+                quill._isProgrammaticInsert = false;
+            }
+        }, 50);
+    };;
 
     // Sync QuillEditor content before form submission
     function syncQuillContent() {

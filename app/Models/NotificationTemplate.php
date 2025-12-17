@@ -49,6 +49,7 @@ class NotificationTemplate extends Model
         'appointment_confirmation_email',
         'appointment_rescheduling_email',
         'appointment_cancel_email',
+        'attachments',
     ];
 
     // Define any date casting if necessary
@@ -58,6 +59,7 @@ class NotificationTemplate extends Model
         'appointment_confirmation_email' => 'array',
         'appointment_rescheduling_email' => 'array',
         'appointment_cancel_email' => 'array',
+        'attachments' => 'array',
     ];
 
     public function team(): BelongsTo

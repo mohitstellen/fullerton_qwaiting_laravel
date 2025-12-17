@@ -10,9 +10,11 @@ use App\Models\{
     Location,
     AccountSetting,
     SiteDetail,
-    Order
+    Order,
+    SmtpDetails
 };
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Config;
@@ -474,19 +476,66 @@ class PatientMyAppointments extends Component
             
             DB::commit();
             
+            // Send appointment reschedule email
+            try {
+                // Get appointment type
+                $appointmentType = Category::find($booking->category_id);
+                
+                // Prepare email data
+                $emailData = [
+                    'to_mail' => $booking->email,
+                    'name' => $booking->name,
+                    'booking_id' => $booking->refID,
+                    'booking_date' => Carbon::parse($booking->booking_date)->format('d/m/Y'),
+                    'booking_time' => $startTime12h,
+                    'refID' => $booking->refID,
+                    'category_name' => $appointmentType->name ?? '',
+                    'service_name' => $appointmentType->name ?? '',
+                    'locations_id' => $booking->location_id,
+                ];
+
+                // Send email
+                SmtpDetails::sendAppointmentRescheduleEmail(
+                    $emailData,
+                    $this->teamId,
+                    $booking->location_id,
+                    $booking->category_id
+                );
+            } catch (\Exception $e) {
+                // Log error but don't fail the reschedule
+                Log::error('Failed to send appointment reschedule email: ' . $e->getMessage());
+            }
+            
             // Reload appointments
             $this->loadAppointments();
             
             // Close modal
             $this->closeRescheduleModal();
             
+            // Dispatch event to show SweetAlert success message
+            $this->dispatch('appointment-rescheduled', [
+                'message' => 'Appointment has been rescheduled successfully.'
+            ]);
+            
             session()->flash('success', 'Appointment has been rescheduled successfully.');
             
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error rescheduling appointment: ' . $e->getMessage());
+            
+            // Dispatch event to show SweetAlert error message
+            $this->dispatch('appointment-reschedule-error', [
+                'message' => 'Failed to reschedule appointment. Please try again.'
+            ]);
+            
             session()->flash('error', 'Failed to reschedule appointment. Please try again.');
         }
+    }
+
+    public function confirmCancelAppointment($bookingId)
+    {
+        // Dispatch event to show SweetAlert confirmation
+        $this->dispatch('show-cancel-confirmation', ['bookingId' => $bookingId]);
     }
 
     public function cancelAppointment($bookingId)
@@ -544,10 +593,80 @@ class PatientMyAppointments extends Component
             }
         }
 
+        // Send appointment cancel email
+        try {
+            // Get appointment type
+            $appointmentType = Category::find($booking->category_id);
+            
+            // Parse time slot for display
+            $timeParts = explode('-', $booking->booking_time);
+            $startTime12h = trim($timeParts[0] ?? '');
+            
+            // Prepare email data
+            $emailData = [
+                'to_mail' => $booking->email,
+                'name' => $booking->name,
+                'booking_id' => $booking->refID,
+                'booking_date' => Carbon::parse($booking->booking_date)->format('d/m/Y'),
+                'booking_time' => $startTime12h,
+                'refID' => $booking->refID,
+                'category_name' => $appointmentType->name ?? '',
+                'service_name' => $appointmentType->name ?? '',
+                'locations_id' => $booking->location_id,
+            ];
+
+            // Send email
+            SmtpDetails::sendAppointmentCancelEmail(
+                $emailData,
+                $this->teamId,
+                $booking->location_id,
+                $booking->category_id
+            );
+        } catch (\Exception $e) {
+            // Log error but don't fail the cancellation
+            Log::error('Failed to send appointment cancel email: ' . $e->getMessage());
+        }
+
         // Reload appointments
         $this->loadAppointments();
         
         session()->flash('success', 'Appointment has been cancelled successfully.');
+    }
+
+    #[On('confirmed-cancel-appointment')]
+    public function handleConfirmedCancelAppointment($bookingId = null)
+    {
+        // Livewire 3 passes event data as the first parameter
+        // The bookingId might come directly or wrapped in an array/object
+        $id = null;
+        
+        if ($bookingId === null) {
+            Log::error('No bookingId received in cancellation event');
+            return;
+        }
+        
+        // Handle different data formats
+        if (is_numeric($bookingId)) {
+            // Direct numeric value
+            $id = (int)$bookingId;
+        } elseif (is_array($bookingId)) {
+            // Array format: ['bookingId' => 123] or [0 => 123] or [0 => ['bookingId' => 123]]
+            $id = $bookingId['bookingId'] ?? (isset($bookingId[0]) && is_numeric($bookingId[0]) ? (int)$bookingId[0] : ($bookingId[0]['bookingId'] ?? null)) ?? null;
+        } elseif (is_object($bookingId)) {
+            // Object format
+            $id = $bookingId->bookingId ?? null;
+        } else {
+            $id = $bookingId;
+        }
+        
+        if ($id) {
+            $this->cancelAppointment($id);
+        } else {
+            Log::error('Failed to extract bookingId from cancellation event', [
+                'received' => $bookingId,
+                'type' => gettype($bookingId)
+            ]);
+        }
     }
 
     public function render()

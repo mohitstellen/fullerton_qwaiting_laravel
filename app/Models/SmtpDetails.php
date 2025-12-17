@@ -492,6 +492,343 @@ public static function replaceTemplatePlaceholders($template, $data,$teamId)
     return str_replace($placeholders, $replacements, $template);
 }
 
+/**
+ * Send appointment confirmation email with attachments
+ *
+ * @param array $data Email data (to_mail, booking details, etc.)
+ * @param int $teamId Team ID
+ * @param int $locationId Location ID
+ * @param int $appointmentTypeId Appointment Type ID
+ * @return void
+ */
+public static function sendAppointmentConfirmationEmail($data, $teamId, $locationId, $appointmentTypeId)
+{
+    try {
+        // Fetch notification template
+        $template = NotificationTemplate::where('team_id', $teamId)
+            ->where('location_id', $locationId)
+            ->where('appointment_type_id', $appointmentTypeId)
+            ->first();
 
+        if (!$template || !$template->appointment_confirmation_email) {
+            \Log::info('No appointment confirmation email template found for team_id: ' . $teamId . ', location_id: ' . $locationId . ', appointment_type_id: ' . $appointmentTypeId);
+            return;
+        }
+
+        $emailConfig = $template->appointment_confirmation_email;
+        $subject = $emailConfig['subject'] ?? 'Appointment Confirmation';
+        $body = $emailConfig['body'] ?? '';
+
+        // Get SMTP details
+        $smtpDetails = self::where('team_id', $teamId)
+            ->where('location_id', $locationId)
+            ->first();
+
+        if (!$smtpDetails || empty($smtpDetails->hostname) || empty($smtpDetails->port) || 
+            empty($smtpDetails->username) || empty($smtpDetails->password) || 
+            empty($smtpDetails->from_email) || empty($smtpDetails->from_name)) {
+            \Log::info('SMTP details not configured for team_id: ' . $teamId . ', location_id: ' . $locationId);
+            return;
+        }
+
+        // Get site details for logo
+        $siteDetail = SiteDetail::where('team_id', $teamId)
+            ->where('location_id', $locationId)
+            ->select('business_logo')
+            ->first();
+
+        $logo = isset($siteDetail) && $siteDetail->business_logo 
+            ? url('storage/' . $siteDetail->business_logo) 
+            : '';
+
+        // Replace placeholders in body
+        $templateBody = self::replaceTemplatePlaceholders($body, $data, $teamId);
+
+        // Build HTML email content
+        $templateContent = '
+        <div style="background:#e8e8e8;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-size:13px;line-height:1.4;padding:2% 7%">
+            <img id="Qwaiting" src="' . $logo . '" alt="logo" class="CToWUd" style="vertical-align:middle;" width="100">
+            <div style="background:#fff;border-top-color:#6e8cce;border-top-style:solid;border-top-width:4px;margin:25px auto;border-radius: 8px;">
+                <div style="border-color:#e5e5e5;border-style:none solid solid;border-width:2px;padding:7%">
+                    <div>
+                        ' . nl2br($templateBody) . '
+                    </div>
+                </div>
+            </div>
+            <div style="text-align:center" align="center">
+                <p style="color:#999;font-size:11px;line-height:1.4;margin:5px 0">Copyright ' . date("Y") . ' © Qwaiting Inc. All Rights Reserved.</p>
+            </div>
+        </div>';
+
+        // Configure SMTP
+        Config::set('mail.mailers.smtp.transport', 'smtp');
+        Config::set('mail.mailers.smtp.host', trim($smtpDetails->hostname));
+        Config::set('mail.mailers.smtp.port', trim($smtpDetails->port));
+        Config::set('mail.mailers.smtp.encryption', trim($smtpDetails->encryption ?? 'ssl'));
+        Config::set('mail.mailers.smtp.username', trim($smtpDetails->username));
+        Config::set('mail.mailers.smtp.password', trim($smtpDetails->password));
+        Config::set('mail.from.address', trim($smtpDetails->from_email));
+        Config::set('mail.from.name', trim($smtpDetails->from_name));
+
+        // Get attachments
+        $attachments = $template->attachments ?? [];
+
+        // Send email with attachments
+        if (!empty($data['to_mail']) && filter_var($data['to_mail'], FILTER_VALIDATE_EMAIL)) {
+            Mail::html($templateContent, function ($message) use ($data, $subject, $smtpDetails, $attachments) {
+                $message->from($smtpDetails->from_email, $smtpDetails->from_name);
+                $message->to($data['to_mail'])->subject($subject);
+
+                // Attach files if any
+                if (!empty($attachments) && is_array($attachments)) {
+                    foreach ($attachments as $attachment) {
+                        if (isset($attachment['path'])) {
+                            $filePath = storage_path('app/public/' . $attachment['path']);
+                            if (file_exists($filePath)) {
+                                $message->attach($filePath);
+                            } else {
+                                \Log::warning('Attachment file not found: ' . $filePath);
+                            }
+                        }
+                    }
+                }
+            });
+
+            \Log::info('Appointment confirmation email sent successfully to: ' . $data['to_mail']);
+        } else {
+            \Log::warning('Invalid email address: ' . ($data['to_mail'] ?? 'not provided'));
+        }
+
+    } catch (\Throwable $e) {
+        \Log::error('Error sending appointment confirmation email: ' . $e->getMessage());
+        \Log::error('Stack trace: ' . $e->getTraceAsString());
+    }
+}
+
+/**
+ * Send appointment reschedule email with attachments
+ *
+ * @param array $data Email data (to_mail, booking details, etc.)
+ * @param int $teamId Team ID
+ * @param int $locationId Location ID
+ * @param int $appointmentTypeId Appointment Type ID
+ * @return void
+ */
+public static function sendAppointmentRescheduleEmail($data, $teamId, $locationId, $appointmentTypeId)
+{
+    try {
+        // Fetch notification template
+        $template = NotificationTemplate::where('team_id', $teamId)
+            ->where('location_id', $locationId)
+            ->where('appointment_type_id', $appointmentTypeId)
+            ->first();
+
+        if (!$template || !$template->appointment_rescheduling_email) {
+            \Log::info('No appointment rescheduling email template found for team_id: ' . $teamId . ', location_id: ' . $locationId . ', appointment_type_id: ' . $appointmentTypeId);
+            return;
+        }
+
+        $emailConfig = $template->appointment_rescheduling_email;
+        $subject = $emailConfig['subject'] ?? 'Appointment Rescheduled';
+        $body = $emailConfig['body'] ?? '';
+
+        // Get SMTP details
+        $smtpDetails = self::where('team_id', $teamId)
+            ->where('location_id', $locationId)
+            ->first();
+
+        if (!$smtpDetails || empty($smtpDetails->hostname) || empty($smtpDetails->port) || 
+            empty($smtpDetails->username) || empty($smtpDetails->password) || 
+            empty($smtpDetails->from_email) || empty($smtpDetails->from_name)) {
+            \Log::info('SMTP details not configured for team_id: ' . $teamId . ', location_id: ' . $locationId);
+            return;
+        }
+
+        // Get site details for logo
+        $siteDetail = SiteDetail::where('team_id', $teamId)
+            ->where('location_id', $locationId)
+            ->select('business_logo')
+            ->first();
+
+        $logo = isset($siteDetail) && $siteDetail->business_logo 
+            ? url('storage/' . $siteDetail->business_logo) 
+            : '';
+
+        // Replace placeholders in body
+        $templateBody = self::replaceTemplatePlaceholders($body, $data, $teamId);
+
+        // Build HTML email content
+        $templateContent = '
+        <div style="background:#e8e8e8;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-size:13px;line-height:1.4;padding:2% 7%">
+            <img id="Qwaiting" src="' . $logo . '" alt="logo" class="CToWUd" style="vertical-align:middle;" width="100">
+            <div style="background:#fff;border-top-color:#6e8cce;border-top-style:solid;border-top-width:4px;margin:25px auto;border-radius: 8px;">
+                <div style="border-color:#e5e5e5;border-style:none solid solid;border-width:2px;padding:7%">
+                    <div>
+                        ' . nl2br($templateBody) . '
+                    </div>
+                </div>
+            </div>
+            <div style="text-align:center" align="center">
+                <p style="color:#999;font-size:11px;line-height:1.4;margin:5px 0">Copyright ' . date("Y") . ' © Qwaiting Inc. All Rights Reserved.</p>
+            </div>
+        </div>';
+
+        // Configure SMTP
+        Config::set('mail.mailers.smtp.transport', 'smtp');
+        Config::set('mail.mailers.smtp.host', trim($smtpDetails->hostname));
+        Config::set('mail.mailers.smtp.port', trim($smtpDetails->port));
+        Config::set('mail.mailers.smtp.encryption', trim($smtpDetails->encryption ?? 'ssl'));
+        Config::set('mail.mailers.smtp.username', trim($smtpDetails->username));
+        Config::set('mail.mailers.smtp.password', trim($smtpDetails->password));
+        Config::set('mail.from.address', trim($smtpDetails->from_email));
+        Config::set('mail.from.name', trim($smtpDetails->from_name));
+
+        // Get attachments
+        $attachments = $template->attachments ?? [];
+
+        // Send email with attachments
+        if (!empty($data['to_mail']) && filter_var($data['to_mail'], FILTER_VALIDATE_EMAIL)) {
+            Mail::html($templateContent, function ($message) use ($data, $subject, $smtpDetails, $attachments) {
+                $message->from($smtpDetails->from_email, $smtpDetails->from_name);
+                $message->to($data['to_mail'])->subject($subject);
+
+                // Attach files if any
+                if (!empty($attachments) && is_array($attachments)) {
+                    foreach ($attachments as $attachment) {
+                        if (isset($attachment['path'])) {
+                            $filePath = storage_path('app/public/' . $attachment['path']);
+                            if (file_exists($filePath)) {
+                                $message->attach($filePath);
+                            } else {
+                                \Log::warning('Attachment file not found: ' . $filePath);
+                            }
+                        }
+                    }
+                }
+            });
+
+            \Log::info('Appointment reschedule email sent successfully to: ' . $data['to_mail']);
+        } else {
+            \Log::warning('Invalid email address: ' . ($data['to_mail'] ?? 'not provided'));
+        }
+
+    } catch (\Throwable $e) {
+        \Log::error('Error sending appointment reschedule email: ' . $e->getMessage());
+        \Log::error('Stack trace: ' . $e->getTraceAsString());
+    }
+}
+
+/**
+ * Send appointment cancel email with attachments
+ *
+ * @param array $data Email data (to_mail, booking details, etc.)
+ * @param int $teamId Team ID
+ * @param int $locationId Location ID
+ * @param int $appointmentTypeId Appointment Type ID
+ * @return void
+ */
+public static function sendAppointmentCancelEmail($data, $teamId, $locationId, $appointmentTypeId)
+{
+    try {
+        // Fetch notification template
+        $template = NotificationTemplate::where('team_id', $teamId)
+            ->where('location_id', $locationId)
+            ->where('appointment_type_id', $appointmentTypeId)
+            ->first();
+
+        if (!$template || !$template->appointment_cancel_email) {
+            \Log::info('No appointment cancel email template found for team_id: ' . $teamId . ', location_id: ' . $locationId . ', appointment_type_id: ' . $appointmentTypeId);
+            return;
+        }
+
+        $emailConfig = $template->appointment_cancel_email;
+        $subject = $emailConfig['subject'] ?? 'Appointment Cancelled';
+        $body = $emailConfig['body'] ?? '';
+
+        // Get SMTP details
+        $smtpDetails = self::where('team_id', $teamId)
+            ->where('location_id', $locationId)
+            ->first();
+
+        if (!$smtpDetails || empty($smtpDetails->hostname) || empty($smtpDetails->port) || 
+            empty($smtpDetails->username) || empty($smtpDetails->password) || 
+            empty($smtpDetails->from_email) || empty($smtpDetails->from_name)) {
+            \Log::info('SMTP details not configured for team_id: ' . $teamId . ', location_id: ' . $locationId);
+            return;
+        }
+
+        // Get site details for logo
+        $siteDetail = SiteDetail::where('team_id', $teamId)
+            ->where('location_id', $locationId)
+            ->select('business_logo')
+            ->first();
+
+        $logo = isset($siteDetail) && $siteDetail->business_logo 
+            ? url('storage/' . $siteDetail->business_logo) 
+            : '';
+
+        // Replace placeholders in body
+        $templateBody = self::replaceTemplatePlaceholders($body, $data, $teamId);
+
+        // Build HTML email content
+        $templateContent = '
+        <div style="background:#e8e8e8;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;font-size:13px;line-height:1.4;padding:2% 7%">
+            <img id="Qwaiting" src="' . $logo . '" alt="logo" class="CToWUd" style="vertical-align:middle;" width="100">
+            <div style="background:#fff;border-top-color:#6e8cce;border-top-style:solid;border-top-width:4px;margin:25px auto;border-radius: 8px;">
+                <div style="border-color:#e5e5e5;border-style:none solid solid;border-width:2px;padding:7%">
+                    <div>
+                        ' . nl2br($templateBody) . '
+                    </div>
+                </div>
+            </div>
+            <div style="text-align:center" align="center">
+                <p style="color:#999;font-size:11px;line-height:1.4;margin:5px 0">Copyright ' . date("Y") . ' © Qwaiting Inc. All Rights Reserved.</p>
+            </div>
+        </div>';
+
+        // Configure SMTP
+        Config::set('mail.mailers.smtp.transport', 'smtp');
+        Config::set('mail.mailers.smtp.host', trim($smtpDetails->hostname));
+        Config::set('mail.mailers.smtp.port', trim($smtpDetails->port));
+        Config::set('mail.mailers.smtp.encryption', trim($smtpDetails->encryption ?? 'ssl'));
+        Config::set('mail.mailers.smtp.username', trim($smtpDetails->username));
+        Config::set('mail.mailers.smtp.password', trim($smtpDetails->password));
+        Config::set('mail.from.address', trim($smtpDetails->from_email));
+        Config::set('mail.from.name', trim($smtpDetails->from_name));
+
+        // Get attachments
+        $attachments = $template->attachments ?? [];
+
+        // Send email with attachments
+        if (!empty($data['to_mail']) && filter_var($data['to_mail'], FILTER_VALIDATE_EMAIL)) {
+            Mail::html($templateContent, function ($message) use ($data, $subject, $smtpDetails, $attachments) {
+                $message->from($smtpDetails->from_email, $smtpDetails->from_name);
+                $message->to($data['to_mail'])->subject($subject);
+
+                // Attach files if any
+                if (!empty($attachments) && is_array($attachments)) {
+                    foreach ($attachments as $attachment) {
+                        if (isset($attachment['path'])) {
+                            $filePath = storage_path('app/public/' . $attachment['path']);
+                            if (file_exists($filePath)) {
+                                $message->attach($filePath);
+                            } else {
+                                \Log::warning('Attachment file not found: ' . $filePath);
+                            }
+                        }
+                    }
+                }
+            });
+
+            \Log::info('Appointment cancel email sent successfully to: ' . $data['to_mail']);
+        } else {
+            \Log::warning('Invalid email address: ' . ($data['to_mail'] ?? 'not provided'));
+        }
+
+    } catch (\Throwable $e) {
+        \Log::error('Error sending appointment cancel email: ' . $e->getMessage());
+        \Log::error('Stack trace: ' . $e->getTraceAsString());
+    }
+}
 
 }

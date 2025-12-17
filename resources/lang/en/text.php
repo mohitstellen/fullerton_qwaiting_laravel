@@ -983,6 +983,11 @@ $langArr = [
         "Company" => "Company",
         "Email Subject" => "Email Subject",
         "Package for" => "Package for",
+        "Select File" => "Select File",
+        "Attachments" => "Attachments",
+        "Add Attachment" => "Add Attachment",
+        "Attached Files" => "Attached Files",
+        "Select Variable" => "Select Variable",
 
 ];
 

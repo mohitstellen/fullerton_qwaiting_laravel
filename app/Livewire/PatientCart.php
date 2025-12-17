@@ -14,6 +14,7 @@ use App\Models\Location;
 use App\Models\Order;
 use App\Models\PaymentSetting;
 use App\Models\StripeResponse;
+use App\Models\SmtpDetails;
 use Carbon\Carbon;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Config;
@@ -440,6 +441,51 @@ class PatientCart extends Component
             
             DB::commit();
             
+            // Store cart items before clearing (needed for email sending)
+            $cartItemsCopy = $this->cartItems;
+            
+            // Send appointment confirmation emails for all customers
+            try {
+                // Send email for each booking
+                foreach ($bookings as $index => $booking) {
+                    // Get the original cart item for this booking (use index to match)
+                    $cartItem = $cartItemsCopy[$index] ?? null;
+                    
+                    if ($cartItem) {
+                        // Parse time slot for display
+                        $timeParts = explode('-', $cartItem['booking_time']);
+                        $startTime12h = trim($timeParts[0] ?? '');
+                        
+                        // Get appointment type
+                        $appointmentType = Category::find($booking->category_id);
+                        
+                        // Prepare email data
+                        $emailData = [
+                            'to_mail' => $this->member->email,
+                            'name' => $cartItem['name'] ?? ($this->member->salutation ? $this->member->salutation . ' ' : '') . $this->member->full_name,
+                            'booking_id' => $refID,
+                            'booking_date' => Carbon::parse($booking->booking_date)->format('d/m/Y'),
+                            'booking_time' => $startTime12h,
+                            'refID' => $refID,
+                            'category_name' => $appointmentType->name ?? '',
+                            'service_name' => $appointmentType->name ?? '',
+                            'locations_id' => $booking->location_id,
+                        ];
+
+                        // Send email
+                        SmtpDetails::sendAppointmentConfirmationEmail(
+                            $emailData,
+                            $this->teamId,
+                            $booking->location_id,
+                            $booking->category_id
+                        );
+                    }
+                }
+            } catch (\Exception $e) {
+                // Log error but don't fail the checkout
+                Log::error('Failed to send appointment confirmation emails in cart checkout: ' . $e->getMessage());
+            }
+            
             // Clear checkout flag
             Session::forget('checkout_in_progress');
             
@@ -449,8 +495,12 @@ class PatientCart extends Component
             
             session()->flash('checkout_success', 'All appointments have been booked successfully! Order Number: ' . $order->order_number);
             
-            // Redirect to appointments page
-            $this->redirect(route('tenant.patient.appointments'), navigate: true);
+            // Dispatch event to show SweetAlert - JavaScript will handle redirect
+            $this->dispatch('payment-success', [
+                'message' => 'Payment successful! All appointments have been booked successfully! Order Number: ' . $order->order_number
+            ]);
+            
+            // Don't redirect here - let JavaScript handle redirect after SweetAlert
             
         } catch (\Exception $e) {
             DB::rollBack();
