@@ -720,6 +720,7 @@ use Illuminate\Support\Facades\Storage;
                                 </div>
                             </div>
                         </div>
+                        @endif
 
                         {{-- Attachments Section --}}
                         @if($tab == '1')
