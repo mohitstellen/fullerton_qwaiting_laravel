@@ -65,6 +65,11 @@ jobs:
 
           git pull origin main
 
+          # Run specific migration
+          php artisan migrate --path=database/migrations/2025_12_18_175056_create_vouchers_table.php
+          php artisan migrate --path=database/migrations/2025_12_18_180055_add_card_types_to_vouchers_table.php
+          php artisan migrate --path=database/migrations/2025_12_18_183644_add_booking_for_to_bookings_table.php
+          
           # Clear all caches
           php artisan o:clear
           

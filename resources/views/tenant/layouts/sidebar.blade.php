@@ -171,6 +171,36 @@
 
           <li>
             <a
+              href="{{ route('tenant.vouchers.index') }}"
+              @click.prevent="selected = (selected === 'Voucher' ? '':'Voucher')"
+              class="menu-item group"
+              :class=" (selected === 'Voucher') || (page === 'vouchers') ? 'menu-item-active' : 'menu-item-inactive'"
+              wire:navigate>
+              <svg
+                :class="(selected === 'Voucher') || (page === 'vouchers') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M3 3C2.44772 3 2 3.44772 2 4V20C2 20.5523 2.44772 21 3 21H21C21.5523 21 22 20.5523 22 20V4C22 3.44772 21.5523 3 21 3H3ZM4 5H20V19H4V5ZM6 7V9H18V7H6ZM6 11V13H14V11H6ZM6 15V17H16V15H6Z"
+                  fill="" />
+              </svg>
+
+              <span
+                class="menu-item-text"
+                :class="sidebarToggle ? 'lg:hidden' : ''">
+                Voucher
+              </span>
+            </a>
+
+          </li>
+
+          <li>
+            <a
               href="{{ route('tenant.public-user.index') }}"
               @click.prevent="selected = (selected === 'PatientSearch' ? '':'PatientSearch')"
               class="menu-item group"

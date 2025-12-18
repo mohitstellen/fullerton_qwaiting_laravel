@@ -169,6 +169,9 @@ use App\Livewire\VirtualQueueTypeSelection;
 use App\Livewire\Company\CompanyList;
 use App\Livewire\Company\AddCompany;
 use App\Livewire\Company\EditCompany;
+use App\Livewire\Voucher\VoucherList;
+use App\Livewire\Voucher\AddVoucher;
+use App\Livewire\Voucher\EditVoucher;
 use App\Livewire\AIAgentCall;
 use App\Livewire\HumanAgentWaiting;
 use App\Livewire\VirtualQueueSettings;
@@ -401,6 +404,11 @@ Route::middleware([
         Route::get('/companies', CompanyList::class)->name('companies.index');
         Route::get('/companies/create', AddCompany::class)->name('companies.create');
         Route::get('/companies/{companyRecord}/edit', EditCompany::class)->name('companies.edit');
+
+        // vouchers module
+        Route::get('/vouchers', VoucherList::class)->name('vouchers.index');
+        Route::get('/vouchers/create', AddVoucher::class)->name('vouchers.create');
+        Route::get('/vouchers/{voucherRecord}/edit', EditVoucher::class)->name('vouchers.edit');
 
         Route::get('/break-reason', BreakReason::class)->name('break-reason');
         Route::get('/break-reasons/create', BreakReasonForm::class)->name('break-reasons.create');

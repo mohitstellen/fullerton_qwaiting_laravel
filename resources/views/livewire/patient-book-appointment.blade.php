@@ -42,10 +42,10 @@
                         </div>
 
                         <!-- Booking For (Self/Dependent) -->
-                        @if($showBookingFor)
+                        @if($appointmentTypeId)
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Booking For
+                                    Booking For <span class="text-red-500">*</span>
                                 </label>
                                 <div class="flex gap-6">
                                     <label class="flex items-center">
@@ -59,6 +59,9 @@
                                         <span class="ml-2 text-gray-700 dark:text-gray-300">Dependent</span>
                                     </label>
                                 </div>
+                                @error('bookingFor') 
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p> 
+                                @enderror
                             </div>
                         @endif
 

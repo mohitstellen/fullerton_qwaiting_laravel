@@ -211,6 +211,13 @@ class PatientBookAppointment extends Component
             'appointmentTypeId.required' => 'Please select an appointment type.',
         ];
         
+        // Only require bookingFor if appointment type is selected
+        if ($this->appointmentTypeId) {
+            $rules['bookingFor'] = 'required|in:Self,Dependent';
+            $messages['bookingFor.required'] = 'Please select booking for Self or Dependent.';
+            $messages['bookingFor.in'] = 'Booking for must be either Self or Dependent.';
+        }
+        
         // Only require package if packages are available
         if (count($this->packages) > 0) {
             $rules['packageId'] = 'required|exists:categories,id';
@@ -572,6 +579,7 @@ class PatientBookAppointment extends Component
                 'refID' => $refID,
                 'status' => Booking::STATUS_RESERVED,
                 'is_private_customer' => true,
+                'booking_for' => $this->bookingFor ?? 'Self',
                 'name' => ($this->member->salutation ? $this->member->salutation . ' ' : '') . $this->member->full_name,
                 'email' => $this->member->email,
                 'phone' => $this->member->mobile_number,

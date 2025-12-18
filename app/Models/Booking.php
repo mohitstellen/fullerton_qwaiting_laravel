@@ -24,6 +24,7 @@ class Booking extends Model
     'reference_number',
     'pax',
     'booking_type',
+    'booking_for',
     'booking_date',
     'booking_time',
     'refID',
