@@ -572,4 +572,9 @@ public function company(): BelongsTo
     return $this->belongsTo(Company::class);
 }
 
+public function companyAppointmentTypes(): HasMany
+{
+    return $this->hasMany(CompanyAppointmentType::class, 'appointment_type_id');
+}
+
 }

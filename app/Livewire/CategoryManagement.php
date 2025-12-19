@@ -151,7 +151,10 @@ public function updatingSearch()
             });
 
         // Eager load relationships based on level
-        if ($this->tab == 2) {
+        if ($this->tab == 1) {
+            // For appointment types, load company and company appointment types
+            $query->with(['company', 'companyAppointmentTypes']);
+        } elseif ($this->tab == 2) {
             $query->with('getparent');
         } elseif ($this->tab == 3) {
             $query->with(['getparent.getparent']);

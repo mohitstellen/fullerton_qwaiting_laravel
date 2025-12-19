@@ -17,6 +17,7 @@ class EditLocation extends Component
 
     public $location_id, $team_id, $location_name, $address, $city, $state, $country, $zip, $latitude, $longitude, $ip_address, $status;
     public $map_link;
+    public $phone_number, $remarks, $sms_number;
     public $available_for_public_booking = '0';
      public $location_image; // New image upload
     public $existing_image; // Store current image
@@ -41,6 +42,9 @@ class EditLocation extends Component
         $this->ip_address = $location->ip_address;
         $this->status = $location->status;
         $this->map_link = $location->map_link;
+        $this->phone_number = $location->phone_number;
+        $this->remarks = $location->remarks;
+        $this->sms_number = $location->sms_number;
         $this->available_for_public_booking = $location->available_for_public_booking ? '1' : '0';
         $this->existing_image = $location->location_image; 
     }
@@ -52,6 +56,9 @@ class EditLocation extends Component
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'map_link' => 'nullable|string|max:500',
+            'phone_number' => 'nullable|string|max:255',
+            'remarks' => 'nullable|string',
+            'sms_number' => 'nullable|string|max:255',
             'available_for_public_booking' => 'nullable|in:0,1',
              'location_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
@@ -85,6 +92,9 @@ class EditLocation extends Component
             'longitude' => $this->longitude,
             'ip_address' => $this->ip_address,
             'map_link' => $this->map_link,
+            'phone_number' => $this->phone_number,
+            'remarks' => $this->remarks,
+            'sms_number' => $this->sms_number,
             'available_for_public_booking' => (bool) ((int) $this->available_for_public_booking),
             'status' => (bool) $this->status,
              'location_image' => $imagePath,

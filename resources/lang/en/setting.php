@@ -675,9 +675,9 @@ $langArr = [
         'Service Font, Border, Family setting' => 'Service Font, Border, Family setting',
 
         'Copy Settings' => 'Copy Settings',
-    'Copy Settings From Another Location' => 'Copy Clinic Settings',
-    'Select Location' => 'Select Clinic',
-    'Choose Location' => 'Choose Clinic',
+        'Copy Settings From Another Location' => 'Copy Clinic Settings',
+        'Select Location' => 'Select Clinic',
+        'Choose Location' => 'Choose Clinic',
         'Ticket Screen, Call screen, Logo and  Other defaults Settings' => 'Ticket Screen, Call screen, Logo and  Other defaults Settings',
         'Color Settings' => 'Color Settings',
         'Copy' => 'Copy',
@@ -755,6 +755,11 @@ $langArr = [
         "Background Color"=>"Background Color",
         "Display By"=>"Display By",
         "Add New Clinic" => "Add New Clinic",
+        "Phone Number" => "Phone Number",
+        "SMS Number" => "SMS Number",
+        "Active" => "Active",
+        "Deactive" => "Deactive",
+        "Expired" => "Expired",
     ];
 
 $result = array_map(function ($value) {

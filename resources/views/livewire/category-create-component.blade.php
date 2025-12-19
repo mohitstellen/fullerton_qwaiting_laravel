@@ -566,8 +566,10 @@ use Illuminate\Support\Facades\Storage;
                         <div class="w-full px-2.5">
                             <h3 class="text-lg font-semibold dark:text-white/90 mb-4 mt-6">{{ __('text.Email Templates') }}</h3>
 
+                            {{-- Email Templates in Column Layout --}}
+                            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
                             {{-- Confirmation Communication --}}
-                            <div class="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
                                 <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                     {{ __('text.Confirmation Communication') }} <span class="text-red-500">*</span>
                                 </label>
@@ -592,13 +594,13 @@ use Illuminate\Support\Facades\Storage;
                                             type="button"
                                             wire:click="appendToConfirmationSubject"
                                             onclick="this.blur()"
-                                            class="flex-1 px-3 py-2 text-sm font-medium text-white rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
                                             {{ __('text.Append to Subject') }}
                                         </button>
                                         <button 
                                             type="button"
                                             onclick="this.blur(); var container = this.closest('.mb-3'); var select = container.querySelector('select'); if(select && select.value) { appendVariableToQuill('confirmation-editor', select.value); @this.call('appendToConfirmationBody'); } return false;"
-                                            class="flex-1 px-3 py-2 text-sm font-medium text-white rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
                                             {{ __('text.Append to Body') }}
                                         </button>
                                     </div>
@@ -614,12 +616,12 @@ use Illuminate\Support\Facades\Storage;
                                     <div
                                         id="confirmation-editor"
                                         class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-                                        style="min-height: 300px;"></div>
+                                        style="height: 250px; overflow-y: auto;"></div>
                                 </div>
                             </div>
 
                             {{-- Rescheduling Communication --}}
-                            <div class="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
                                 <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                     {{ __('text.Rescheduling Communication') }}
                                 </label>
@@ -643,13 +645,13 @@ use Illuminate\Support\Facades\Storage;
                                         <button 
                                             type="button"
                                             wire:click="appendToReschedulingSubject"
-                                            class="flex-1 px-3 py-2 text-sm font-medium text-white rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
                                             {{ __('text.Append to Subject') }}
                                         </button>
                                         <button 
                                             type="button"
                                             onclick="this.blur(); var container = this.closest('.mb-3'); var select = container.querySelector('select'); if(select && select.value) { appendVariableToQuill('rescheduling-editor', select.value); select.value = ''; @this.set('selectedVariableRescheduling', ''); } return false;"
-                                            class="flex-1 px-3 py-2 text-sm font-medium text-white rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
                                             {{ __('text.Append to Body') }}
                                         </button>
                                     </div>
@@ -665,12 +667,12 @@ use Illuminate\Support\Facades\Storage;
                                     <div
                                         id="rescheduling-editor"
                                         class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-                                        style="min-height: 300px;"></div>
+                                        style="height: 250px; overflow-y: auto;"></div>
                                 </div>
                             </div>
 
                             {{-- Cancel Communication --}}
-                            <div class="mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
                                 <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                     {{ __('text.Cancel Communication') }}
                                 </label>
@@ -694,13 +696,13 @@ use Illuminate\Support\Facades\Storage;
                                         <button 
                                             type="button"
                                             wire:click="appendToCancelSubject"
-                                            class="flex-1 px-3 py-2 text-sm font-medium text-white rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
                                             {{ __('text.Append to Subject') }}
                                         </button>
                                         <button 
                                             type="button"
                                             onclick="this.blur(); var container = this.closest('.mb-3'); var select = container.querySelector('select'); if(select && select.value) { appendVariableToQuill('cancel-editor', select.value); select.value = ''; @this.set('selectedVariableCancel', ''); } return false;"
-                                            class="flex-1 px-3 py-2 text-sm font-medium text-white rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
                                             {{ __('text.Append to Body') }}
                                         </button>
                                     </div>
@@ -716,8 +718,137 @@ use Illuminate\Support\Facades\Storage;
                                     <div
                                         id="cancel-editor"
                                         class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-                                        style="min-height: 300px;"></div>
+                                        style="height: 250px; overflow-y: auto;"></div>
                                 </div>
+                            </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        {{-- SMS Templates Section --}}
+                        @if($tab == '1')
+                        <div class="w-full px-2.5">
+                            <h3 class="text-lg font-semibold dark:text-white/90 mb-4 mt-6">{{ __('text.SMS Templates') }}</h3>
+
+                            {{-- SMS Templates in Column Layout --}}
+                            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
+                            {{-- Confirmation SMS --}}
+                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
+                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                    {{ __('text.Confirm SMS') }}
+                                </label>
+                                
+                                {{-- Variable Selector for Confirmation SMS --}}
+                                <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                    <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                        {{ __('text.Select Variable') }}
+                                    </label>
+                                    <div class="relative">
+                                        <select 
+                                            wire:model="selectedVariableConfirmationSms"
+                                            class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                                            <option value="">{{ __('text.Select Variable') }}</option>
+                                            @foreach($variables as $key => $value)
+                                                <option value="{{ $key }}">{{ $value }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mt-2 flex gap-2">
+                                        <button 
+                                            type="button"
+                                            wire:click="appendToConfirmationSms"
+                                            onclick="this.blur()"
+                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            {{ __('text.Append to Body') }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <textarea
+                                    wire:model.live="confirmationSms"
+                                    placeholder="{{ __('text.SMS Message') }}"
+                                    rows="6"
+                                    class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                    style="resize: vertical;"></textarea>
+                            </div>
+
+                            {{-- Rescheduling SMS --}}
+                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
+                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                    {{ __('text.Reschedule SMS') }}
+                                </label>
+                                
+                                {{-- Variable Selector for Rescheduling SMS --}}
+                                <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                    <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                        {{ __('text.Select Variable') }}
+                                    </label>
+                                    <div class="relative">
+                                        <select 
+                                            wire:model="selectedVariableReschedulingSms"
+                                            class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                                            <option value="">{{ __('text.Select Variable') }}</option>
+                                            @foreach($variables as $key => $value)
+                                                <option value="{{ $key }}">{{ $value }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mt-2 flex gap-2">
+                                        <button 
+                                            type="button"
+                                            wire:click="appendToReschedulingSms"
+                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            {{ __('text.Append to Body') }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <textarea
+                                    wire:model.live="reschedulingSms"
+                                    placeholder="{{ __('text.SMS Message') }}"
+                                    rows="6"
+                                    class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                    style="resize: vertical;"></textarea>
+                            </div>
+
+                            {{-- Cancel SMS --}}
+                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
+                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                    {{ __('text.Cancel SMS') }}
+                                </label>
+                                
+                                {{-- Variable Selector for Cancel SMS --}}
+                                <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                    <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                        {{ __('text.Select Variable') }}
+                                    </label>
+                                    <div class="relative">
+                                        <select 
+                                            wire:model="selectedVariableCancelSms"
+                                            class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                                            <option value="">{{ __('text.Select Variable') }}</option>
+                                            @foreach($variables as $key => $value)
+                                                <option value="{{ $key }}">{{ $value }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mt-2 flex gap-2">
+                                        <button 
+                                            type="button"
+                                            wire:click="appendToCancelSms"
+                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
+                                            {{ __('text.Append to Body') }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <textarea
+                                    wire:model.live="cancelSms"
+                                    placeholder="{{ __('text.SMS Message') }}"
+                                    rows="6"
+                                    class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                    style="resize: vertical;"></textarea>
+                            </div>
                             </div>
                         </div>
                         @endif

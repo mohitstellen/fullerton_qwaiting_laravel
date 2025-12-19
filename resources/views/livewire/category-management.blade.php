@@ -71,20 +71,45 @@
                             <th class="px-5 py-3 sm:px-6" >
                                     <input type="checkbox" id="selectAll" class="cursor-pointer">
                             </th>
+                                @if($tab == 1)
                                 <th class="px-5 py-3 sm:px-6">
-                                            {{__('text.Image')}}
+                                            S.No
+                                </th>
+                                @endif
+                               
+                                <th class="px-5 py-3 sm:px-6">
+                                            {{ $tab == 1 ? 'Service Type Name' : __('text.name') }}
+                                </th>
+                                @if($tab == 1)
+                                <th class="px-5 py-3 sm:px-6">
+                                            Available Booking
                                 </th>
                                 <th class="px-5 py-3 sm:px-6">
-                                            {{__('text.name')}}
+                                            Amount
                                 </th>
+                                <th class="px-5 py-3 sm:px-6">
+                                            Applicable for
+                                </th>
+                                <th class="px-5 py-3 sm:px-6">
+                                            Corporate
+                                </th>
+                                <th class="px-5 py-3 sm:px-6">
+                                            Status
+                                </th>
+                                @endif
                                 @if($tab==3)
                                 <th class="px-5 py-3 sm:px-6">
                                             {{__('text.first parent')}}
                                 </th>
                                 @endif
-                                @if($tab > 1)
+                                @if($tab == 3)
                                 <th class="px-5 py-3 sm:px-6">
-                                            {{ $tab == 2 ? __('text.appointment type') : __('text.parent') }}
+                                            {{__('text.parent') }}
+                                </th>
+                                @endif
+                                @if($tab == 2)
+                                <th class="px-5 py-3 sm:px-6">
+                                            Amount
                                 </th>
                                 @endif
                                 {{-- <th class="px-5 py-3 sm:px-6">
@@ -98,10 +123,11 @@
                                             {{__('text.display on')}}
                                 </th> --}}
                                
-                
+                                @if($tab != 1 && $tab != 2)
                                 <th class="px-5 py-3 sm:px-6">
                                             {{__('text.created at')}}
                                 </th>
+                                @endif
                                 <th class="px-5 py-3 sm:px-6">
                                              {{__('text.Actions')}}
                                 </th>
@@ -116,28 +142,45 @@
                         <td class="px-5 py-4 sm:px-6">
                         <input type="checkbox" class="select-checkbox cursor-pointer" value="{{ $category->id }}">
                     </td>
+                                @if($tab == 1)
                                 <td class="px-5 py-4 sm:px-6">
-                                    <div class="flex items-center">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 overflow-hidden rounded-full flex items-center justify-center border">
-                                                <img src="{{$category->img ? url('storage/'. $category->img) : url('images/no-image.jpg') }}"
-                                                    alt="cateogry-image" />
-                                            </div>
-                                    
-                                        </div>
-                                    </div>
+                                            {{ $categories->firstItem() + $loop->index }}
                                 </td>
+                                @endif
+                                
                                 <td class="px-5 py-4 sm:px-6">
                                             {{ $category->name ?? '' }}
                                         </td>
+                                        @if($tab == 1)
+                                        <td class="px-5 py-4 sm:px-6">
+                                            {{ !empty($category->booking_category_show_for) ? 'Y' : 'N' }}
+                                        </td>
+                                        <td class="px-5 py-4 sm:px-6">
+                                            {{ $category->amount ?? '0' }}
+                                        </td>
+                                        <td class="px-5 py-4 sm:px-6">
+                                            {{ $category->companyAppointmentTypes->first()?->applicable_for ?? 'N/A' }}
+                                        </td>
+                                        <td class="px-5 py-4 sm:px-6">
+                                            {{ $category->company ?? '' }}
+                                        </td>
+                                        <td class="px-5 py-4 sm:px-6">
+                                            {{ $category->deleted_at ? 'I' : 'A' }}
+                                        </td>
+                                        @endif
                                         @if($tab==3)
                                         <td class="px-5 py-4 sm:px-6">
                                                    {{ $category->getparent?->getparent?->name ?? '' }}
                                         </td>
                                         @endif
-                                        @if($tab > 1)
+                                        @if($tab == 3)
                                 <td class="px-5 py-4 sm:px-6">
                                            {{ $category->getparent?->name ?? '' }}
+                                </td>
+                                @endif
+                                @if($tab == 2)
+                                <td class="px-5 py-4 sm:px-6">
+                                            {{ $category->amount ?? '0' }}
                                 </td>
                                 @endif
                                 {{-- <td class="px-5 py-4 sm:px-6">
@@ -151,10 +194,11 @@
                                             {{ $category->display_on ?? '' }}
                                 </td> --}}
                                 
-                           
+                                @if($tab != 1 && $tab != 2)
                                 <td class="px-5 py-4 sm:px-6">
                                             {{ $category->created_at ?? '' }}
                                 </td>
+                                @endif
                                 <td class="py-3 whitespace-nowrap">
 
                                     <div class="flex items-center justify-center">
@@ -213,7 +257,7 @@
                             @endforeach
                             @else
                             <tr>
-                            <td colspan="18" class="text-center py-6">
+                            <td colspan="{{ $tab == 1 ? '10' : '18' }}" class="text-center py-6">
                                 <img src="{{ url('images/no-record.jpg') }}" alt="No Records Found"
                                     class="mx-auto h-30 w-30" style="">
                             </td>

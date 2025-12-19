@@ -28,13 +28,16 @@
                         Company Name
                     </th>
                     <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        Account Manager
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        Contact Person
+                    </th>
+                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        Remarks
+                    </th>
+                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                         Status
-                    </th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                        EHS / Year
-                    </th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                        Primary Contact
                     </th>
                     <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                         Actions
@@ -47,23 +50,24 @@
                         <td class="whitespace-nowrap px-4 py-3 text-gray-700 dark:text-gray-200">
                             {{ $company->id }}
                         </td>
+                       
                         <td class="whitespace-nowrap px-4 py-3 text-gray-900 dark:text-gray-100">
                             {{ $company->company_name }}
                         </td>
-                        <td class="whitespace-nowrap px-4 py-3">
-                            <span
-                                class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize
-                                    {{ $company->status === 'active'
-                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-200'
-                                        : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' }}">
-                                {{ $company->status }}
-                            </span>
+
+                        <td class="whitespace-nowrap px-4 py-3 text-gray-900 dark:text-gray-100">
+                            {{ $company->accountManager->name ?? 'N/A' }}
                         </td>
-                        <td class="whitespace-nowrap px-4 py-3 text-gray-700 dark:text-gray-200">
-                            {{ $company->ehs_appointments_per_year }}
-                        </td>
-                        <td class="whitespace-nowrap px-4 py-3 text-gray-700 dark:text-gray-200">
+
+                        <td class="whitespace-nowrap px-4 py-3 text-gray-900 dark:text-gray-100">
                             {{ $company->contact_person1_name }}
+                        </td>
+                       
+                        <td class="px-4 py-3 text-gray-900 dark:text-gray-100">
+                            {{ Str::limit($company->remarks, 50) }}
+                        </td>
+                        <td class="whitespace-nowrap px-4 py-3 text-gray-900 dark:text-gray-100">
+                            {{ $company->status == 'active' ? __('setting.Active') : __('setting.Expired') }}
                         </td>
                         <td class="whitespace-nowrap px-4 py-3 text-right space-x-2">
                             <a href="{{ route('tenant.companies.edit', $company) }}"

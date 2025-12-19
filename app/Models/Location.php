@@ -29,6 +29,9 @@ class Location extends Model
         'location_image',
         'status',
         'map_link',
+        'phone_number',
+        'remarks',
+        'sms_number',
         'available_for_public_booking',
     ];
 

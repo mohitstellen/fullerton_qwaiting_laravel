@@ -11,6 +11,7 @@ use App\Models\Location;
 use App\Models\FormField;
 use App\Models\Company;
 use App\Models\NotificationTemplate;
+use App\Models\MessageTemplate;
 use App\Models\TemplateVariable;
 use Livewire\WithFileUploads;
 use Auth;
@@ -66,6 +67,11 @@ class CategoryCreateComponent extends Component
     public $cancelTitle = '';
     public $cancelContent = '';
 
+    // SMS templates
+    public $confirmationSms = '';
+    public $reschedulingSms = '';
+    public $cancelSms = '';
+
     // Attachments
     public $attachmentFile = null;
     public $attachments = [];
@@ -74,6 +80,12 @@ class CategoryCreateComponent extends Component
     public $selectedVariableConfirmation = '';
     public $selectedVariableRescheduling = '';
     public $selectedVariableCancel = '';
+    
+    // Variable selection for SMS templates
+    public $selectedVariableConfirmationSms = '';
+    public $selectedVariableReschedulingSms = '';
+    public $selectedVariableCancelSms = '';
+    
     public $variables = [];
 
     public function mount($level = null, $categoryId = null)
@@ -241,6 +253,9 @@ class CategoryCreateComponent extends Component
         // Load email templates
         $this->loadEmailTemplates();
         
+        // Load SMS templates
+        $this->loadSmsTemplates();
+        
         // Load attachments
         $this->loadAttachments();
     }
@@ -269,6 +284,24 @@ class CategoryCreateComponent extends Component
                 $this->cancelTitle = $template->appointment_cancel_email['subject'] ?? '';
                 $this->cancelContent = $template->appointment_cancel_email['body'] ?? '';
             }
+        }
+    }
+
+    private function loadSmsTemplates()
+    {
+        if (!$this->isEdit || !$this->category) {
+            return;
+        }
+
+        $template = MessageTemplate::where('appointment_type_id', $this->category->id)
+            ->where('team_id', $this->teamId)
+            ->where('location_id', $this->locationId)
+            ->first();
+
+        if ($template) {
+            $this->confirmationSms = $template->appointment_confirmation_sms ?? '';
+            $this->reschedulingSms = $template->appointment_rescheduling_sms ?? '';
+            $this->cancelSms = $template->appointment_cancel_sms ?? '';
         }
     }
 
@@ -552,6 +585,9 @@ class CategoryCreateComponent extends Component
 
         // Save email templates
         $this->saveEmailTemplates($categoryDetail->id);
+        
+        // Save SMS templates
+        $this->saveSmsTemplates($categoryDetail->id);
     }
 
     private function saveEmailTemplates($categoryId)
@@ -602,6 +638,22 @@ class CategoryCreateComponent extends Component
                 'appointment_rescheduling_email' => $emailTemplates['appointment_rescheduling_email'],
                 'appointment_cancel_email' => $emailTemplates['appointment_cancel_email'],
                 'attachments' => $this->attachments,
+            ]
+        );
+    }
+
+    private function saveSmsTemplates($categoryId)
+    {
+        MessageTemplate::updateOrCreate(
+            [
+                'appointment_type_id' => $categoryId,
+                'team_id' => $this->teamId,
+                'location_id' => $this->locationId,
+            ],
+            [
+                'appointment_confirmation_sms' => $this->confirmationSms ?? '',
+                'appointment_rescheduling_sms' => $this->reschedulingSms ?? '',
+                'appointment_cancel_sms' => $this->cancelSms ?? '',
             ]
         );
     }
@@ -701,6 +753,39 @@ class CategoryCreateComponent extends Component
             ]);
             
             $this->selectedVariableCancel = '';
+        }
+    }
+
+    /**
+     * Append variable to confirmation SMS
+     */
+    public function appendToConfirmationSms()
+    {
+        if ($this->selectedVariableConfirmationSms) {
+            $this->confirmationSms .= ' ' . $this->selectedVariableConfirmationSms;
+            $this->selectedVariableConfirmationSms = '';
+        }
+    }
+
+    /**
+     * Append variable to rescheduling SMS
+     */
+    public function appendToReschedulingSms()
+    {
+        if ($this->selectedVariableReschedulingSms) {
+            $this->reschedulingSms .= ' ' . $this->selectedVariableReschedulingSms;
+            $this->selectedVariableReschedulingSms = '';
+        }
+    }
+
+    /**
+     * Append variable to cancel SMS
+     */
+    public function appendToCancelSms()
+    {
+        if ($this->selectedVariableCancelSms) {
+            $this->cancelSms .= ' ' . $this->selectedVariableCancelSms;
+            $this->selectedVariableCancelSms = '';
         }
     }
 

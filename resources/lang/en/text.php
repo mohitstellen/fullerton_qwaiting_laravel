@@ -567,6 +567,11 @@ $langArr = [
         "Confirmation Communication" => "Confirmation Communication",
         "Rescheduling Communication" => "Rescheduling Communication",
         "Cancel Communication" => "Cancel Communication",
+        "SMS Templates" => "SMS Templates",
+        "Confirm SMS" => "Confirm SMS",
+        "Reschedule SMS" => "Reschedule SMS",
+        "Cancel SMS" => "Cancel SMS",
+        "SMS Message" => "SMS Message",
         "Email Body" => "Email Body",
 
         "Ticket Generation Notifications" => "Ticket Generation Notifications",
@@ -988,6 +993,8 @@ $langArr = [
         "Add Attachment" => "Add Attachment",
         "Attached Files" => "Attached Files",
         "Select Variable" => "Select Variable",
+        "Active" => "Active",
+        "Expired" => "Expired",
 
 ];
 

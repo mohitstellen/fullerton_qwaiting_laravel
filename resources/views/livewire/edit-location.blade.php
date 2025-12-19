@@ -19,6 +19,24 @@
             @error('map_link') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
         </div>
 
+        <div class="mb-4">
+            <label class="block text-gray-700">Phone Number</label>
+            <input type="text" wire:model="phone_number" placeholder="Phone Number" class="w-full p-2 border rounded">
+            @error('phone_number') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700">Remarks</label>
+            <textarea wire:model="remarks" placeholder="Remarks" rows="3" class="w-full p-2 border rounded"></textarea>
+            @error('remarks') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700">SMS Number</label>
+            <input type="text" wire:model="sms_number" placeholder="SMS Number" class="w-full p-2 border rounded">
+            @error('sms_number') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+        </div>
+
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <label class="block text-gray-700">{{ __('setting.City') }}</label>

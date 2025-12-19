@@ -17,6 +17,7 @@ class AddLocation extends Component
 
     public $team_id, $location_name, $address, $city, $state, $country, $zip, $latitude, $longitude, $ip_address, $status,$location_image;
     public $map_link;
+    public $phone_number, $remarks, $sms_number;
     public $available_for_public_booking = '0';
 
     public function mount()
@@ -39,6 +40,9 @@ class AddLocation extends Component
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'map_link' => 'nullable|string|max:500',
+            'phone_number' => 'nullable|string|max:255',
+            'remarks' => 'nullable|string',
+            'sms_number' => 'nullable|string|max:255',
             'available_for_public_booking' => 'nullable|in:0,1',
             'location_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
@@ -62,6 +66,9 @@ class AddLocation extends Component
             'longitude' => $this->longitude,
             'ip_address' => $this->ip_address,
             'map_link' => $this->map_link,
+            'phone_number' => $this->phone_number,
+            'remarks' => $this->remarks,
+            'sms_number' => $this->sms_number,
             'available_for_public_booking' => (bool) ((int) $this->available_for_public_booking),
             'status' => (bool) $this->status,
               'location_image' => $imagePath,

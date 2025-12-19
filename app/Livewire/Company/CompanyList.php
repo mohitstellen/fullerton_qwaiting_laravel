@@ -22,7 +22,7 @@ class CompanyList extends Component
 
     public function render()
     {
-        $companies = Company::orderBy('company_name')->get();
+        $companies = Company::with('accountManager')->orderBy('company_name')->get();
 
         return view('livewire.company.company-list', compact('companies'));
     }

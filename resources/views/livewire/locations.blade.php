@@ -32,27 +32,24 @@
                             <th class="px-5 py-3 sm:px-6">
                                         {{ __('setting.Name') }}
                             </th>
+
                             <th class="px-5 py-3 sm:px-6">
                                     {{ __('setting.Address') }}
                             </th>
+
+                            <th class="px-5 py-3 sm:px-6">
+                                        {{ __('setting.Phone Number') }}
+                            </th>
+
+                            <th class="px-5 py-3 sm:px-6">
+                                        {{ __('setting.SMS Number') }}
+                            </th>
+
+                           
                             <th class="px-5 py-3 sm:px-6">
                                     {{ __('setting.Status') }}
                             </th>
-                            <th class="px-5 py-3 sm:px-6">
-
-                                    {{ __('setting.City') }}
-                            </th>
-                            <th class="px-5 py-3 sm:px-6">
-                                    {{ __('setting.State') }}
-                            </th>
-                            <th class="px-5 py-3 sm:px-6">
-
-                                    {{ __('setting.Country') }}
-                            </th>
-                            <th class="px-5 py-3 sm:px-6">
-
-                                    {{ __('setting.ZIP Code') }}
-                            </th>
+            
                             <th class="px-5 py-3 sm:px-6">
 
                                     {{ __('setting.Actions') }}
@@ -65,11 +62,9 @@
                         <tr>
                             <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $location->location_name }}</td>
                             <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ str::limit($location->address,50) }}</td>
-                            <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $location->status == 1 ? __('setting.Active') : __('setting.Deactive') }}</td>
-                            <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $location->city }}</td>
-                            <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $location->state }}</td>
-                            <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $location->country }}</td>
-                            <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $location->zip }}</td>
+                            <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $location->phone_number }}</td>
+                            <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $location->sms_number }}</td>
+                            <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $location->status == 1 ? __('setting.Active') : __('setting.Deactive') }}</td>    
                             <td class="p-3 border-b border-gray-300">
                                 <div x-data="{ openDropDown: false }" class="relative">
                                     <button @click="openDropDown = !openDropDown" class="text-gray-500 dark:text-gray-400 action-btn">
