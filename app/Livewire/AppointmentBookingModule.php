@@ -411,8 +411,21 @@ class AppointmentBookingModule extends Component
 
     public function openBookingModal($appointmentId = null)
     {
-        // Fetch the actual booking from database directly
-        $booking = Booking::with(['location', 'categories', 'categories.company', 'company'])->find($appointmentId);
+        // Validate appointment ID
+        if (empty($appointmentId) || !is_numeric($appointmentId)) {
+            Log::warning('openBookingModal called with invalid appointment ID', ['appointmentId' => $appointmentId]);
+            return;
+        }
+
+        // Fetch the actual booking from database directly, ensuring it belongs to the current team
+        $query = Booking::with(['location', 'categories', 'categories.company', 'company']);
+        
+        // Add team_id filter if teamId is set
+        if ($this->teamId) {
+            $query->where('team_id', $this->teamId);
+        }
+        
+        $booking = $query->find($appointmentId);
 
         if ($booking) {
             // Prepare appointment data
@@ -450,9 +463,15 @@ class AppointmentBookingModule extends Component
             // Initialize selectedDateForSlots from dateTime
             $this->initializeDateFromDateTime();
             $this->originalBookingClinicId = null; // Reset when editing existing appointment
+            
             // Ensure boolean values for checkboxes - check both database value and JSON
-            $this->isVip = (bool)($jsonData['is_vip'] ?? $booking->is_vip ?? false);
-            $this->isPrivateCustomer = (bool)($jsonData['is_private_customer'] ?? $booking->is_private_customer ?? false);
+            // Explicitly cast to boolean to ensure checkboxes work properly
+            $isVipValue = $jsonData['is_vip'] ?? $booking->is_vip ?? false;
+            $isPrivateCustomerValue = $jsonData['is_private_customer'] ?? $booking->is_private_customer ?? false;
+            
+            // Convert to proper boolean (handle string "1"/"0", integer 1/0, or boolean true/false)
+            $this->isVip = filter_var($isVipValue, FILTER_VALIDATE_BOOLEAN);
+            $this->isPrivateCustomer = filter_var($isPrivateCustomerValue, FILTER_VALIDATE_BOOLEAN);
 
             // Get company name only if NOT a private customer
             if (!$this->isPrivateCustomer) {
@@ -494,18 +513,26 @@ class AppointmentBookingModule extends Component
             $this->showBookingModal = true;
             $this->activeTab = 'booking-details';
 
-            // Force Livewire to refresh the view to update checkboxes
-            $this->dispatch('$refresh');
-
             // Load audit trail logs for this appointment
             $this->loadAuditTrailLogs($booking->id);
+            
+            // Force Livewire to refresh the view to update checkboxes after all data is loaded
+            $this->dispatch('$refresh');
+        } else {
+            // Log when booking is not found
+            Log::warning('Booking not found when trying to open modal', [
+                'appointmentId' => $appointmentId,
+                'teamId' => $this->teamId
+            ]);
+            // Optionally show an error message to the user
+            session()->flash('error', 'Appointment not found. It may have been deleted.');
         }
     }
 
     public function loadAuditTrailLogs($bookingId)
     {
         // Load the booking to get current data
-        $booking = Booking::with(['categories', 'categories.company'])->find($bookingId);
+        $booking = Booking::with(['categories', 'categories.company', 'company'])->find($bookingId);
 
         // Load activity logs for this appointment booking
         $logs = ActivityLog::where('team_id', $this->teamId)
@@ -532,7 +559,20 @@ class AppointmentBookingModule extends Component
             $gender = $booking->gender ?? 'N/A';
             $dob = $booking->date_of_birth ? Carbon::parse($booking->date_of_birth)->format('d/m/Y') : 'N/A';
             $appointmentType = $booking->categories->name ?? 'N/A';
-            $package = ($booking->categories?->company?->name ?? '') . ($booking->categories?->company?->name && $booking->categories?->name ? ' - ' : '') . ($booking->categories?->name ?? '');
+            
+            // Package should show company name, not appointment type
+            // First try to get from direct company relationship, then from category's company
+            $package = '';
+            if ($booking->company && $booking->company->company_name) {
+                $package = $booking->company->company_name;
+            } elseif ($booking->categories?->company?->company_name) {
+                $package = $booking->categories->company->company_name;
+            } elseif ($booking->is_private_customer) {
+                $package = 'Private Customer';
+            } else {
+                $package = 'N/A';
+            }
+            
             $startDateTime = $booking ? Carbon::parse($booking->booking_date . ' ' . $booking->start_time)->format('d/m/Y h:iA') : 'N/A';
             $endDateTime = $booking ? Carbon::parse($booking->booking_date . ' ' . $booking->end_time)->format('d/m/Y h:iA') : 'N/A';
 
@@ -570,8 +610,14 @@ class AppointmentBookingModule extends Component
                 $dob = trim($matches[1]);
             }
 
-            if (empty($package) && preg_match('/Company:\s*([^,|]+)/', $remark, $matches)) {
-                $package = trim($matches[1]);
+            // Only extract package from remark if it's still empty or N/A
+            // This ensures we get the company name from the remark if available
+            if (($package === '' || $package === 'N/A') && preg_match('/Company:\s*([^,|]+)/', $remark, $matches)) {
+                $extractedCompany = trim($matches[1]);
+                // Only use it if it's not the same as the appointment type
+                if ($extractedCompany !== $appointmentType) {
+                    $package = $extractedCompany;
+                }
             }
 
             return [
@@ -674,14 +720,23 @@ class AppointmentBookingModule extends Component
         $this->bookingStatus = $status;
     }
 
-    public function toggleViewMode()
+    public function setViewModeCalendar()
     {
-        $this->viewMode = $this->viewMode === 'calendar' ? 'timeline' : 'calendar';
+        $this->viewMode = 'calendar';
+        
+        // Hide search filters when switching view mode
+        $this->showSearchFilters = false;
+    }
+
+    public function setViewModeTimeline()
+    {
+        $this->viewMode = 'timeline';
+        
+        // Hide search filters when switching view mode
+        $this->showSearchFilters = false;
 
         // Load timeline appointments when switching to timeline view
-        if ($this->viewMode === 'timeline') {
-            $this->loadTimelineAppointments();
-        }
+        $this->loadTimelineAppointments();
     }
 
     public function loadTimelineAppointments()
@@ -819,6 +874,9 @@ class AppointmentBookingModule extends Component
         $this->selectedYear = $previousDate->year;
         $this->selectedDayName = $previousDate->format('l');
         $this->selectedDate = $previousDate->format('Y-m-d');
+        
+        // Hide search filters when navigating dates
+        $this->showSearchFilters = false;
 
         // Reload timeline appointments if in timeline view
         if ($this->viewMode === 'timeline') {
@@ -836,6 +894,9 @@ class AppointmentBookingModule extends Component
         $this->selectedYear = $nextDate->year;
         $this->selectedDayName = $nextDate->format('l');
         $this->selectedDate = $nextDate->format('Y-m-d');
+        
+        // Hide search filters when navigating dates
+        $this->showSearchFilters = false;
 
         // Reload timeline appointments if in timeline view
         if ($this->viewMode === 'timeline') {
@@ -856,6 +917,9 @@ class AppointmentBookingModule extends Component
                 // Handle error if date parsing fails
             }
         }
+        
+        // Hide search filters when date is changed via date picker
+        $this->showSearchFilters = false;
 
         // Reload timeline appointments when date changes
         if ($this->viewMode === 'timeline') {
@@ -1387,13 +1451,14 @@ class AppointmentBookingModule extends Component
                 ->first();
 
             // Prepare additional data as JSON
+            // Ensure boolean values are properly cast
             $jsonData = [
                 'nric' => $this->nricFinPassport,
                 'gender' => $this->gender,
                 'nationality' => $this->nationality,
                 'title' => $this->title,
-                'is_vip' => $this->isVip,
-                'is_private_customer' => $this->isPrivateCustomer,
+                'is_vip' => (bool)$this->isVip,
+                'is_private_customer' => (bool)$this->isPrivateCustomer,
             ];
 
             // Create the booking
@@ -1417,8 +1482,8 @@ class AppointmentBookingModule extends Component
                 'company_id' => $this->companyId,
                 'additional_comments' => $this->additionalComments,
                 'payment_status' => $this->paymentStatus,
-                'is_vip' => $this->isVip,
-                'is_private_customer' => $this->isPrivateCustomer,
+                'is_vip' => (bool)$this->isVip,
+                'is_private_customer' => (bool)$this->isPrivateCustomer,
                 'status' => $this->bookingStatus ?? Booking::STATUS_RESERVED,
                 'json' => json_encode($jsonData),
                 'created_by' => Auth::id(),
@@ -1475,12 +1540,29 @@ class AppointmentBookingModule extends Component
             // Show success message
             session()->flash('success', 'Appointment booked successfully!');
 
+            // Dispatch event for SweetAlert notification
+            $this->dispatch('booking-confirmed', [
+                'title' => 'Booking Confirmed!',
+                'message' => 'Appointment booked successfully!',
+                'icon' => 'success'
+            ]);
+
             // Close modal and reset form
             $this->closeBookingModal();
             $this->resetForm();
 
-            // Reload appointments
+            // Reload timeline appointments if in timeline view FIRST
+            // This ensures the timeline is updated and wire:click handlers are re-bound
+            if ($this->viewMode === 'timeline') {
+                $this->loadTimelineAppointments();
+            }
+            
+            // Reload appointments to update the calendar view
             $this->loadAppointments();
+            
+            // Force Livewire to refresh the view to update calendar slots and timeline
+            // This ensures all wire:click handlers are properly re-bound after data updates
+            $this->dispatch('$refresh');
         } catch (\Exception $e) {
             // Show error message
             session()->flash('error', 'Failed to book appointment: ' . $e->getMessage());
@@ -1588,13 +1670,14 @@ class AppointmentBookingModule extends Component
 
                     // Prepare JSON data
                     $existingJson = json_decode($booking->json, true) ?? [];
+                    // Ensure boolean values are properly cast
                     $jsonData = array_merge($existingJson, [
                         'nric' => $this->nricFinPassport,
                         'gender' => $this->gender,
                         'nationality' => $this->nationality,
                         'title' => $this->title,
-                        'is_vip' => $this->isVip,
-                        'is_private_customer' => $this->isPrivateCustomer,
+                        'is_vip' => (bool)$this->isVip,
+                        'is_private_customer' => (bool)$this->isPrivateCustomer,
                     ]);
 
                     // Update the booking
@@ -1616,8 +1699,8 @@ class AppointmentBookingModule extends Component
                         'company_id' => $this->companyId,
                         'additional_comments' => $this->additionalComments,
                         'payment_status' => $this->paymentStatus,
-                        'is_vip' => $this->isVip,
-                        'is_private_customer' => $this->isPrivateCustomer,
+                        'is_vip' => (bool)$this->isVip,
+                        'is_private_customer' => (bool)$this->isPrivateCustomer,
                         'status' => $this->bookingStatus,
                         'json' => json_encode($jsonData),
                     ]);
@@ -1706,7 +1789,18 @@ class AppointmentBookingModule extends Component
                     // Close modal and reload
                     $this->closeBookingModal();
                     $this->resetForm();
+                    
+                    // Reload timeline appointments if in timeline view FIRST
+                    if ($this->viewMode === 'timeline') {
+                        $this->loadTimelineAppointments();
+                    }
+                    
+                    // Reload appointments to update the calendar view
                     $this->loadAppointments();
+                    
+                    // Force Livewire to refresh the view to update calendar slots and timeline
+                    // This ensures all wire:click handlers are properly re-bound after data updates
+                    $this->dispatch('$refresh');
                 }
             }
         } catch (\Exception $e) {

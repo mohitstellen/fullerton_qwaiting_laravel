@@ -6,7 +6,7 @@
         <!-- Address Autocomplete -->
 
         <div class="mb-4">
-           <label class="block text-gray-700">{{ __('setting.Name') }}*</label>
+           <label class="block text-gray-700">{{ __('setting.Clinic Name') }}*</label>
            <input type="text" id="location-name-autocomplete" wire:model="location_name" class="w-full p-2 border rounded">
            @error('location_name') <span class="text-error-500 text-sm">{{ $message }}</span> @enderror
        </div>
@@ -17,25 +17,27 @@
         </div>
 
         <div class="mb-4">
-            <label class="block text-gray-700">Map Link</label>
-            <input type="text" wire:model="map_link" placeholder="https://maps.google.com/..." class="w-full p-2 border rounded">
-            @error('map_link') <span class="text-error-500 text-sm">{{ $message }}</span> @enderror
-        </div>
-
-        <div class="mb-4">
-            <label class="block text-gray-700">Phone Number</label>
+            <label class="block text-gray-700">{{ __('setting.Phone Number') }}</label>
             <input type="text" wire:model="phone_number" placeholder="Phone Number" class="w-full p-2 border rounded">
             @error('phone_number') <span class="text-error-500 text-sm">{{ $message }}</span> @enderror
         </div>
 
         <div class="mb-4">
-            <label class="block text-gray-700">Remarks</label>
+            <label class="block text-gray-700">{{ __('setting.Map') }}</label>
+            <input type="text" wire:model="map_link" placeholder="https://maps.google.com/..." class="w-full p-2 border rounded">
+            @error('map_link') <span class="text-error-500 text-sm">{{ $message }}</span> @enderror
+        </div>
+
+        
+
+        <div class="mb-4">
+            <label class="block text-gray-700">{{ __('setting.Remarks') }}</label>
             <textarea wire:model="remarks" placeholder="Remarks" rows="3" class="w-full p-2 border rounded"></textarea>
             @error('remarks') <span class="text-error-500 text-sm">{{ $message }}</span> @enderror
         </div>
 
         <div class="mb-4">
-            <label class="block text-gray-700">SMS Number</label>
+            <label class="block text-gray-700">{{ __('setting.SMS Number') }}</label>
             <input type="text" wire:model="sms_number" placeholder="SMS Number" class="w-full p-2 border rounded">
             @error('sms_number') <span class="text-error-500 text-sm">{{ $message }}</span> @enderror
         </div>
@@ -76,7 +78,7 @@
         </div>
 
          <div class="grid grid-cols-2 gap-4 mt-4">
-            <label class="block text-gray-700">Clinic Image</label>
+            <label class="block text-gray-700">{{ __('setting.Clinic Image') }}</label>
             <input type="file" wire:model="location_image" class="w-full p-2 border rounded">
             @error('location_image') <span class="text-error-500 text-sm">{{ $message }}</span> @enderror
 
@@ -86,18 +88,19 @@
         </div>
 
         <div class="grid grid-cols-2 gap-4 mt-4">
-            <div>
-                <label class="block text-gray-700">Available for Public Booking</label>
-                <select wire:model="available_for_public_booking" class="w-full p-2 border rounded">
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-                @error('available_for_public_booking') <span class="text-error-500 text-sm">{{ $message }}</span> @enderror
-            </div>
-            <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2">
                 <input type="checkbox" wire:model="status" id="status" class="h-4 w-4">
                 <label for="status" class="text-gray-700">{{ __('setting.Active') }}</label>
             </div>
+            <div>
+                <label class="block text-gray-700">{{ __('setting.Available for Public Booking') }}</label>
+                <select wire:model="available_for_public_booking" class="w-full p-2 border rounded">
+                    <option value="0">{{ __('setting.No') }}</option>
+                    <option value="1">{{ __('setting.Yes') }}</option>
+                </select>
+                @error('available_for_public_booking') <span class="text-error-500 text-sm">{{ $message }}</span> @enderror
+            </div>
+           
         </div>
 
         <input type="hidden" wire:model="ip_address">

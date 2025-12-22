@@ -8,26 +8,33 @@
             </a>
         </div>
 
-        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-            <form wire:submit.prevent="update" class="space-y-6">
-                @include('livewire.company.company-form')
+        {{-- Two Column Layout --}}
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
+            {{-- Left Column: Company Form + Appointment Type Validity --}}
+            <div class="space-y-6 lg:col-span-2">
+                {{-- Company Form --}}
+                <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                    <form wire:submit.prevent="update" class="space-y-6">
+                        <div class="edit-company-form">
+                            @include('livewire.company.company-form')
+                        </div>
 
-                <div class="flex items-center justify-end gap-3">
-                    <button type="submit"
-                            class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
-                        Update
-                    </button>
+                        <div class="flex items-center justify-end gap-3">
+                            <button type="submit"
+                                    class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
+                                Update
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
 
-        {{-- Appointment Type Validity Section --}}
-        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-            <div class="space-y-4">
-                <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Appointment Type Validity</h3>
-                    </div>
+                {{-- Appointment Type Validity Card --}}
+                <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                    <div class="space-y-4">
+                        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Appointment Type Validity</h3>
+                            </div>
                     <button type="button"
                             wire:click="createAppointmentType"
                             class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
@@ -64,23 +71,23 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
                             @forelse ($companyAppointmentTypes as $index => $appointmentType)
-                                <tr wire:key="appointment-type-{{ $appointmentType['id'] }}" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                                <tr wire:key="appointment-type-{{ $appointmentType->id }}" class="hover:bg-gray-50 dark:hover:bg-gray-800">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $index + 1 }}
+                                        {{ $companyAppointmentTypes->firstItem() + $index }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $appointmentType['appointment_type_name'] }}
+                                        {{ $appointmentType->appointmentType->name ?? 'N/A' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $appointmentType['valid_from'] }} - {{ $appointmentType['valid_to'] }}
+                                        {{ $appointmentType->valid_from->format('d-M-Y') }} - {{ $appointmentType->valid_to->format('d-M-Y') }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $appointmentType['applicable_for'] }}
+                                        {{ $appointmentType->applicable_for }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex items-center justify-end gap-2">
                                             <button type="button"
-                                                    wire:click="editAppointmentType({{ $appointmentType['id'] }})"
+                                                    wire:click="editAppointmentType({{ $appointmentType->id }})"
                                                     class="inline-flex items-center justify-center rounded-lg border border-gray-300 p-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
                                                     title="Edit">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -88,7 +95,7 @@
                                                 </svg>
                                             </button>
                                             <button type="button"
-                                                    wire:click="deleteAppointmentType({{ $appointmentType['id'] }})"
+                                                    wire:click="deleteAppointmentType({{ $appointmentType->id }})"
                                                     class="inline-flex items-center justify-center rounded-lg border border-red-200 p-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-900/40 dark:text-red-300 dark:hover:bg-red-900/20"
                                                     title="Delete"
                                                     onclick="return confirm('Are you sure you want to delete this appointment type validity?')">
@@ -108,6 +115,11 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                {{-- Pagination for Appointment Type Validity --}}
+                <div class="mt-4">
+                    {{ $companyAppointmentTypes->links() }}
                 </div>
 
                 {{-- Appointment Type Form Modal --}}
@@ -221,15 +233,85 @@
                         </div>
                     </div>
                 @endif
-            </div>
-        </div>
-
-        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-            <div class="space-y-4">
-                <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Company packages</h3>
                     </div>
+                </div>
+            </div>
+
+            {{-- Right Column: Contact Details + Company Packages --}}
+            <div class="space-y-6 lg:col-span-3">
+                {{-- Contact Details Section --}}
+                <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                    <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Contact Details</h3>
+                    
+                    <div class="space-y-6">
+                        {{-- Primary Contact --}}
+                        <div>
+                            <h4 class="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Primary Contact</h4>
+                            <div class="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Name</label>
+                                    <input type="text"
+                                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                                           wire:model.defer="company.contact_person1_name">
+                                    @error('company.contact_person1_name')
+                                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Mobile No</label>
+                                    <input type="text"
+                                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                                           wire:model.defer="company.contact_person1_phone">
+                                    @error('company.contact_person1_phone')
+                                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Email ID</label>
+                                    <input type="email"
+                                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                                           wire:model.defer="company.contact_person1_email">
+                                    @error('company.contact_person1_email')
+                                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Secondary Contact --}}
+                        <div class="border-t border-gray-200 pt-4 dark:border-gray-700">
+                            <h4 class="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">Secondary Contact</h4>
+                            <div class="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Name</label>
+                                    <input type="text"
+                                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                                           wire:model.defer="company.contact_person2_name">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Mobile No</label>
+                                    <input type="text"
+                                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                                           wire:model.defer="company.contact_person2_phone">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Email ID</label>
+                                    <input type="email"
+                                           class="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                                           wire:model.defer="company.contact_person2_email">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Company Packages Section --}}
+                <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                    <div class="space-y-4">
+                        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Company packages</h3>
+                            </div>
                     <button type="button"
                             wire:click="createMapping"
                             class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
@@ -269,26 +351,26 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
                             @forelse ($companyPackages as $index => $mapping)
-                                <tr wire:key="company-package-{{ $mapping['id'] }}" class="hover:bg-gray-50 dark:hover:bg-gray-800">
+                                <tr wire:key="company-package-{{ $mapping->id }}" class="hover:bg-gray-50 dark:hover:bg-gray-800">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $index + 1 }}
+                                        {{ $companyPackages->firstItem() + $index }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                         {{ $companyModel->company_name }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $mapping['appointment_type_name'] }}
+                                        {{ $mapping->appointmentType->name ?? 'N/A' }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $mapping['package_name'] }}
+                                        {{ $mapping->package->name ?? 'N/A' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ number_format($mapping['package_amount'] ?? 0, 2) }}
+                                        {{ number_format($mapping->package->amount ?? 0, 2) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex items-center justify-end gap-2">
                                             <button type="button"
-                                                    wire:click="editMapping({{ $mapping['id'] }})"
+                                                    wire:click="editMapping({{ $mapping->id }})"
                                                     class="inline-flex items-center justify-center rounded-lg border border-gray-300 p-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
                                                     title="Edit">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -296,7 +378,7 @@
                                                 </svg>
                                             </button>
                                             <button type="button"
-                                                    wire:click="deleteMapping({{ $mapping['id'] }})"
+                                                    wire:click="deleteMapping({{ $mapping->id }})"
                                                     class="inline-flex items-center justify-center rounded-lg border border-red-200 p-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-900/40 dark:text-red-300 dark:hover:bg-red-900/20"
                                                     title="Delete"
                                                     onclick="return confirm('Are you sure you want to delete this package?')">
@@ -316,6 +398,11 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+
+                {{-- Pagination for Company Packages --}}
+                <div class="mt-4">
+                    {{ $companyPackages->links() }}
                 </div>
 
                 @if ($showForm)
@@ -353,7 +440,7 @@
                                                 </div>
                                             </div>
                                             
-                                            <div x-show="open && $wire.packageAppointmentTypeSearch.length > 0"
+                                            <div x-show="open"
                                                  x-cloak
                                                  class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-gray-300 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800">
                                                 @forelse ($this->filteredPackageAppointmentTypes as $type)
@@ -365,7 +452,11 @@
                                                     </button>
                                                 @empty
                                                     <div class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
-                                                        No appointment types found
+                                                        @if($wire.packageAppointmentTypeSearch)
+                                                            No appointment types found
+                                                        @else
+                                                            Type to search appointment types...
+                                                        @endif
                                                     </div>
                                                 @endforelse
                                             </div>
@@ -470,6 +561,8 @@
                         </div>
                     </div>
                 @endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -478,6 +571,11 @@
 @once
     @push('styles')
         <style>
+            /* Hide contact fields in edit form (they're shown in right column) */
+            .edit-company-form .contact-section {
+                display: none;
+            }
+            
             /* Fix Select2 clear button overlapping with dropdown arrow */
             .select2-container--default .select2-selection--multiple .select2-selection__clear {
                 position: absolute;

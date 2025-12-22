@@ -760,6 +760,12 @@ $langArr = [
         "Active" => "Active",
         "Deactive" => "Deactive",
         "Expired" => "Expired",
+        "Clinic Name" => "Clinic Name",
+        "Map" => "Map",
+        "Remarks" => "Remarks",
+        "Clinic Image" => "Clinic Image",
+        "Single Display URL" => "Single Display URL",
+        "Available for Public Booking" => "Available for Public Booking",
     ];
 
 $result = array_map(function ($value) {

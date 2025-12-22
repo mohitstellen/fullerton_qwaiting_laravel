@@ -36,6 +36,14 @@ class AddCompany extends Component
         ];
     }
 
+    public function clear(): void
+    {
+        $this->company = [
+            'status' => 'active',
+            'ehs_appointments_per_year' => 1,
+        ];
+    }
+
     public function save(): void
     {
         $this->validate();

@@ -65,15 +65,6 @@ jobs:
 
           git pull origin main
 
-          # Run specific migration
-          php artisan migrate --path=database/migrations/2025_12_18_175056_create_vouchers_table.php
-          php artisan migrate --path=database/migrations/2025_12_18_180055_add_card_types_to_vouchers_table.php
-          php artisan migrate --path=database/migrations/2025_12_18_183644_add_booking_for_to_bookings_table.php
-          php artisan migrate --path=database/migrations/2025_12_19_171324_add_phone_remarks_sms_to_locations_table.php
-          php artisan migrate --path=database/migrations/2025_12_19_173232_add_created_by_to_companies_table.php
-          php artisan migrate --path=database/migrations/2025_12_19_173430_remove_created_by_from_companies_table.php
-          php artisan migrate --path=database/migrations/2025_12_19_185031_add_appointment_sms_templates_to_message_templates_table.php
-          
           # Clear all caches
           php artisan o:clear
           

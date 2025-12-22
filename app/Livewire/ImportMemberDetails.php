@@ -133,7 +133,7 @@ class ImportMemberDetails extends Component
         $imports = MemberImport::where('team_id', $this->teamId)
             ->with('company')
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate(5);
 
         return view('livewire.import-member-details', [
             'imports' => $imports,

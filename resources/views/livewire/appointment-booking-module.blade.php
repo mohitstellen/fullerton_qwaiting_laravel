@@ -256,13 +256,13 @@
                         $timelineBg = $viewMode === 'timeline' ? '#ef4444' : '#ef4444';
                     @endphp
                     <button 
-                        wire:click="toggleViewMode"
+                        wire:click="setViewModeCalendar"
                         style="background-color: {{ $calendarBg }}; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 15px; white-space: nowrap;"
                     >
                         CALENDAR
                     </button>
                     <button 
-                        wire:click="toggleViewMode"
+                        wire:click="setViewModeTimeline"
                         style="background-color: {{ $timelineBg }}; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; font-size: 15px; white-space: nowrap;"
                     >
                         TIMELINE
@@ -345,7 +345,7 @@
                 
                 <!-- Timeline View - Grouped by Appointment Type -->
                 @if(count($timelineAppointments) > 0)
-                    @foreach($timelineAppointments as $group)
+                    @foreach($timelineAppointments as $groupIndex => $group)
                         <!-- Clinic Name and Appointment Type Header -->
                         <div style="margin-bottom: 24px;">
                             <h2 style="font-size: 22px; font-weight: 600; margin-bottom: 8px; color: #111827;">
@@ -372,10 +372,13 @@
                                             </tr>
                                         </thead>
                                         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                            @foreach($group['appointments'] as $appointment)
+                                            @foreach($group['appointments'] as $appointmentIndex => $appointment)
+                                                @if(!empty($appointment['id']))
                                                 <tr 
+                                                    wire:key="timeline-group-{{ $groupIndex }}-appointment-{{ $appointment['id'] }}-{{ $appointmentIndex }}"
                                                     wire:click="openBookingModal({{ $appointment['id'] }})"
                                                     class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                                                    style="cursor: pointer;"
                                                 >
                                                     <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['time'] }}</td>
                                                     <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['gender'] }}</td>
@@ -386,6 +389,7 @@
                                                     <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['phone'] }}</td>
                                                     <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['remarks'] }}</td>
                                                 </tr>
+                                                @endif
                                             @endforeach
                                         </tbody>
                                     </table>
@@ -421,8 +425,10 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                @forelse($appointments as $appointment)
+                                @forelse($appointments as $appointmentIndex => $appointment)
+                                    @if(!empty($appointment['id']))
                                     <tr 
+                                        wire:key="appointment-{{ $appointment['id'] }}-{{ $appointmentIndex }}"
                                         wire:click="openBookingModal({{ $appointment['id'] }})"
                                         class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                                     >
@@ -435,6 +441,7 @@
                                         <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['phone'] }}</td>
                                         <td class="px-4 py-3 whitespace-nowrap text-base text-gray-900 dark:text-gray-100" style="font-size: 15px;">{{ $appointment['location'] }}</td>
                                     </tr>
+                                    @endif
                                 @empty
                                     <tr>
                                         <td colspan="8" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">No appointments found</td>
@@ -462,9 +469,10 @@
                                     <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
                                         <span style="color: #374151; font-weight: 500; min-width: 100px; font-size: 16px;">{{ $time }}</span>
                                         
-                                        @if(is_array($slotInfo) && isset($slotInfo['status']) && $slotInfo['status'] !== 'empty')
+                                        @if(is_array($slotInfo) && isset($slotInfo['status']) && $slotInfo['status'] !== 'empty' && !empty($slotInfo['booking_id']))
                                             {{-- Booked slot - show booking info --}}
                                             <button 
+                                                wire:key="booking-slot-{{ $slotInfo['booking_id'] }}-{{ $time }}"
                                                 wire:click="openBookingModal({{ $slotInfo['booking_id'] }})"
                                                 style="padding: 8px 16px; border-radius: 6px; min-width: 300px; text-align: left; border: 2px solid; cursor: pointer; font-weight: 500; font-size: 13px; 
                                                 @if($slotInfo['status'] === 'Reserved') background-color: #dbeafe; border-color: #60a5fa; color: #1e40af;
@@ -484,7 +492,7 @@
                                         @else
                                             {{-- Empty slot - allow booking --}}
                                             <button 
-                                                wire:click="bookAppointment({{ $slotData['clinic_id'] }}, '{{ $slotData['appointment_type'] }}', '{{ $time }}')"
+                                                wire:click="bookAppointment({{ $slotData['clinic_id'] }}, {{ json_encode($slotData['appointment_type']) }}, {{ json_encode($time) }})"
                                                 style="background-color:rgb(255, 255, 255); color: white; padding: 8px 16px; border-radius: 6px; min-width: 150px; text-align: left; border: none; cursor: pointer; font-weight: 500; font-size: 16px; border: rgb(0,0,0) solid; color: rgb(0, 0, 0);"
                                             >
                                                 Empty
@@ -1138,7 +1146,7 @@
                                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $log['gender'] }}</td>
                                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $log['dob'] }}</td>
                                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $log['appointment_type'] }}</td>
-                                                <td class="px-4 py-3 text-sm text-gray-900">{{ $log['package'] }}</td>
+                                                <td class="px-4 py-3 text-sm text-gray-900"></td>
                                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $log['start_date_time'] }}</td>
                                                 <td class="px-4 py-3 text-sm text-gray-900">{{ $log['end_date_time'] }}</td>
                                             </tr>
@@ -1873,6 +1881,71 @@
             }
         });
     }
+
+    // Listen for booking confirmation event and show SweetAlert
+    document.addEventListener('livewire:init', function() {
+        Livewire.on('booking-confirmed', (data) => {
+            const message = Array.isArray(data) 
+                ? (data[0]?.message || data[0] || 'Appointment booked successfully!')
+                : (data?.message || 'Appointment booked successfully!');
+            
+            const title = Array.isArray(data)
+                ? (data[0]?.title || data[0]?.title || 'Booking Confirmed!')
+                : (data?.title || 'Booking Confirmed!');
+            
+            const icon = Array.isArray(data)
+                ? (data[0]?.icon || 'success')
+                : (data?.icon || 'success');
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: title,
+                    text: message,
+                    icon: icon,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3085d6',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            } else {
+                // Fallback to regular alert if SweetAlert is not available
+                alert(message);
+            }
+        });
+    });
+
+    // Also listen if Livewire is already initialized
+    if (window.Livewire) {
+        Livewire.on('booking-confirmed', (data) => {
+            const message = Array.isArray(data) 
+                ? (data[0]?.message || data[0] || 'Appointment booked successfully!')
+                : (data?.message || 'Appointment booked successfully!');
+            
+            const title = Array.isArray(data)
+                ? (data[0]?.title || data[0]?.title || 'Booking Confirmed!')
+                : (data?.title || 'Booking Confirmed!');
+            
+            const icon = Array.isArray(data)
+                ? (data[0]?.icon || 'success')
+                : (data?.icon || 'success');
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: title,
+                    text: message,
+                    icon: icon,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3085d6',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            } else {
+                // Fallback to regular alert if SweetAlert is not available
+                alert(message);
+            }
+        });
+    }
+
 </script>
 @endpush
 

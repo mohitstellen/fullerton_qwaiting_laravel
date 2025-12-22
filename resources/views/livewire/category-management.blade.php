@@ -7,9 +7,11 @@
         <li><a href="javascript:void(0)" wire:click.prevent="setTab('2')"
             class="p-2 inline-flex items-center gap-2 px-4 py-2 text-sm capitalize font-medium rounded-md h group hover:text-white hover:bg-brand-500 dark:hover:text-white text-gray-800 dark:text-white {{ $tab == 2 ? 'active-tab text-white bg-brand-500' : ''}}">{{ $level2 }}
             </a></li>
+            @if(!empty($level3))
         <li><a href="javascript:void(0)" wire:click.prevent="setTab('3')"
             class="p-2 inline-flex items-center gap-2 px-4 py-2 text-sm capitalize font-medium rounded-md h group hover:text-white hover:bg-brand-500  dark:hover:text-white text-gray-800 dark:text-white {{ $tab == 3 ? 'active-tab text-white bg-brand-500' : ''}}">{{ $level3 }}
             </a></li>
+            @endif
         </ul>
     </div>
     <div class="mb-4">

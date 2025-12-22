@@ -10,14 +10,15 @@ use App\Models\Location;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class EditCompany extends Component
 {
+    use WithPagination;
+
     public Company $companyModel;
 
     public array $company = [];
-
-    public array $companyPackages = [];
 
     public array $appointmentTypes = [];
 
@@ -42,8 +43,6 @@ class EditCompany extends Component
     ];
 
     // Appointment Type Validity properties
-    public array $companyAppointmentTypes = [];
-
     public array $appointmentTypeForm = [];
 
     public bool $showAppointmentTypeForm = false;
@@ -111,8 +110,6 @@ class EditCompany extends Component
         $this->appointmentTypeForm = $this->emptyAppointmentTypeForm();
 
         $this->loadOptions();
-        $this->loadCompanyPackages();
-        $this->loadCompanyAppointmentTypes();
     }
 
     public function updatedMappingFormAppointmentTypeId($value): void
@@ -228,14 +225,23 @@ class EditCompany extends Component
 
     public function getFilteredPackageAppointmentTypesProperty(): array
     {
-        if (empty($this->packageAppointmentTypeSearch)) {
+        $search = trim($this->packageAppointmentTypeSearch ?? '');
+        
+        if (empty($search)) {
             return $this->appointmentTypes;
         }
 
-        $search = strtolower($this->packageAppointmentTypeSearch);
-        return array_filter($this->appointmentTypes, function ($type) use ($search) {
-            return str_contains(strtolower($type['name']), $search);
+        $searchLower = strtolower($search);
+        $filtered = array_filter($this->appointmentTypes, function ($type) use ($searchLower) {
+            if (empty($type['name'])) {
+                return false;
+            }
+            $name = strtolower(trim($type['name']));
+            // Check if search term is contained in the name
+            return str_contains($name, $searchLower);
         });
+        
+        return array_values($filtered);
     }
 
     public function saveMapping(): void
@@ -312,9 +318,9 @@ class EditCompany extends Component
 
         session()->flash('companyPackagesMessage', 'Company package(s) saved successfully.');
 
-        $this->loadCompanyPackages();
         $this->loadAppointmentTypesForValidity();
         $this->closeForm();
+        $this->resetPage('packagesPage');
     }
 
     public function deleteMapping(int $mappingId): void
@@ -327,9 +333,9 @@ class EditCompany extends Component
             $this->closeForm();
         }
 
-        $this->loadCompanyPackages();
         $this->loadAppointmentTypesForValidity();
         session()->flash('companyPackagesMessage', 'Company package removed.');
+        $this->resetPage('packagesPage');
     }
 
     public function closeForm(): void
@@ -339,6 +345,14 @@ class EditCompany extends Component
         $this->packageAppointmentTypeSearch = '';
         $this->showPackageAppointmentTypeDropdown = false;
         $this->showForm = false;
+    }
+
+    public function updatedCompanyIsBillingSameAsCompany($value): void
+    {
+        if ($value) {
+            // When checked, copy company address to billing address
+            $this->company['billing_address'] = $this->company['address'] ?? '';
+        }
     }
 
     public function update(): void
@@ -404,7 +418,10 @@ class EditCompany extends Component
 
     public function render()
     {
-        return view('livewire.company.edit-company');
+        return view('livewire.company.edit-company', [
+            'companyAppointmentTypes' => $this->getCompanyAppointmentTypesProperty(),
+            'companyPackages' => $this->getCompanyPackagesProperty(),
+        ]);
     }
 
     protected function mappingRules(): array
@@ -433,27 +450,12 @@ class EditCompany extends Component
         ];
     }
 
-    protected function loadCompanyPackages(): void
+    protected function getCompanyPackagesProperty()
     {
-        $this->companyPackages = $this->companyModel->companyPackages()
+        return $this->companyModel->companyPackages()
             ->with(['appointmentType:id,name', 'package:id,name,amount'])
             ->orderByDesc('updated_at')
-            ->get()
-            ->map(function (CompanyPackage $mapping) {
-                return [
-                    'id' => $mapping->id,
-                    'appointment_type_id' => $mapping->appointment_type_id,
-                    'appointment_type_name' => $mapping->appointmentType->name ?? 'N/A',
-                    'package_id' => $mapping->package_id,
-                    'package_name' => $mapping->package->name ?? 'N/A',
-                    'package_amount' => $mapping->package->amount ?? 0.00,
-                    'modes_of_identification' => $mapping->modes_of_identification ?? [],
-                    'clinic_ids' => $mapping->clinic_ids ?? [],
-                    'remarks' => $mapping->remarks,
-                    'updated_at' => optional($mapping->updated_at)->diffForHumans(),
-                ];
-            })
-            ->toArray();
+            ->paginate(5, ['*'], 'packagesPage');
     }
 
     protected function dispatchSelectInitializers(): void
@@ -659,8 +661,8 @@ class EditCompany extends Component
             session()->flash('appointmentTypesMessage', 'Appointment type validity added successfully.');
         }
 
-        $this->loadCompanyAppointmentTypes();
         $this->closeAppointmentTypeForm();
+        $this->resetPage('appointmentTypesPage');
     }
 
     public function deleteAppointmentType(int $appointmentTypeId): void
@@ -673,8 +675,8 @@ class EditCompany extends Component
             $this->closeAppointmentTypeForm();
         }
 
-        $this->loadCompanyAppointmentTypes();
         session()->flash('appointmentTypesMessage', 'Appointment type validity removed.');
+        $this->resetPage('appointmentTypesPage');
     }
 
     public function closeAppointmentTypeForm(): void
@@ -700,24 +702,12 @@ class EditCompany extends Component
         ];
     }
 
-    protected function loadCompanyAppointmentTypes(): void
+    protected function getCompanyAppointmentTypesProperty()
     {
-        $this->companyAppointmentTypes = $this->companyModel->companyAppointmentTypes()
+        return $this->companyModel->companyAppointmentTypes()
             ->with(['appointmentType:id,name'])
             ->orderByDesc('updated_at')
-            ->get()
-            ->map(function (CompanyAppointmentType $appointmentType) {
-                return [
-                    'id' => $appointmentType->id,
-                    'appointment_type_id' => $appointmentType->appointment_type_id,
-                    'appointment_type_name' => $appointmentType->appointmentType->name ?? 'N/A',
-                    'valid_from' => $appointmentType->valid_from->format('d-M-Y'),
-                    'valid_to' => $appointmentType->valid_to->format('d-M-Y'),
-                    'applicable_for' => $appointmentType->applicable_for,
-                    'updated_at' => optional($appointmentType->updated_at)->diffForHumans(),
-                ];
-            })
-            ->toArray();
+            ->paginate(5, ['*'], 'appointmentTypesPage');
     }
 
     protected function emptyAppointmentTypeForm(): array

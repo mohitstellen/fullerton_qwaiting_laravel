@@ -30,7 +30,7 @@
         <label class="mt-2 inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
             <input type="checkbox"
                    class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                   wire:model.defer="company.is_billing_same_as_company">
+                   wire:model.live="company.is_billing_same_as_company">
             <span>Billing address same as company address</span>
         </label>
     </div>
@@ -64,7 +64,7 @@
         </div>
     </div>
 
-    <div class="border-t border-gray-200 pt-4 dark:border-gray-700">
+    <div class="border-t border-gray-200 pt-4 dark:border-gray-700 contact-section">
         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Primary Contact</h3>
         <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
@@ -97,7 +97,7 @@
         </div>
     </div>
 
-    <div class="border-t border-gray-200 pt-4 dark:border-gray-700">
+    <div class="border-t border-gray-200 pt-4 dark:border-gray-700 contact-section">
         <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Secondary Contact</h3>
         <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>

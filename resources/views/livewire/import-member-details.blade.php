@@ -35,15 +35,29 @@
         <!-- Import Tab Content -->
         @if($activeTab === 'import')
         <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-            <form wire:submit.prevent="import" class="space-y-6">
-                <!-- Import Type -->
-                <div>
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                        Import Type
-                    </label>
-                    <select disabled class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                        <option>Member Details</option>
-                    </select>
+            <form wire:submit.prevent="import" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Import Type -->
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                            Import Type
+                        </label>
+                        <select disabled class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                            <option>Member Details</option>
+                        </select>
+                    </div>
+
+                    <!-- Enforce password change on first login -->
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                            Enforce password change on first login
+                        </label>
+                        <select wire:model="enforcePasswordChange" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                        @error('enforcePasswordChange') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
+                    </div>
                 </div>
 
                 <!-- Company Name Search -->
@@ -89,46 +103,32 @@
                     @error('company_id') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
                 </div>
 
-                <!-- Enforce password change on first login -->
-                <div>
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                        Enforce password change on first login
-                    </label>
-                    <select wire:model="enforcePasswordChange" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                    </select>
-                    @error('enforcePasswordChange') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
-                </div>
-
                 <!-- File Upload -->
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                         Choose File
                     </label>
-                    <div class="flex items-center gap-4">
-                        <label class="cursor-pointer">
-                            <input type="file" wire:model="file" accept=".xlsx,.csv" class="hidden" />
-                            <span class="inline-flex items-center rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
-                                Choose file
+                    <div class="flex items-center gap-4 justify-between">
+                        <div class="flex items-center gap-4 flex-1">
+                            <label class="cursor-pointer">
+                                <input type="file" wire:model="file" accept=".xlsx,.csv" class="hidden" />
+                                <span class="inline-flex items-center rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">
+                                    Choose file
+                                </span>
+                            </label>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">
+                                @if($file)
+                                    {{ $file->getClientOriginalName() }}
+                                @else
+                                    No file chosen
+                                @endif
                             </span>
-                        </label>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">
-                            @if($file)
-                                {{ $file->getClientOriginalName() }}
-                            @else
-                                No file chosen
-                            @endif
-                        </span>
+                        </div>
+                        <button type="submit" class="inline-flex items-center rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
+                            Import Member Details
+                        </button>
                     </div>
                     @error('file') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
-                </div>
-
-                <!-- Import Button -->
-                <div>
-                    <button type="submit" class="inline-flex items-center rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
-                        Import Member Details
-                    </button>
                 </div>
             </form>
         </div>
