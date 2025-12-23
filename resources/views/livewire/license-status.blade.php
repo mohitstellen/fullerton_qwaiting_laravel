@@ -34,13 +34,19 @@
          }
      }" x-init="init()">
     @if($isValid)
-        <div class="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600">
+        <div x-show="remaining <= 2592000" 
+            :class="{
+                'bg-red-50 border-red-300 dark:bg-red-900/20 dark:border-red-600': remaining <= 86400,
+                'bg-orange-50 border-orange-300 dark:bg-orange-900/20 dark:border-orange-600': remaining > 86400 && remaining <= 259200,
+                'bg-yellow-50 border-yellow-300 dark:bg-yellow-900/20 dark:border-yellow-600': remaining > 259200 && remaining <= 2592000
+            }"
+            class="flex items-center gap-2 px-3 py-2 border rounded-lg">
             <span class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">License:</span>
             <span 
                 :class="{
                     'text-red-600 dark:text-red-400 font-bold': remaining <= 86400,
                     'text-orange-600 dark:text-orange-400 font-semibold': remaining > 86400 && remaining <= 259200,
-                    'text-green-600 dark:text-green-400': remaining > 259200
+                    'text-yellow-700 dark:text-yellow-400 font-semibold': remaining > 259200 && remaining <= 2592000
                 }" 
                 class="text-sm font-semibold whitespace-nowrap"
                 x-text="remaining <= 0 ? 'Expired' : formatTime(remaining)">

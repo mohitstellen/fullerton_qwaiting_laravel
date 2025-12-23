@@ -157,37 +157,41 @@ class PublicUserForm extends Component
         }
 
         // Admin approval logic
-        if ($isAdmin) {
-            // Admin adding/editing - active by default
-            $data['is_active'] = 1;
-            $data['status'] = 'active';
-            $data['approved_by'] = $user->id;
-            $data['approved_at'] = now();
-        } else {
-            // Non-admin adding - requires approval
-            if (!$this->editing) {
-                $data['is_active'] = 0;
-                $data['status'] = 'inactive';
-            }
-        }
-
         if ($this->editing) {
+            // When editing, respect the selected status from the form
             // Don't update created_by when editing
             unset($data['created_by']);
 
             $member = Member::where('team_id', $this->teamId)
                 ->findOrFail($this->memberId);
 
-            // Only update approval if admin is editing and status is changing to active
-            if ($isAdmin && $this->status === 'active' && !$member->is_active) {
-                $data['approved_by'] = $user->id;
-                $data['approved_at'] = now();
+            // Update is_active based on the selected status
+            if ($this->status === 'active') {
                 $data['is_active'] = 1;
+                // If status is changing to active and member wasn't active, update approval
+                if (!$member->is_active && $isAdmin) {
+                    $data['approved_by'] = $user->id;
+                    $data['approved_at'] = now();
+                }
+            } else {
+                $data['is_active'] = 0;
             }
 
             $member->update($data);
             session()->flash('message', 'Member updated successfully.');
         } else {
+            // When creating new members, set defaults based on admin status
+            if ($isAdmin) {
+                // Admin creating - active by default
+                $data['is_active'] = 1;
+                $data['status'] = 'active';
+                $data['approved_by'] = $user->id;
+                $data['approved_at'] = now();
+            } else {
+                // Non-admin creating - requires approval
+                $data['is_active'] = 0;
+                $data['status'] = 'inactive';
+            }
             $member = Member::create($data);
             
             // Send welcome email with credentials for new members

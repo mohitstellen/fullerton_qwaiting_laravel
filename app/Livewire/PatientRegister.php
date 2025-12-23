@@ -298,7 +298,7 @@ class PatientRegister extends Component
 
     public function close()
     {
-        return redirect()->route('tenant.login');
+        return redirect()->route('tenant.patient.login');
     }
 
     public function render()

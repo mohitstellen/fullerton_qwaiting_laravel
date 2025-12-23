@@ -23,8 +23,8 @@
     </style>
     <div class="max-w-md w-full space-y-8">
         <!-- Logo -->
-        <div class="text-center">
-            <img src="{{ url($logo) }}" alt="Fullerton Health" class="mx-auto h-24 w-auto mb-6" />
+        <div class="text-center mb-6">
+            <img src="{{ url($logo) }}" alt="Fullerton Health" class="mx-auto max-w-xs h-auto" style="max-height: 120px;" />
         </div>
 
         @if (session()->has('error'))
@@ -41,7 +41,7 @@
 
         <!-- Login Form -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-            <form wire:submit.prevent="login" class="space-y-6">
+            <form wire:submit.prevent="login" class="space-y-5">
                 <!-- Customer Type Selection -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
@@ -74,7 +74,7 @@
                     <input type="text" wire:model.live="mobile_number" 
                         name="mobile_number"
                         placeholder="Country Code & Mobile Number (e.g. 65XXXXXXXX)"
-                        class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400">
+                        class="block w-full rounded-lg border border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500 focus:bg-white text-sm h-11 px-4 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400">
                     @error('mobile_number')
                     <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                     @enderror
@@ -89,11 +89,11 @@
                         @if($showPassword)
                             <input type="text" wire:model.live="password" 
                                 placeholder="Password"
-                                class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 pr-10 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400">
+                                class="block w-full rounded-lg border border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500 focus:bg-white text-sm h-11 px-4 pr-10 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400">
                         @else
                             <input type="password" wire:model.live="password" name="password" 
                                 placeholder="Password"
-                                class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 pr-10 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400">
+                                class="block w-full rounded-lg border border-gray-300 bg-gray-50 focus:border-blue-500 focus:ring-blue-500 focus:bg-white text-sm h-11 px-4 pr-10 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400">
                         @endif
                         <button type="button" wire:click="togglePassword" 
                             class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
@@ -117,15 +117,15 @@
                 </div>
 
                 <!-- Login Button -->
-                <div>
+                <div class="pt-2">
                     <button type="submit"
-                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 uppercase">
                         LOGIN
                     </button>
                 </div>
 
                 <!-- Links -->
-                <div class="flex justify-between text-sm">
+                <div class="flex justify-between text-sm pt-2">
                     <a href="{{ route('tenant.patient.register') }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400">
                         Sign Up
                     </a>
@@ -136,10 +136,6 @@
             </form>
         </div>
 
-        <!-- Browser Recommendation -->
-        <p class="text-center text-xs text-gray-500 dark:text-gray-400">
-            Best viewed in Chrome, Edge and Mozilla Firefox
-        </p>
     </div>
 </div>
 
