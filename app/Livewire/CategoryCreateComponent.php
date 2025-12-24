@@ -437,7 +437,7 @@ class CategoryCreateComponent extends Component
             'parent_id' => $this->tab > 1 ? 'required|integer' : 'nullable',
             'company_id' => 'nullable|integer|exists:companies,id',
             'package_for' => $this->tab == 2 ? 'required|in:Both,Self,Dependent' : 'nullable',
-            'confirmationTitle' => 'required|string|max:255',
+            'confirmationTitle' => $this->tab == 1 ? 'required|string|max:255' : 'nullable|string|max:255',
         ], [
 
             'parent_id.required' => 'Parent Service is required',
@@ -583,11 +583,13 @@ class CategoryCreateComponent extends Component
             $this->dispatch('created', '/category-management?tab=' . $this->tab);
         }
 
-        // Save email templates
-        $this->saveEmailTemplates($categoryDetail->id);
-        
-        // Save SMS templates
-        $this->saveSmsTemplates($categoryDetail->id);
+        // Save email templates only for appointment types (tab == 1)
+        if ($this->tab == 1) {
+            $this->saveEmailTemplates($categoryDetail->id);
+            
+            // Save SMS templates only for appointment types (tab == 1)
+            $this->saveSmsTemplates($categoryDetail->id);
+        }
     }
 
     private function saveEmailTemplates($categoryId)

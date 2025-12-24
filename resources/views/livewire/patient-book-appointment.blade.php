@@ -128,7 +128,7 @@
                                     <div>
                                         <p class="font-semibold text-gray-900 dark:text-white mb-2">Package includes:</p>
                                         <div class="text-sm text-gray-700 dark:text-gray-300 space-y-2">
-                                            {!! nl2br(e($selectedPackage->description)) !!}
+                                            {!! $selectedPackage->description !!}
                                         </div>
                                     </div>
                                 @else

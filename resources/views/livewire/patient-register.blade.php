@@ -1,4 +1,4 @@
-<div class="p-6">
+<div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
     <style>
         /* Ensure checkboxes are visible */
         input[type="checkbox"] {
@@ -21,38 +21,26 @@
             outline-offset: 2px;
         }
     </style>
-
-    @if (session()->has('success'))
-        <div class="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-200 mb-4">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if (session()->has('error'))
-        <div class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200 mb-4">
-            {{ session('error') }}
-        </div>
-    @endif
-
-    <!-- Logo Section -->
-    <div class="max-w-4xl mx-auto mb-6 text-center">
-        <img src="{{ url($logo) }}" alt="Logo" class="mx-auto max-w-xs h-auto" style="max-height: 120px;" />
-    </div>
-
-    <!-- Sign Up Form -->
-    <div class="max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-lg shadow-lg">
-        <!-- Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-blue-600 dark:bg-blue-800 rounded-t-lg">
-            <h2 class="text-xl font-semibold text-white">Sign Up</h2>
-            <button wire:click="close" class="text-white hover:text-gray-200 focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
+    <div class="max-w-4xl w-full space-y-8">
+        <!-- Logo -->
+        <div class="text-center mb-6">
+            <img src="{{ url($logo) }}" alt="Fullerton Health" class="mx-auto max-w-xs h-auto" style="max-height: 120px;" />
         </div>
 
-        <!-- Form Content -->
-        <div class="p-6 max-h-[80vh] overflow-y-auto">
+        @if (session()->has('success'))
+            <div class="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-200">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session()->has('error'))
+            <div class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        <!-- Sign Up Form -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-h-[80vh] overflow-y-auto">
             <form wire:submit.prevent="register" class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Identification Type -->

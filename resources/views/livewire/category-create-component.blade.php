@@ -412,10 +412,18 @@ use Illuminate\Support\Facades\Storage;
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                 {{__('text.description')}}
                             </label>
-                            <div>
-                                <textarea id="editor" wire:model="description" class="bg-white dark:bg-dark-900 datepickerTwo shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 pr-4 pl-4 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30"></textarea>
-                            </div>
-
+                            @if($tab == 2)
+                                {{-- Rich text editor for packages --}}
+                                <div wire:ignore>
+                                    <div
+                                        id="description-editor"
+                                        class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                                        style="height: 200px; overflow-y: auto;"></div>
+                                </div>
+                            @else
+                                {{-- Plain textarea for appointment types --}}
+                                <textarea wire:model="description" row="5" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
+                            @endif
                             @error('description') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                         </div>
 
@@ -1066,24 +1074,42 @@ use Illuminate\Support\Facades\Storage;
 
         // Cancel email editor - QuillEditor
         initQuillEditor('cancel-editor', 'cancelContent');
+
+        // Description editor for packages - QuillEditor (check if element exists)
+        const descriptionEditorEl = document.getElementById('description-editor');
+        if (descriptionEditorEl && !descriptionEditorEl._quill) {
+            try {
+                initQuillEditor('description-editor', 'description');
+            } catch(e) {
+                console.error('Error initializing description editor:', e);
+            }
+        }
     }
 
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(initQuillEditors, 100);
+            setTimeout(initQuillEditors, 200);
+            // Also try after a longer delay to catch any late-rendered elements
+            setTimeout(initQuillEditors, 500);
         });
     } else {
-        setTimeout(initQuillEditors, 100);
+        setTimeout(initQuillEditors, 200);
+        // Also try after a longer delay
+        setTimeout(initQuillEditors, 500);
     }
 
     // Initialize when Livewire is ready
     document.addEventListener('livewire:init', function() {
-        initQuillEditors();
+        setTimeout(function() {
+            initQuillEditors();
+        }, 200);
 
         // Listen for append-to-editor event (Livewire 3 format)
-        // Remove any existing listener first to prevent duplicates
-        Livewire.off('append-to-editor');
+        // Remove any existing listener first to prevent duplicates (if method exists)
+        if (typeof Livewire !== 'undefined' && typeof Livewire.off === 'function') {
+            Livewire.off('append-to-editor');
+        }
         
         Livewire.on('append-to-editor', (data) => {
             // Handle both array and object formats
@@ -1132,7 +1158,8 @@ use Illuminate\Support\Facades\Storage;
                         const propertyMap = {
                             'confirmation-editor': 'confirmationContent',
                             'rescheduling-editor': 'reschedulingContent',
-                            'cancel-editor': 'cancelContent'
+                            'cancel-editor': 'cancelContent',
+                            'description-editor': 'description'
                         };
                         const propertyName = propertyMap[editorId];
                         if (propertyName) {
@@ -1154,7 +1181,12 @@ use Illuminate\Support\Facades\Storage;
             // Reinitialize after Livewire updates
             setTimeout(function() {
                 initQuillEditors();
-            }, 100);
+                // Specifically check for description editor after updates
+                const descEditor = document.getElementById('description-editor');
+                if (descEditor && !descEditor._quill) {
+                    initQuillEditor('description-editor', 'description');
+                }
+            }, 200);
         });
     });
 
@@ -1223,6 +1255,10 @@ use Illuminate\Support\Facades\Storage;
         if (window.quillInstances['cancel-editor']) {
             @this.set('cancelContent', window.quillInstances['cancel-editor'].root.innerHTML);
         }
+        // Sync description editor if it exists
+        if (window.quillInstances['description-editor']) {
+            @this.set('description', window.quillInstances['description-editor'].root.innerHTML);
+        }
     }
 </script>
 <script>
@@ -1234,6 +1270,8 @@ use Illuminate\Support\Facades\Storage;
                 @this.set('locations', data);
             });
         });
+        
     });
+    
 </script>
 </div>

@@ -36,7 +36,7 @@
             </a>
 
             <!-- Profile Card -->
-            <a href="#" class="block p-6 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition">
+            <a href="{{ route('tenant.patient.profile') }}" class="block p-6 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <svg class="w-12 h-12 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -51,12 +51,5 @@
             </a>
         </div>
 
-        <!-- Customer Type Info -->
-        <div class="mt-6 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-            <p class="text-sm text-gray-600 dark:text-gray-400">
-                <strong>Customer Type:</strong> 
-                <span class="text-blue-600 dark:text-blue-400">{{ $member->customer_type ?? 'Not Set' }}</span>
-            </p>
-        </div>
     </div>
 </div>

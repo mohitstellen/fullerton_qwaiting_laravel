@@ -34,15 +34,19 @@
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
                 <div class="flex items-center">
-                    @if(isset($logo))
+                    <?php
+                    $teamId = tenant('id');
+                    $firstLocation = App\Models\Location::where('team_id', $teamId)
+                        ->where('status', 1)
+                        ->orderBy('id')
+                        ->first();
+                    $sidebarlocation = $firstLocation ? $firstLocation->id : null;
+                    $settingsidebar = App\Models\SiteDetail::viewImage('business_logo', $teamId, $sidebarlocation);
+                    ?>
                     <a href="{{ route('tenant.patient.dashboard') }}">
-                        <img src="{{ url($logo) }}" alt="Logo" class="h-12 w-auto" />
+                        <img class="dark:hidden h-12 w-auto" src="{{ url($settingsidebar) }}" alt="Logo" style="max-height:50px;width:auto" />
+                        <img class="hidden dark:block h-12 w-auto" src="{{ url($settingsidebar) }}" alt="Logo" style="max-height:50px;width:auto" />
                     </a>
-                    @else
-                    <a href="{{ route('tenant.patient.dashboard') }}">
-                        <img src="{{ url('images/logo-transparent.png') }}" alt="Logo" class="h-12 w-auto" />
-                    </a>
-                    @endif
                 </div>
 
                 <!-- Navigation Links -->

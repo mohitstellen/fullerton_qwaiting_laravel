@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Country;
 use App\Models\SiteDetail;
 use App\Models\SmtpDetails;
+use App\Models\Location;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Config;
 
-#[Layout('components.layouts.custom-booking-layout')]
+#[Layout('components.layouts.custom-patient')]
 #[Title('Sign Up')]
 class PatientRegister extends Component
 {
@@ -322,8 +323,16 @@ class PatientRegister extends Component
         // Get nationalities from config file
         $nationalities = config('nationalities');
 
-        // Get logo
-        $logo = SiteDetail::viewImage(SiteDetail::FIELD_BUSINESS_LOGO, $this->teamId ?? null, $this->locationId ?? null);
+        // Get first location for the team
+        $firstLocation = Location::where('team_id', $this->teamId)
+            ->where('status', 1)
+            ->orderBy('id')
+            ->first();
+        
+        $locationId = $firstLocation ? $firstLocation->id : null;
+        
+        // Get logo based on team id and first location
+        $logo = SiteDetail::viewImage(SiteDetail::FIELD_BUSINESS_LOGO, $this->teamId ?? null, $locationId);
 
         return view('livewire.patient-register', [
             'phoneCodeCountries' => $phoneCodeCountries,

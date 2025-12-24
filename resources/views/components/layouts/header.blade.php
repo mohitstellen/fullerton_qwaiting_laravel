@@ -126,23 +126,7 @@ $settingsidebar = App\Models\SiteDetail::viewImage('business_logo', tenant('id')
                   </a>
                 </li>
               @endcan
-              @if(Auth::user()->is_admin == 1)
-                <li>
-                  <a href="{{ route('buy-subcription') }}"
-                    class="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
-                    <svg class="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300"
-                      x="0" y="0" viewBox="0 0 8.467 8.467" style="enable-background:new 0 0 512 512" xml:space="preserve"
-                      height="22" width="22">
-                      <g transform="matrix(1.05,0,0,1.05,-0.21169998794794065,-0.21169999986886978)">
-                        <path
-                          d="M4.233.265A3.973 3.973 0 0 0 .265 4.233a3.973 3.973 0 0 0 3.968 3.97 3.973 3.973 0 0 0 3.97-3.97A3.973 3.973 0 0 0 4.232.265zm0 .529a3.437 3.437 0 0 1 3.442 3.44 3.44 3.44 0 0 1-3.442 3.441 3.437 3.437 0 0 1-3.44-3.442 3.436 3.436 0 0 1 3.44-3.44zM4.23 2.118a.265.265 0 0 0-.26.268v.223c-.427.08-.793.355-.793.832 0 .33.15.598.35.754s.426.224.624.29c.199.067.37.13.467.206.098.075.144.14.144.338 0 .44-1.056.44-1.056 0a.265.265 0 1 0-.529 0c0 .476.366.752.793.832v.222a.265.265 0 1 0 .529 0V5.86c.427-.08.793-.356.793-.832 0-.331-.15-.599-.35-.754-.2-.156-.426-.226-.624-.292-.199-.066-.37-.129-.468-.204-.097-.076-.144-.14-.144-.338 0-.441 1.056-.441 1.056 0a.265.265 0 1 0 .53 0c0-.476-.366-.751-.793-.832v-.223a.265.265 0 0 0-.27-.268z"
-                          fill=""></path>
-                      </g>
-                    </svg>
-                    {{ __('report.Billing') }}
-                  </a>
-                </li>
-              @endif
+           
               @can('Change Password')
                 <li>
                   <a href="{{ route('tenant.change-password') }}"

@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\CompanyAppointmentType;
 use App\Models\CompanyPackage;
 use App\Models\Location;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -58,6 +59,11 @@ class EditCompany extends Component
 
     public bool $showPackageAppointmentTypeDropdown = false;
 
+    // Account Manager Search
+    public string $accountManagerSearch = '';
+    public bool $showAccountManagerDropdown = false;
+    public array $accountManagers = [];
+
     protected array $messages = [
         'company.company_name.required' => 'The company name field is required.',
         'company.address.required' => 'The address field is required.',
@@ -98,6 +104,7 @@ class EditCompany extends Component
             'remarks',
             'status',
             'ehs_appointments_per_year',
+            'account_manager_id',
             'contact_person1_name',
             'contact_person1_phone',
             'contact_person1_email',
@@ -106,10 +113,19 @@ class EditCompany extends Component
             'contact_person2_email',
         ]);
 
+        // Load account manager name if exists
+        if (!empty($this->company['account_manager_id'])) {
+            $accountManager = User::find($this->company['account_manager_id']);
+            if ($accountManager) {
+                $this->accountManagerSearch = $accountManager->name;
+            }
+        }
+
         $this->mappingForm = $this->emptyMappingForm();
         $this->appointmentTypeForm = $this->emptyAppointmentTypeForm();
 
         $this->loadOptions();
+        $this->loadAccountManagers();
     }
 
     public function updatedMappingFormAppointmentTypeId($value): void
@@ -353,6 +369,38 @@ class EditCompany extends Component
             // When checked, copy company address to billing address
             $this->company['billing_address'] = $this->company['address'] ?? '';
         }
+    }
+
+    public function clear(): void
+    {
+        // Reset to original company values
+        $this->company = $this->companyModel->only([
+            'company_name',
+            'address',
+            'billing_address',
+            'is_billing_same_as_company',
+            'remarks',
+            'status',
+            'ehs_appointments_per_year',
+            'account_manager_id',
+            'contact_person1_name',
+            'contact_person1_phone',
+            'contact_person1_email',
+            'contact_person2_name',
+            'contact_person2_phone',
+            'contact_person2_email',
+        ]);
+
+        // Reset account manager search
+        if (!empty($this->company['account_manager_id'])) {
+            $accountManager = User::find($this->company['account_manager_id']);
+            if ($accountManager) {
+                $this->accountManagerSearch = $accountManager->name;
+            }
+        } else {
+            $this->accountManagerSearch = '';
+        }
+        $this->showAccountManagerDropdown = false;
     }
 
     public function update(): void
@@ -621,13 +669,13 @@ class EditCompany extends Component
     public function getFilteredAppointmentTypesProperty(): array
     {
         if (empty($this->appointmentTypeSearch)) {
-            return $this->appointmentTypesForValidity;
+            return $this->appointmentTypes;
         }
 
         $search = strtolower($this->appointmentTypeSearch);
-        return array_filter($this->appointmentTypesForValidity, function ($type) use ($search) {
+        return array_values(array_filter($this->appointmentTypes, function ($type) use ($search) {
             return str_contains(strtolower($type['name']), $search);
-        });
+        }));
     }
 
     public function saveAppointmentType(): void
@@ -719,5 +767,65 @@ class EditCompany extends Component
             'valid_to' => '',
             'applicable_for' => 'Both',
         ];
+    }
+
+    public function selectAccountManager(int $userId, string $userName): void
+    {
+        $this->company['account_manager_id'] = $userId;
+        $this->accountManagerSearch = $userName;
+        $this->showAccountManagerDropdown = false;
+    }
+
+    public function updatedAccountManagerSearch(): void
+    {
+        $this->showAccountManagerDropdown = !empty($this->accountManagerSearch);
+        
+        // If search matches exactly with a selected manager, keep it selected
+        if (!empty($this->company['account_manager_id'])) {
+            $selectedManager = collect($this->accountManagers)->firstWhere('id', (int) $this->company['account_manager_id']);
+            if ($selectedManager && strtolower($selectedManager['name']) === strtolower($this->accountManagerSearch)) {
+                return;
+            }
+        }
+        
+        // Clear selection if search doesn't match
+        $this->company['account_manager_id'] = null;
+    }
+
+    public function getFilteredAccountManagersProperty(): array
+    {
+        if (empty($this->accountManagerSearch)) {
+            return $this->accountManagers;
+        }
+
+        $search = strtolower($this->accountManagerSearch);
+        return array_values(array_filter($this->accountManagers, function ($manager) use ($search) {
+            return str_contains(strtolower($manager['name']), $search) || 
+                   str_contains(strtolower($manager['email'] ?? ''), $search);
+        }));
+    }
+
+    protected function loadAccountManagers(): void
+    {
+        $teamId = $this->companyModel->team_id;
+
+        $this->accountManagers = User::query()
+            ->when($teamId, function ($query) use ($teamId) {
+                $query->where('team_id', $teamId);
+            })
+            ->where(function ($query) {
+                $query->where('is_admin', 1)
+                      ->orWhereHas('roles', function ($q) {
+                          $q->where('name', User::ROLE_ADMIN);
+                      });
+            })
+            ->orderBy('name')
+            ->get(['id', 'name', 'email', 'team_id'])
+            ->map(fn ($user) => [
+                'id' => (int) $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ])
+            ->toArray();
     }
 }

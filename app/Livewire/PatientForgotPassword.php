@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Member;
 use App\Models\SiteDetail;
 use App\Models\SmtpDetails;
+use App\Models\Location;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Config;
 
-#[Layout('components.layouts.custom-booking-layout')]
+#[Layout('components.layouts.custom-patient')]
 #[Title('Forgot Login ID / Password')]
 class PatientForgotPassword extends Component
 {
@@ -175,8 +176,16 @@ class PatientForgotPassword extends Component
 
     public function render()
     {
-        // Get logo
-        $logo = SiteDetail::viewImage(SiteDetail::FIELD_BUSINESS_LOGO, $this->teamId ?? null, null);
+        // Get first location for the team
+        $firstLocation = Location::where('team_id', $this->teamId)
+            ->where('status', 1)
+            ->orderBy('id')
+            ->first();
+        
+        $locationId = $firstLocation ? $firstLocation->id : null;
+        
+        // Get logo based on team id and first location
+        $logo = SiteDetail::viewImage(SiteDetail::FIELD_BUSINESS_LOGO, $this->teamId ?? null, $locationId);
 
         return view('livewire.patient-forgot-password', [
             'logo' => $logo,

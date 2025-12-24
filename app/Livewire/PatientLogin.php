@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Member;
 use App\Models\SiteDetail;
+use App\Models\Location;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Log as LogFacade;
 
-#[Layout('components.layouts.custom-booking-layout')]
+#[Layout('components.layouts.custom-patient')]
 #[Title('Patient Login')]
 class PatientLogin extends Component
 {
@@ -126,8 +127,16 @@ class PatientLogin extends Component
 
     public function render()
     {
-        // Get logo
-        $logo = SiteDetail::viewImage(SiteDetail::FIELD_BUSINESS_LOGO, $this->teamId ?? null, null);
+        // Get first location for the team
+        $firstLocation = Location::where('team_id', $this->teamId)
+            ->where('status', 1)
+            ->orderBy('id')
+            ->first();
+        
+        $locationId = $firstLocation ? $firstLocation->id : null;
+        
+        // Get logo based on team id and first location
+        $logo = SiteDetail::viewImage(SiteDetail::FIELD_BUSINESS_LOGO, $this->teamId ?? null, $locationId);
 
         return view('livewire.patient-login', [
             'logo' => $logo,
