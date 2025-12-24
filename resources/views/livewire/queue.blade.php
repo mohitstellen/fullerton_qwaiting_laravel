@@ -436,17 +436,7 @@
 
                                     <span> {{ $otherName }} </span>
                                     {{-- Description --}}
-                                    @php
-                                    $description = '';
-                                    if (!empty($child['description'])) {
-                                    if (session('app_locale') !== 'en') {
-                                    $descriptionKey = $child['name'] . '_description';
-                                    $description = ' - ' . ($translations[$descriptionKey][session('app_locale')] ?? $child['description']);
-                                    } else {
-                                    $description = ' - ' . $child['description'];
-                                    }
-                                    }
-                                    @endphp
+                                   
                                     <div>
                                         <span class="{{ $descriptionFontSize }} {{ $fontFamily }}">{{ $description }}</span>
                                     </div>
