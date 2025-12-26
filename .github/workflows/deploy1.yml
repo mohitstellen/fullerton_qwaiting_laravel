@@ -65,9 +65,6 @@ jobs:
 
           git pull origin main
 
-          # Run specific migration for mobile_length column in countries table
-          php artisan migrate --path=database/migrations/2025_12_26_183911_add_mobile_length_to_countries_table.php --force
-
           # Clear all caches
           php artisan o:clear
           

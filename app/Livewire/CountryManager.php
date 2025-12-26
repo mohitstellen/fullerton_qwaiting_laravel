@@ -277,7 +277,7 @@ class CountryManager extends Component
             $csvData[] = [
                 $index + 1,
                 $country->name . ' (+' . $country->phonecode . ')',
-                $country->country_code ?? '-',
+                $country->phonecode ?? '-',
                 $country->mobile_length ?? '-',
             ];
         }
