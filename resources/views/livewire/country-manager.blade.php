@@ -62,9 +62,6 @@
                             Mobile Length
                         </th>
 
-                        <th class="px-5 py-3 sm:px-6">
-                            Created
-                        </th>
 
                         <th class="px-5 py-3 sm:px-6">
 
@@ -77,10 +74,10 @@
                     @if(count($countries) > 0)
                     @foreach ($countries as $country)
                     <tr>
-                        <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $country->name }} (+{{ $country->phone_code }})</td>
-                        <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $country->country_code ?? '-' }}</td>
+                        <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $country->name }} (+{{ $country->phonecode }})</td>
+                        <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $country->phonecode ?? '-' }}</td>
                         <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $country->mobile_length ?? '-' }}</td>
-                        <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $country->created_at->format($dateformat) }}</td>
+                       
                         <td class="p-3 border-b border-gray-300">
                             <div
                                 x-data="{
@@ -215,15 +212,12 @@
 
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1">
-                    Country <span class="text-red-500">*</span>
+                    Country Name <span class="text-red-500">*</span>
                 </label>
-                <select wire:model="select_countryId" class="w-full border rounded px-2 py-1 dark:bg-dark-900 dark:text-white/90 dark:border-gray-700">
-                    <option value="">-- Select Country --</option>
-                    @foreach ($allcountries as $country)
-                    <option value="{{ $country->id }}">{{ $country->name }} (+{{ $country->phonecode }})</option>
-                    @endforeach
-                </select>
-                @error('select_countryId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                <input type="text" wire:model="countryName"
+                    class="w-full border rounded px-2 py-1 dark:bg-dark-900 dark:text-white/90 dark:border-gray-700"
+                    placeholder="Enter country name" />
+                @error('countryName') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
             <div class="mb-4">

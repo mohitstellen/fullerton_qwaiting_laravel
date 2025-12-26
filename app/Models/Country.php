@@ -12,7 +12,9 @@ class Country extends Model
     protected $fillable = [
         'name',
         'code',
-        'phonecode'
+        'phonecode',
+        'country_code',
+        'mobile_length'
     ];
     public function states(): HasMany 
     {
