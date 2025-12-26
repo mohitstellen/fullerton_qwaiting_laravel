@@ -52,6 +52,7 @@ class ProfileForm extends Component
     public $enable_location_page_option= [];
     public $enable_location_page;
     public $enable_active_users_list;
+    public $two_factor_auth;
 
     public function mount()
     {
@@ -80,6 +81,7 @@ class ProfileForm extends Component
             'date_format' => $this->user->date_format ?? '',
             'enable_location_page' => $domain->enable_location_page ?? 0,
             'enable_active_users_list' => $sitedetail->enable_active_users_list ?? 0,
+            'two_factor_auth' => $this->user->two_factor_auth ?? 0,
         ]);
     }
 
@@ -99,6 +101,7 @@ class ProfileForm extends Component
             'sms_reminder_queue' => $this->sms_reminder_queue,
             'date_format' => $this->date_format,
             'locations' => $this->locations,
+            'two_factor_auth' => $this->two_factor_auth ?? 0,
         ]);
 
         Domain::where('team_id', $this->user->team_id)->update([

@@ -60,7 +60,8 @@ $langArr = [
   "What's New" => "What's New",
   "Automation" => "Automation",
   "analytics" => "Analytics",
-   "Allowed Country" => "Allowed Country",
+   "Allowed Country" => "Country Master",
+   "Country Master" => "Country Master",
    "Appointment Type" => "Appointment Type",
    "Appointment Booking" => "Appointment Booking",
 ];

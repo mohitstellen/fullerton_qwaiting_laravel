@@ -362,11 +362,44 @@
                                                     @php
                                                         $daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
                                                         $groupedDays = [];
+                                                        
                                                         foreach($rescheduleLocationBusinessHours as $day) {
                                                             if(isset($day['is_closed']) && $day['is_closed'] == \App\Models\ServiceSetting::SERVICE_OPEN) {
-                                                                $key = ($day['start_time'] ?? '') . '-' . ($day['end_time'] ?? '');
+                                                                // Collect all time ranges for this day
+                                                                $timeRanges = [];
+                                                                
+                                                                // Add main time range if it exists
+                                                                if(!empty($day['start_time']) && !empty($day['end_time'])) {
+                                                                    $timeRanges[] = [
+                                                                        'start' => $day['start_time'],
+                                                                        'end' => $day['end_time']
+                                                                    ];
+                                                                }
+                                                                
+                                                                // Add day_interval time ranges if they exist
+                                                                if(!empty($day['day_interval']) && is_array($day['day_interval'])) {
+                                                                    foreach($day['day_interval'] as $interval) {
+                                                                        if(!empty($interval['start_time']) && !empty($interval['end_time'])) {
+                                                                            $timeRanges[] = [
+                                                                                'start' => $interval['start_time'],
+                                                                                'end' => $interval['end_time']
+                                                                            ];
+                                                                        }
+                                                                    }
+                                                                }
+                                                                
+                                                                // Create a key based on all time ranges
+                                                                $timeRangesStr = '';
+                                                                foreach($timeRanges as $range) {
+                                                                    $timeRangesStr .= $range['start'] . '-' . $range['end'] . '|';
+                                                                }
+                                                                $key = md5($timeRangesStr);
+                                                                
                                                                 if(!isset($groupedDays[$key])) {
-                                                                    $groupedDays[$key] = ['times' => ($day['start_time'] ?? '') . ' - ' . ($day['end_time'] ?? ''), 'days' => []];
+                                                                    $groupedDays[$key] = [
+                                                                        'timeRanges' => $timeRanges,
+                                                                        'days' => []
+                                                                    ];
                                                                 }
                                                                 $groupedDays[$key]['days'][] = $day['day'] ?? '';
                                                             }
@@ -380,9 +413,47 @@
                                                                 $lastDay = end($group['days']);
                                                                 $daysStr = $firstDay . '-' . $lastDay;
                                                             }
+                                                            
+                                                            // Format all time ranges
+                                                            $timeRangesDisplay = [];
+                                                            foreach($group['timeRanges'] as $range) {
+                                                                $startTime = $range['start'];
+                                                                $endTime = $range['end'];
+                                                                
+                                                                // Times are stored in "h:i A" format, but check if they need conversion
+                                                                // Try to parse as H:i first (24-hour format)
+                                                                try {
+                                                                    $startCarbon = \Carbon\Carbon::createFromFormat('H:i', $startTime);
+                                                                    $startTime = $startCarbon->format('h:i A');
+                                                                } catch (\Exception $e) {
+                                                                    // If parsing fails, it's likely already in h:i A format, use as is
+                                                                    try {
+                                                                        $startCarbon = \Carbon\Carbon::createFromFormat('h:i A', $startTime);
+                                                                        $startTime = $startCarbon->format('h:i A');
+                                                                    } catch (\Exception $e2) {
+                                                                        // Use as is if both formats fail
+                                                                    }
+                                                                }
+                                                                
+                                                                try {
+                                                                    $endCarbon = \Carbon\Carbon::createFromFormat('H:i', $endTime);
+                                                                    $endTime = $endCarbon->format('h:i A');
+                                                                } catch (\Exception $e) {
+                                                                    // If parsing fails, it's likely already in h:i A format, use as is
+                                                                    try {
+                                                                        $endCarbon = \Carbon\Carbon::createFromFormat('h:i A', $endTime);
+                                                                        $endTime = $endCarbon->format('h:i A');
+                                                                    } catch (\Exception $e2) {
+                                                                        // Use as is if both formats fail
+                                                                    }
+                                                                }
+                                                                
+                                                                $timeRangesDisplay[] = $startTime . ' - ' . $endTime;
+                                                            }
+                                                            $timesDisplay = implode(', ', $timeRangesDisplay);
                                                         @endphp
                                                         <p class="text-sm text-gray-600 dark:text-gray-400">
-                                                            {{ $daysStr }} : {{ $group['times'] }}
+                                                            {{ $daysStr }} : {{ $timesDisplay }}
                                                         </p>
                                                     @endforeach
                                                 </div>

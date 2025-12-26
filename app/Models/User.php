@@ -64,7 +64,8 @@ class User extends Authenticatable
         'priority',
         'is_admin',
         'saleforce_user_id',
-        'must_change_password'
+        'must_change_password',
+        'two_factor_auth'
     ];
 
 

@@ -137,6 +137,12 @@ class PatientCart extends Component
         $cart = array_values($cart); // Re-index array
         Session::put('patient_cart', $cart);
         
+        // Clear timer if cart is empty
+        if (empty($cart)) {
+            Session::forget('cart_timer_start');
+            Session::forget('cart_timer_duration');
+        }
+        
         $this->loadCartItems();
         
         session()->flash('cart_message', 'Item removed from cart successfully.');
@@ -177,8 +183,9 @@ class PatientCart extends Component
                 'services.stripe.secret' => $this->paymentSetting->api_secret,
             ]);
             
-            // Dispatch event to initialize Stripe card element
+            // Dispatch event to initialize Stripe card element and open modal
             $this->dispatch('cardElement');
+            $this->dispatch('payment-modal-open');
         } else {
             // Settings changed or invalid - this shouldn't happen if button condition was correct
             // But handle it gracefully
@@ -489,8 +496,10 @@ class PatientCart extends Component
             // Clear checkout flag
             Session::forget('checkout_in_progress');
             
-            // Clear cart
+            // Clear cart and timer
             Session::forget('patient_cart');
+            Session::forget('cart_timer_start');
+            Session::forget('cart_timer_duration');
             $this->cartItems = [];
             
             session()->flash('checkout_success', 'All appointments have been booked successfully! Order Number: ' . $order->order_number);

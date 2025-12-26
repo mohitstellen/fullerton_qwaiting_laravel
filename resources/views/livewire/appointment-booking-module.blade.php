@@ -17,15 +17,11 @@
             <!-- Logo -->
             <div style="display: flex; align-items: center; gap: 12px;">
                 @php
-                    $url = request()->url();
-                    $headerPage = App\Models\SiteDetail::FIELD_BUSINESS_LOGO;
-                    if (strpos($url, 'mobile/queue') !== false) {
-                        $headerPage = App\Models\SiteDetail::FIELD_MOBILE_LOGO;
-                    }
-                    $logo = App\Models\SiteDetail::viewImage($headerPage);
+                    $sidebarlocation = Session::get('selectedLocation');
+                    $settingsidebar = App\Models\SiteDetail::viewImage('business_logo', tenant('id'), $sidebarlocation);
                 @endphp
                 <a href="{{ route('tenant.dashboard') }}" style="display: flex; align-items: center; gap: 8px; text-decoration: none; cursor: pointer;">
-                    <img src="{{ url($logo) }}" alt="Logo" style="max-height: 60px; max-width: 110px;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2218%22 fill=%22%233b82f6%22/%3E%3Ctext x=%2220%22 y=%2225%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2216%22 font-weight=%22bold%22%3EW%3C/text%3E%3C/svg%3E'">
+                    <img src="{{ url($settingsidebar) }}" alt="Logo" style="max-height: 60px; max-width: 110px; height: 40px; width: auto;">
                 </a>
                 
                 <!-- Dashboard Button -->

@@ -50,56 +50,103 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <nav class="hidden md:flex space-x-1">
+                <nav class="hidden md:flex items-center space-x-0.5">
                     <a href="{{ route('tenant.patient.book-appointment') }}" 
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 {{ request()->routeIs('patient.book-appointment') ? 'text-blue-600 border-b-2 border-blue-600' : '' }}">
-                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors {{ request()->routeIs('patient.book-appointment') ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : '' }}">
+                        <svg class="w-3.5 h-3.5 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>Book an Appointment
                     </a>
                     <a href="{{ route('tenant.patient.appointments') }}" 
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 {{ request()->routeIs('patient.appointments') ? 'text-blue-600 border-b-2 border-blue-600' : '' }}">
-                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors {{ request()->routeIs('patient.appointments') ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : '' }}">
+                        <svg class="w-3.5 h-3.5 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
                         </svg>My Appointments
                     </a>
                     <a href="{{ route('tenant.patient.profile') }}" 
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 {{ request()->routeIs('patient.profile') ? 'text-blue-600 border-b-2 border-blue-600' : '' }}">
-                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors {{ request()->routeIs('patient.profile') ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : '' }}">
+                        <svg class="w-3.5 h-3.5 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>Profile
                     </a>
                     <a href="{{ route('tenant.patient.dependents') }}" 
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 {{ request()->routeIs('patient.dependents') ? 'text-blue-600 border-b-2 border-blue-600' : '' }}">
-                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors {{ request()->routeIs('patient.dependents') ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : '' }}">
+                        <svg class="w-3.5 h-3.5 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                         </svg>Dependents
                     </a>
                     <a href="{{ route('tenant.patient.change-password') }}" 
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 {{ request()->routeIs('patient.change-password') ? 'text-blue-600 border-b-2 border-blue-600' : '' }}">
-                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors {{ request()->routeIs('patient.change-password') ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : '' }}">
+                        <svg class="w-3.5 h-3.5 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                         </svg>Change Password
                     </a>
                     @if(session('patient_member_id') && session('patient_customer_type') === 'Private')
                     <a href="{{ route('tenant.patient.cart') }}" 
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 {{ request()->routeIs('patient.cart') ? 'text-blue-600 border-b-2 border-blue-600' : '' }}">
-                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors relative {{ request()->routeIs('patient.cart') ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/20' : '' }}">
+                        <svg class="w-3.5 h-3.5 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>Cart
                         @php
                             $cartCount = count(session('patient_cart', []));
                         @endphp
                         @if($cartCount > 0)
-                            <span class="ml-1 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">{{ $cartCount }}</span>
+                            <span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center leading-none">{{ $cartCount }}</span>
                         @endif
                     </a>
+                    @php
+                        $cartTimerStart = session('cart_timer_start');
+                        $cartTimerDuration = session('cart_timer_duration', 9900);
+                        $hasTimer = $cartTimerStart && count(session('patient_cart', [])) > 0;
+                        $remainingSeconds = $hasTimer ? max(0, $cartTimerDuration - (now()->timestamp - $cartTimerStart)) : 0;
+                    @endphp
+                    @if($hasTimer && $remainingSeconds > 0)
+                    <div class="px-2.5 py-1.5 text-xs font-bold text-gray-900 dark:text-gray-100 border-2 border-red-500 rounded flex items-center gap-1.5 bg-white dark:bg-gray-800 whitespace-nowrap" 
+                         x-data="{
+                             remaining: {{ $remainingSeconds }},
+                             timer: null,
+                             init() {
+                                 // Clear any existing timer
+                                 if (this.timer) {
+                                     clearInterval(this.timer);
+                                 }
+                                 // Start the countdown timer
+                                 this.timer = setInterval(() => {
+                                     if (this.remaining > 0) {
+                                         this.remaining--;
+                                     } else {
+                                         this.remaining = 0;
+                                         clearInterval(this.timer);
+                                         // Reload page when timer expires
+                                         setTimeout(() => {
+                                             location.reload();
+                                         }, 1000);
+                                     }
+                                 }, 1000);
+                             },
+                             formatTime(seconds) {
+                                 if (seconds <= 0) return '00:00:00';
+                                 const h = Math.floor(seconds / 3600);
+                                 const m = Math.floor((seconds % 3600) / 60);
+                                 const s = Math.floor(seconds % 60);
+                                 const pad = (num) => num.toString().padStart(2, '0');
+                                 return pad(h) + ':' + pad(m) + ':' + pad(s);
+                             }
+                         }" 
+                         x-init="init()"
+                         x-effect="remaining">
+                        <svg class="w-3.5 h-3.5 text-gray-900 dark:text-gray-100 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span x-text="formatTime(remaining)" class="font-bold"></span>
+                    </div>
+                    @endif
                     @endif
                     <form method="POST" action="{{ route('tenant.patient.logout') }}" class="inline">
                         @csrf
                         <button type="submit" 
-                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">
-                            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors">
+                            <svg class="w-3.5 h-3.5 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                             </svg>Logout
                         </button>
@@ -158,6 +205,53 @@
                             <span class="ml-1 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">{{ $cartCount }}</span>
                         @endif
                     </a>
+                    @php
+                        $cartTimerStart = session('cart_timer_start');
+                        $cartTimerDuration = session('cart_timer_duration', 9900);
+                        $hasTimer = $cartTimerStart && count(session('patient_cart', [])) > 0;
+                        $remainingSeconds = $hasTimer ? max(0, $cartTimerDuration - (now()->timestamp - $cartTimerStart)) : 0;
+                    @endphp
+                    @if($hasTimer && $remainingSeconds > 0)
+                    <div class="block px-3 py-2 text-sm font-bold text-gray-900 dark:text-gray-100 border-2 border-red-500 rounded flex items-center gap-1.5 bg-white dark:bg-gray-800 whitespace-nowrap" 
+                         x-data="{
+                             remaining: {{ $remainingSeconds }},
+                             timer: null,
+                             init() {
+                                 // Clear any existing timer
+                                 if (this.timer) {
+                                     clearInterval(this.timer);
+                                 }
+                                 // Start the countdown timer
+                                 this.timer = setInterval(() => {
+                                     if (this.remaining > 0) {
+                                         this.remaining--;
+                                     } else {
+                                         this.remaining = 0;
+                                         clearInterval(this.timer);
+                                         // Reload page when timer expires
+                                         setTimeout(() => {
+                                             location.reload();
+                                         }, 1000);
+                                     }
+                                 }, 1000);
+                             },
+                             formatTime(seconds) {
+                                 if (seconds <= 0) return '00:00:00';
+                                 const h = Math.floor(seconds / 3600);
+                                 const m = Math.floor((seconds % 3600) / 60);
+                                 const s = Math.floor(seconds % 60);
+                                 const pad = (num) => num.toString().padStart(2, '0');
+                                 return pad(h) + ':' + pad(m) + ':' + pad(s);
+                             }
+                         }" 
+                         x-init="init()"
+                         x-effect="remaining">
+                        <svg class="w-3.5 h-3.5 text-gray-900 dark:text-gray-100 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span x-text="formatTime(remaining)" class="font-bold"></span>
+                    </div>
+                    @endif
                     @endif
                     <form method="POST" action="{{ route('tenant.patient.logout') }}" class="block">
                         @csrf
@@ -181,15 +275,6 @@
     @livewireScripts
     <script src="{{ asset('js/cdn/jquery.min.js') }}"></script>
     <script src="{{ asset('js/cdn/sweetalert2.js') }}"></script>
-    <script src="{{ asset('/js/livewire.js?v='.time()) }}" type="module"></script>
-    <script>
-        // Initialize Alpine.js for mobile menu
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('mobileMenu', () => ({
-                mobileMenuOpen: false
-            }));
-        });
-    </script>
     @stack('scripts')
 </body>
 

@@ -15,9 +15,17 @@
 </div>
 
  @can('Location')
-        <a href="{{ route('tenant.add-location') }}" class="p-3 text-sm font-medium text-white transition-colors rounded-lg bg-brand-500 hover:bg-brand-600">
-            <i class="ri-map-pin-2-line"></i> {{ __('setting.Add New Clinic') }}
-        </a>
+        <div class="flex gap-x-3">
+            <button wire:click="exportCSV" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors rounded-lg bg-green-600 hover:bg-green-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                {{ __('setting.Export to CSV') }}
+            </button>
+            <a href="{{ route('tenant.add-location') }}" class="p-3 text-sm font-medium text-white transition-colors rounded-lg bg-brand-500 hover:bg-brand-600">
+                <i class="ri-map-pin-2-line"></i> {{ __('setting.Add New Clinic') }}
+            </a>
+        </div>
         @endcan
 </div>
 
@@ -64,7 +72,17 @@
                             <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ str::limit($location->address,50) }}</td>
                             <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $location->phone_number }}</td>
                             <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $location->sms_number }}</td>
-                            <td class="px-5 py-3 sm:px-6 border-b border-gray-300">{{ $location->status == 1 ? __('setting.Active') : __('setting.Deactive') }}</td>    
+                            <td class="px-5 py-3 sm:px-6 border-b border-gray-300">
+                                @if($location->status == 1)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200">
+                                        {{ __('setting.Active') }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200">
+                                        {{ __('setting.Inactive') }}
+                                    </span>
+                                @endif
+                            </td>    
                             <td class="p-3 border-b border-gray-300">
                                 <div x-data="{ openDropDown: false }" class="relative">
                                     <button @click="openDropDown = !openDropDown" class="text-gray-500 dark:text-gray-400 action-btn">

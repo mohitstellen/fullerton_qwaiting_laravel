@@ -65,6 +65,9 @@ jobs:
 
           git pull origin main
 
+          # Run database migrations
+          php artisan migrate --force
+
           # Clear all caches
           php artisan o:clear
           

@@ -500,6 +500,12 @@ class PatientBookAppointment extends Component
             // Store in session
             Session::put('patient_cart', $cart);
             
+            // Start cart timer if not already started (2 hours 45 minutes = 9900 seconds)
+            if (!Session::has('cart_timer_start')) {
+                Session::put('cart_timer_start', now()->timestamp);
+                Session::put('cart_timer_duration', 9900); // 2 hours 45 minutes in seconds
+            }
+            
             // Show success message
             session()->flash('cart_success', 'Appointment added to cart successfully!');
             

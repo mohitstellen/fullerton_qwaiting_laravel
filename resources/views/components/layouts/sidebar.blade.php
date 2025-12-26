@@ -205,6 +205,36 @@
                         </a>
                     </li>
 
+                    @can('Location')
+                    <li>
+                        <a data-tooltip="Clinics" href="{{ route('tenant.locations') }}" class="menu-item group"
+                            :class=" (selected === 'Clinics') || (page === 'locations') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
+                            <svg :class="(selected === 'Clinics') || (page === 'locations') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                                width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" class="menu-item-icon-inactive">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" fill=""></path>
+                            </svg>
+                            <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                {{ __('sidebar.Clinics') }}
+                            </span>
+                        </a>
+                    </li>
+                    @endcan
+
+                    <li>
+                        <a data-tooltip="Country Master" href="{{ route('tenant.country-manager') }}" class="menu-item group"
+                            :class=" (selected === 'Country Master') || (page === 'country-manager') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
+                            <svg :class="(selected === 'Country Master') || (page === 'country-manager') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
+                                width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" class="menu-item-icon-inactive">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill=""></path>
+                            </svg>
+                            <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                                {{ __('sidebar.Country Master') }}
+                            </span>
+                        </a>
+                    </li>
+
                     <li>
                         <a data-tooltip="Patient Search" href="{{ route('tenant.public-user.index') }}" class="menu-item group"
                             :class=" (selected === 'PatientSearch') || (page === 'public-user') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
@@ -346,9 +376,9 @@
                         <a
                           href="{{ route('appointment-booking-module') }}"
                           class="menu-item group"
-                          :class=" (selected === 'Appointment Booking Module') || (page === 'appointment-booking-module') ? 'menu-item-active' : 'menu-item-inactive'">
+                          :class=" (selected === 'Appointment Booking Module') || (page === 'appointment-booking-module') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
                           <svg :class="(selected === 'Appointment Booking Module') || (page === 'appointment-booking-module') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="menu-item-icon-inactive">
-                            <path fill-rule="evenodd" clip-rule="evenodd" d="M7.75586 5.50098C7.75586 5.08676 8.09165 4.75098 8.50586 4.75098H18.4985C18.9127 4.75098 19.2485 5.08676 19.2485 5.50098L19.2485 15.4956C19.2485 15.9098 18.9127 16.2456 18.4985 16.2456H8.50586C8.09165 16.2456 7.75586 15.9098 7.75586 15.4956V5.50098ZM8.50586 3.25098C7.26322 3.25098 6.25586 4.25834 6.25586 5.50098V6.26318H5.50195C4.25931 6.26318 3.25195 7.27054 3.25195 8.51318V18.4995C3.25195 19.7422 4.25931 20.7495 5.50195 20.7495H15.4883C16.7309 20.7495 17.7383 19.7421 17.7383 18.4995L17.7383 17.7456H18.4985C19.7411 17.7456 20.7485 16.7382 20.7485 15.4956L20.7485 5.50097C20.7485 4.25833 19.7411 3.25098 18.4985 3.25098H8.50586ZM16.2383 17.7456H8.50586C7.26322 17.7456 6.25586 16.7382 6.25586 15.4956V7.76318H5.50195C5.08774 7.76318 4.75195 8.09897 4.75195 8.51318V18.4995C4.75195 18.9137 5.08774 19.2495 5.50195 19.2495H15.4883C15.9025 19.2495 16.2383 18.9137 16.2383 18.4995L16.2383 17.7456Z" fill=""></path>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M8 2C8.41421 2 8.75 2.33579 8.75 2.75V3.75H15.25V2.75C15.25 2.33579 15.5858 2 16 2C16.4142 2 16.75 2.33579 16.75 2.75V3.75H18.5C19.7426 3.75 20.75 4.75736 20.75 6V9V19C20.75 20.2426 19.7426 21.25 18.5 21.25H5.5C4.25736 21.25 3.25 20.2426 3.25 19V9V6C3.25 4.75736 4.25736 3.75 5.5 3.75H7.25V2.75C7.25 2.33579 7.58579 2 8 2ZM8 5.25H5.5C5.08579 5.25 4.75 5.58579 4.75 6V8.25H19.25V6C19.25 5.58579 18.9142 5.25 18.5 5.25H16H8ZM19.25 9.75H4.75V19C4.75 19.4142 5.08579 19.75 5.5 19.75H18.5C18.9142 19.75 19.25 19.4142 19.25 19V9.75Z" fill=""></path>
                           </svg>
                           <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
                             {{ __('sidebar.Appointment Booking') }}
@@ -367,11 +397,11 @@
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M8 2C8.41421 2 8.75 2.33579 8.75 2.75V3.75H15.25V2.75C15.25 2.33579 15.5858 2 16 2C16.4142 2 16.75 2.33579 16.75 2.75V3.75H18.5C19.7426 3.75 20.75 4.75736 20.75 6V9V19C20.75 20.2426 19.7426 21.25 18.5 21.25H5.5C4.25736 21.25 3.25 20.2426 3.25 19V9V6C3.25 4.75736 4.25736 3.75 5.5 3.75H7.25V2.75C7.25 2.33579 7.58579 2 8 2ZM8 5.25H5.5C5.08579 5.25 4.75 5.58579 4.75 6V8.25H19.25V6C19.25 5.58579 18.9142 5.25 18.5 5.25H16H8ZM19.25 9.75H4.75V19C4.75 19.4142 5.08579 19.75 5.5 19.75H18.5C18.9142 19.75 19.25 19.4142 19.25 19V9.75Z" fill=""></path>
                             </svg>
 
-                            <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                            <span class="menu-item-text flex-1" :class="sidebarToggle ? 'lg:hidden' : ''">
                                 {{ __('sidebar.Booking Management') }}
                             </span>
 
-                            <svg class="menu-item-arrow absolute right-2.5 top-1/2 -translate-y-1/2 stroke-current"
+                            <svg class="menu-item-arrow stroke-current"
                                 :class="[(selected === 'booking') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
                                 width="20" height="20" viewBox="0 0 20 20" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -624,11 +654,11 @@
                         </g>
                     </svg>
 
-                    <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                    <span class="menu-item-text flex-1" :class="sidebarToggle ? 'lg:hidden' : ''">
                         {{ __('sidebar.Branch Reports') }}
                     </span>
 
-                    <svg class="menu-item-arrow absolute right-2.5 top-1/2 -translate-y-1/2 stroke-current"
+                    <svg class="menu-item-arrow stroke-current"
                         :class="[(selected === 'Branch Reports') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
                         width="20" height="20" viewBox="0 0 20 20" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
@@ -710,11 +740,11 @@
                         </g>
                     </svg>
 
-                    <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                    <span class="menu-item-text flex-1" :class="sidebarToggle ? 'lg:hidden' : ''">
                         {{ __('sidebar.Settings') }}
                     </span>
 
-                    <svg class="menu-item-arrow absolute right-2.5 top-1/2 -translate-y-1/2 stroke-current"
+                    <svg class="menu-item-arrow stroke-current"
                         :class="[(selected === 'Settings') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
                         width="20" height="20" viewBox="0 0 20 20" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
@@ -877,15 +907,6 @@
                             </a>
                         </li>
                         @endcan
-                        @can('Location')
-                        <li>
-                            <a href="{{ route('tenant.locations') }}"
-                                class="menu-dropdown-item group {{ request()->routeIs('tenant.locations') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                {{ __('sidebar.Clinics') }}
-                            </a>
-                        </li>
-                        @endcan
-
                         <li>
                             <a href="{{ route('tenant.language-settings') }}"
                                 class="menu-dropdown-item group {{ request()->routeIs('tenant.language-settings') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
@@ -902,13 +923,6 @@
                             </a>
                         </li>
                         @endcan
-                        <li>
-                            <a href="{{ route('tenant.country-manager') }}"
-                                class="menu-dropdown-item group
-           {{ request()->routeIs('tenant.country-manager') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
-                                {{ __('sidebar.Allowed Country') }}
-                            </a>
-                        </li>
                     </ul>
 
                 </div>
@@ -931,12 +945,12 @@
                     </svg>
 
 
-                    <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
+                    <span class="menu-item-text flex-1" :class="sidebarToggle ? 'lg:hidden' : ''">
                         {{ __('sidebar.Help') }}
                     </span>
 
-                    <svg class="menu-item-arrow absolute right-2.5 top-1/2 -translate-y-1/2 stroke-current"
-                        :class="[(selected === 'Settings') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
+                    <svg class="menu-item-arrow stroke-current"
+                        :class="[(selected === 'Help') ? 'menu-item-arrow-active' : 'menu-item-arrow-inactive', sidebarToggle ? 'lg:hidden' : '' ]"
                         width="20" height="20" viewBox="0 0 20 20" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
                         <path d="M4.79175 7.39584L10.0001 12.6042L15.2084 7.39585" stroke="" stroke-width="1.5"

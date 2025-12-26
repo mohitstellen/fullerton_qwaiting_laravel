@@ -38,6 +38,15 @@
                     disabled
                 />
             </div>
+            <div>
+                <label>{{ __('text.Two Factor Authentication') }}</label>
+                <select wire:model.defer="two_factor_auth" class="w-full p-2 px-3 border rounded-md border-gray-300 mt-2 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+                    @foreach($enable_location_page_option as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+                @error('two_factor_auth') <span class="text-red-500">{{ $message }}</span> @enderror
+            </div>
           @if(Auth::check() && Auth::user()->hasRole('Admin'))
             <div>
                 <label>{{ __('text.address') }}</label>

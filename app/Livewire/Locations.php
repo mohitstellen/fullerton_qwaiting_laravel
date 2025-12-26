@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Title;
 use Auth;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Response;
 
 class Locations extends Component
 {
@@ -161,6 +162,65 @@ public function copySettings()
     // Fire success event
     $this->dispatch('copy-success');
 }
+
+    public function exportCSV()
+    {
+        $query = Location::where('team_id', $this->teamId);
+
+        $query->when($this->search, function ($query) {
+            $query->where(function ($q) {
+                $q->where('location_name', 'like', '%' . $this->search . '%')
+                  ->orWhere('city', 'like', '%' . $this->search . '%')
+                  ->orWhere('state', 'like', '%' . $this->search . '%')
+                  ->orWhere('country', 'like', '%' . $this->search . '%');
+            });
+        });
+
+        $locations = $query->orderBy('location_name')->get();
+
+        $csvData = [];
+        
+        // Add header row
+        $csvData[] = [
+            __('setting.Name'),
+            __('setting.Address'),
+            __('setting.Phone Number'),
+            __('setting.SMS Number'),
+            __('setting.Status'),
+        ];
+
+        // Add data rows
+        foreach ($locations as $location) {
+            $csvData[] = [
+                $location->location_name ?? '',
+                $location->address ?? '',
+                $location->phone_number ?? '',
+                $location->sms_number ?? '',
+                $location->status == 1 ? __('setting.Active') : __('setting.Inactive'),
+            ];
+        }
+
+        $filename = 'clinics_export_' . now()->format('Ymd_His') . '.csv';
+        $handle = fopen('php://temp', 'r+');
+        
+        // Add BOM for UTF-8 to ensure proper encoding in Excel
+        fwrite($handle, "\xEF\xBB\xBF");
+        
+        foreach ($csvData as $line) {
+            fputcsv($handle, $line);
+        }
+
+        rewind($handle);
+        $csvContent = stream_get_contents($handle);
+        fclose($handle);
+
+        return Response::streamDownload(function () use ($csvContent) {
+            echo $csvContent;
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
 
     public function render()
     {

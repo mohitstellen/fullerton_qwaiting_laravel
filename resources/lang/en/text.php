@@ -995,6 +995,7 @@ $langArr = [
         "Select Variable" => "Select Variable",
         "Active" => "Active",
         "Expired" => "Expired",
+        "Two Factor Authentication" => "Two Factor Authentication",
 
 ];
 

@@ -9,6 +9,7 @@ use App\Models\AllowedCountry;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Response;
 use Livewire\Attributes\On;
 
 class CountryManager extends Component
@@ -27,6 +28,8 @@ class CountryManager extends Component
     public $selectedCountryForLogs = null;
     public $perPage = 10; // number of records per page
     public $userAuth;
+    public $searchCode = '';
+    public $searchCountryName = '';
 
     protected $paginationTheme = 'tailwind'; // works well with Tailwind
 
@@ -56,10 +59,29 @@ class CountryManager extends Component
     //     }
     // }
 
+    public function updatingSearchCode()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingSearchCountryName()
+    {
+        $this->resetPage();
+    }
+
     private function countriesQuery()
     {
         return AllowedCountry::where('team_id', $this->teamId)
             ->where('location_id', $this->location)
+            ->when($this->searchCode, function ($query) {
+                $query->where(function ($q) {
+                    $q->where('country_code', 'like', '%' . $this->searchCode . '%')
+                      ->orWhere('phone_code', 'like', '%' . $this->searchCode . '%');
+                });
+            })
+            ->when($this->searchCountryName, function ($query) {
+                $query->where('name', 'like', '%' . $this->searchCountryName . '%');
+            })
             ->latest();
     }
 
@@ -195,6 +217,49 @@ class CountryManager extends Component
         $this->reset(['countryId', 'select_countryId', 'countryCode', 'mobileLength']);
         $this->dispatch('alert', type: 'success', message: 'Country Deleted!');
         $this->resetPage(); // reset pagination after delete
+    }
+
+    public function exportCSV()
+    {
+        $query = $this->countriesQuery();
+        $countries = $query->get();
+
+        $csvData = [];
+        $csvData[] = [
+            'S.No',
+            'Country (Code)',
+            'Country Code',
+            'Mobile Length',
+            'Created',
+        ];
+
+        foreach ($countries as $index => $country) {
+            $csvData[] = [
+                $index + 1,
+                $country->name . ' (+' . $country->phone_code . ')',
+                $country->country_code ?? '-',
+                $country->mobile_length ?? '-',
+                $country->created_at->format('Y-m-d H:i:s'),
+            ];
+        }
+
+        $filename = 'country_master_export_' . now()->format('Ymd_His') . '.csv';
+        $handle = fopen('php://temp', 'r+');
+        fwrite($handle, "\xEF\xBB\xBF"); // Add BOM for UTF-8
+        foreach ($csvData as $line) {
+            fputcsv($handle, $line);
+        }
+
+        rewind($handle);
+        $csvContent = stream_get_contents($handle);
+        fclose($handle);
+
+        return Response::streamDownload(function () use ($csvContent) {
+            echo $csvContent;
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     public function render()
