@@ -65,8 +65,9 @@ jobs:
 
           git pull origin main
 
-          # Run database migrations
-          php artisan migrate --force
+          
+          # Run specific migration for two_factor_auth column
+          php artisan migrate --path=database/migrations/2025_12_26_170335_add_two_factor_auth_to_users_table.php --force
 
           # Clear all caches
           php artisan o:clear
