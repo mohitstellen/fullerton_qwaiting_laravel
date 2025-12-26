@@ -279,7 +279,6 @@ class CountryManager extends Component
                 $country->name . ' (+' . $country->phonecode . ')',
                 $country->country_code ?? '-',
                 $country->mobile_length ?? '-',
-                $country->created_at->format('Y-m-d H:i:s'),
             ];
         }
 
