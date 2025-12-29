@@ -33,14 +33,14 @@
 
     </div>
 
-    <div class="mb-4 flex flex-wrap gap-3 justify-between mb-4">
+    <div class="mb-4 flex flex-col lg:flex-row gap-3 justify-between mb-4">
 
-        <div class="flex flex-wrap gap-3 flex-1">
+        <div class="flex flex-nowrap gap-3 flex-1 min-w-0">
             @if($tab == 2)
             <!-- Filter by Appointment Type (only for Packages) -->
-            <div class="relative w-full lg:w-[300px]">
+            <div class="relative flex-shrink-0 w-[250px] lg:w-[300px]">
                 <select wire:model.live="appointmentTypeFilter" 
-                    class="bg-white dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-[42px] w-full rounded-lg border border-gray-300 py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden xl:w-[300px] dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">
+                    class="bg-white dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-[42px] w-full rounded-lg border border-gray-300 py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">
                     <option value="">Filter by Appointment Type</option>
                     @foreach($appointmentTypes as $appointmentType)
                         <option value="{{ $appointmentType->id }}">{{ $appointmentType->name }}</option>
@@ -48,7 +48,7 @@
                 </select>
             </div>
             @endif
-            <div  class="relative w-full lg:w-[300px]">
+            <div class="relative flex-shrink-0 w-[250px] lg:w-[300px]">
                 <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/4">
                     <svg class="fill-gray-500 dark:fill-gray-400" width="20" height="20" viewBox="0 0 20 20" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
@@ -58,10 +58,10 @@
                     </svg>
                 </span>
                 <input type="text" wire:model.live.debounce.300ms="search" placeholder="@if($tab == 2) Search Package Name... @else Search... @endif"
-                    class="bg-white dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden xl:w-[300px] dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+                    class="bg-white dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
             </div>
             @if($tab == 1)
-            <div  class="relative w-full lg:w-[300px]">
+            <div class="relative flex-shrink-0 w-[250px] lg:w-[300px]">
                 <span class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/4">
                     <svg class="fill-gray-500 dark:fill-gray-400" width="20" height="20" viewBox="0 0 20 20" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
@@ -71,22 +71,22 @@
                     </svg>
                 </span>
                 <input type="text" wire:model.live.debounce.300ms="corporateSearch" placeholder="Search Corporate..."
-                    class="bg-white dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden xl:w-[300px] dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+                    class="bg-white dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
             </div>
             @endif
         </div>
-        <div class="flex gap-x-3">
-        <button wire:click="exportCSV" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors rounded-lg bg-green-600 hover:bg-green-700">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <div class="flex flex-wrap gap-2 items-start">
+        <button wire:click="exportCSV" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white transition-colors rounded-lg bg-green-600 hover:bg-green-700 whitespace-nowrap">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
             Export to CSV
         </button>
-        <button id="bulkDeleteBtn" class="bg-red-500 text-white px-3 py-2 rounded-md flex gap-x-2 hover:bg-red-600"><i class="ri-delete-bin-line"></i> {{__('text.Bulk Delete')}}</button>
+        <button id="bulkDeleteBtn" class="bg-red-500 text-white px-2.5 py-1.5 text-xs rounded-md flex gap-x-1.5 hover:bg-red-600 whitespace-nowrap"><i class="ri-delete-bin-line text-sm"></i> {{__('text.Bulk Delete')}}</button>
         @can('Service Add')
         <div>
             <a href="{{ route('tenant.category.create',['level'=>$tab]) }}"
-                 class="primary-btn py-2 px-3 font-medium text-white transition-colors rounded-md bg-brand-500 hover:bg-brand-600 flex gap-x-2"><i class="ri-add-circle-line"></i>@if($tab == 1) {{__('text.Add Appointment Type')}} @elseif($tab == 2) {{__('text.Add Package')}} @endif</a>
+                 class="primary-btn py-1.5 px-2.5 text-xs font-medium text-white transition-colors rounded-md bg-brand-500 hover:bg-brand-600 flex gap-x-1.5 whitespace-nowrap"><i class="ri-add-circle-line text-sm"></i>@if($tab == 1) {{__('text.Add Appointment Type')}} @elseif($tab == 2) {{__('text.Add Package')}} @endif</a>
 
         </div>
         @endcan
