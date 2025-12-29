@@ -143,7 +143,7 @@ public $waitingTime;
                 $locationName = Location::locationName($this->location);
                 $dateformat = AccountSetting::showDateTimeFormat();
 
-$pendingCount =$this->pendingCount;
+       $pendingCount =$this->pendingCount;
         $this->data = [
                 'name' => $queueStorage->name,
                 'phone' => $queueStorage->phone,

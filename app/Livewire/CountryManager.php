@@ -26,7 +26,7 @@ class CountryManager extends Component
     public $showLogsModal = false;
     public $activityLogs = [];
     public $selectedCountryForLogs = null;
-    public $perPage = 10; // number of records per page
+    public $perPage = 25; // number of records per page
     public $userAuth;
     public $searchCode = '';
     public $searchCountryName = '';
@@ -67,6 +67,11 @@ class CountryManager extends Component
     public function updatingSearchCountryName()
     {
         $this->resetPage();
+    }
+
+    public function updatingPerPage()
+    {
+        $this->resetPage(); // Reset pagination when per page changes
     }
 
     private function countriesQuery()

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Livewire;
 
 use Livewire\Component;
@@ -29,18 +30,19 @@ class CategoryManagement extends Component
     public $search = '';
     public $corporateSearch = '';
     public $appointmentTypeFilter = ''; // For filtering packages by appointment type
-    public $selectedCategory=null;
+    public $selectedCategory = null;
     public $selectedMultiple = [];
     public $selectAll = false;
     public $level1;
     public $level2;
     public $level3;
     public $userAuth;
+    public $perPage = 25; // Number of records per page
 
 
     public function mount(Request $request)
     {
-         $this->userAuth = Auth::user();
+        $this->userAuth = Auth::user();
         if (!$this->userAuth->hasPermissionTo('Service Read')) {
             abort(403);
         }
@@ -48,10 +50,10 @@ class CategoryManagement extends Component
         $this->teamId = tenant('id'); // Get the current tenant ID
         $this->locationId = Session::get('selectedLocation');
         $levels =  Level::where('team_id', $this->teamId)
-        ->where('location_id', $this->locationId)
-        ->whereIn('level', [1, 2, 3])
-        ->get()
-        ->keyBy('level');
+            ->where('location_id', $this->locationId)
+            ->whereIn('level', [1, 2, 3])
+            ->get()
+            ->keyBy('level');
 
         $this->level1 = 'Appointment Types';
         $this->level2 = 'Packages';
@@ -61,37 +63,42 @@ class CategoryManagement extends Component
     }
 
 
-// Trigger loadCategories when search is updated
-public function updatedSearch()
-{
-    // $this->loadCategories();
-    $this->resetPage();
-}
+    // Trigger loadCategories when search is updated
+    public function updatedSearch()
+    {
+        // $this->loadCategories();
+        $this->resetPage();
+    }
 
-public function updatingSearch()
+    public function updatingSearch()
     {
         $this->resetPage(); // Reset pagination when searching
     }
 
-public function updatedCorporateSearch()
-{
-    $this->resetPage();
-}
+    public function updatedCorporateSearch()
+    {
+        $this->resetPage();
+    }
 
-public function updatingCorporateSearch()
-{
-    $this->resetPage(); // Reset pagination when searching
-}
+    public function updatingCorporateSearch()
+    {
+        $this->resetPage(); // Reset pagination when searching
+    }
 
-public function updatedAppointmentTypeFilter()
-{
-    $this->resetPage();
-}
+    public function updatedAppointmentTypeFilter()
+    {
+        $this->resetPage();
+    }
 
-public function updatingAppointmentTypeFilter()
-{
-    $this->resetPage(); // Reset pagination when filtering
-}
+    public function updatingAppointmentTypeFilter()
+    {
+        $this->resetPage(); // Reset pagination when filtering
+    }
+
+    public function updatingPerPage()
+    {
+        $this->resetPage(); // Reset pagination when per page changes
+    }
 
     public function setTab($tab)
     {
@@ -117,7 +124,7 @@ public function updatingAppointmentTypeFilter()
             Category::where('id', $this->selectedCategory)->delete(); // Delete the category
             $this->resetPage();
             // session()->flash('message', 'Staff deleted successfully.');
-             ActivityLog::storeLog($this->teamId, $this->userAuth->id, null, null, ActivityLog::DELETE, $this->locationId, ActivityLog::CATEGORY, null, $this->userAuth);
+            ActivityLog::storeLog($this->teamId, $this->userAuth->id, null, null, ActivityLog::DELETE, $this->locationId, ActivityLog::CATEGORY, null, $this->userAuth);
             $this->dispatch('deleted');
         }
 
@@ -149,7 +156,7 @@ public function updatingAppointmentTypeFilter()
             Category::whereIn('id', $this->selectedMultiple)->delete();
             $this->selectedMultiple = [];
             $this->selectAll = false;
-              ActivityLog::storeLog($this->teamId, $this->userAuth->id, null, null, ActivityLog::BULK_DELETE, $this->locationId, ActivityLog::CATEGORY, null, $this->userAuth);
+            ActivityLog::storeLog($this->teamId, $this->userAuth->id, null, null, ActivityLog::BULK_DELETE, $this->locationId, ActivityLog::CATEGORY, null, $this->userAuth);
             $this->dispatch('deleted');
         }
     }
@@ -187,7 +194,7 @@ public function updatingAppointmentTypeFilter()
         $categories = $query->orderBy('name')->get();
 
         $csvData = [];
-        
+
         if ($this->tab == 1) {
             // Appointment Types CSV
             $csvData[] = [
@@ -233,10 +240,10 @@ public function updatingAppointmentTypeFilter()
         }
 
         $handle = fopen('php://temp', 'r+');
-        
+
         // Add BOM for UTF-8 to ensure proper encoding in Excel
         fwrite($handle, "\xEF\xBB\xBF");
-        
+
         foreach ($csvData as $line) {
             fputcsv($handle, $line);
         }
@@ -257,10 +264,10 @@ public function updatingAppointmentTypeFilter()
     {
 
         $siteSetting = SiteDetail::where('team_id', $this->teamId)
-            ->where('location_id',$this->locationId)
-            ->select('category_slot_level','enable_time_slot')
+            ->where('location_id', $this->locationId)
+            ->select('category_slot_level', 'enable_time_slot')
             ->first();
-    $query = Category::where('level_id', $this->tab)
+        $query = Category::where('level_id', $this->tab)
             ->where('team_id', $this->teamId)
             ->whereJsonContains('category_locations', (string) $this->locationId)
             ->when($this->search, function ($query) {
@@ -285,7 +292,7 @@ public function updatingAppointmentTypeFilter()
             $query->with(['getparent.getparent']);
         }
 
-        $categories = $query->paginate(10);
+        $categories = $query->paginate($this->perPage);
 
         // Get appointment types for filter (only when on packages tab)
         // Show ALL appointment types regardless of location
@@ -295,14 +302,13 @@ public function updatingAppointmentTypeFilter()
                 ->where('location_id', $this->locationId)
                 ->where('level', 1)
                 ->first();
-                 
+
             if ($level1) {
                 $appointmentTypes = Category::where('level_id', 1)
                     ->where('team_id', $this->teamId)
                     ->whereNull('deleted_at')
                     ->orderBy('name')
                     ->get();
-
             }
         }
 

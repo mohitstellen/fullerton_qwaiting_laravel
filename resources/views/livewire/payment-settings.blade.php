@@ -12,27 +12,25 @@
             <ul class="flex space-x-2 tabs-nav">
                 <li>
                     <button wire:click="switchTab('payment')"
-                        class="inline-block px-4 py-2 rounded-lg hover:text-gray-600 hover:bg-gray-100 bg-white
-                        {{ $activeTab === 'payment' ? 'active-tab' : 'text-gray-800' }}">
+                        class="inline-block px-4 py-2 rounded-lg hover:text-gray-600 hover:bg-gray-100 bg-white transition-colors
+                        {{ $activeTab === 'payment' ? 'active-tab text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-800 dark:text-gray-300' }}">
                         {{ __('text.Payment Gateway Settings') }}
                     </button>
                 </li>
                 <li>
                     <button wire:click="switchTab('integration')" style="display:none;"
-                        class="inline-block px-4 py-2 rounded-lg hover:text-gray-600 hover:bg-gray-100 bg-white tex-blue-600
-                        {{ $activeTab === 'integration' ? 'active-tab' : 'text-gray-800' }}">
+                        class="inline-block px-4 py-2 rounded-lg hover:text-gray-600 hover:bg-gray-100 bg-white transition-colors
+                        {{ $activeTab === 'integration' ? 'active-tab text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-800 dark:text-gray-300' }}">
                         {{ __('text.Integration') }}
                     </button>
                 </li>
                 <li>
                     <button wire:click="switchTab('general')"
-                        class="inline-block px-4 py-2 rounded-lg hover:text-gray-600 hover:bg-gray-100 bg-white tex-blue-600
-                        {{ $activeTab === 'general' ? 'active-tab' : 'text-gray-800' }}">
+                        class="inline-block px-4 py-2 rounded-lg hover:text-gray-600 hover:bg-gray-100 bg-white transition-colors
+                        {{ $activeTab === 'general' ? 'active-tab text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-800 dark:text-gray-300' }}">
                         {{ __('text.General Settings') }}
                     </button>
                 </li>
-
-              
             </ul>
         </div>
 
@@ -53,20 +51,6 @@
                                 </div>
                             </div>
                             <span class="font-semibold text-{{ $paymentStatus == 'Enabled' ? 'green' : 'red'}}-500">{{ $paymentStatus }}</span>
-                        </div>
-                    </div>
-
-                    <!-- Juspay -->
-                    <div onclick="openModal('juspay')" class="cursor-pointer bg-white rounded p-6 shadow hover:shadow-xl transition-all transform hover:scale-105 duration-300  dark:bg-white/[0.03]">
-                        <div class="flex items-center justify-between space-x-6">
-                            <div class="flex items-center space-x-4">
-                                <img src="{{ url('images/juspay.png') }}" class="w-16 h-16">
-                                <div>
-                                    <h2 class="text-xl font-semibold">{{ __('text.Juspay') }}</h2>
-                                    <p class="text-gray-500 mt-2">{{ __('text.Enable Juspay to accept online payments.') }}</p>
-                                </div>
-                            </div>
-                            <span class="font-semibold text-{{ $juspayEnable ? 'green' : 'red'}}-500">{{ $juspayEnable ? __('text.Enabled') : __('text.Disabled') }}</span>
                         </div>
                     </div>
 

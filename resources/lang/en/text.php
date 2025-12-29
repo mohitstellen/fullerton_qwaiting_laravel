@@ -996,6 +996,7 @@ $langArr = [
         "Active" => "Active",
         "Expired" => "Expired",
         "Two Factor Authentication" => "Two Factor Authentication",
+        "Back" => "Back",
 
 ];
 

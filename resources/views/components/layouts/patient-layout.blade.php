@@ -105,11 +105,16 @@
                          x-data="{
                              remaining: {{ $remainingSeconds }},
                              timer: null,
+                             checkInterval: null,
                              init() {
-                                 // Clear any existing timer
+                                 // Clear any existing timers
                                  if (this.timer) {
                                      clearInterval(this.timer);
                                  }
+                                 if (this.checkInterval) {
+                                     clearInterval(this.checkInterval);
+                                 }
+                                 
                                  // Start the countdown timer
                                  this.timer = setInterval(() => {
                                      if (this.remaining > 0) {
@@ -117,12 +122,44 @@
                                      } else {
                                          this.remaining = 0;
                                          clearInterval(this.timer);
-                                         // Reload page when timer expires
+                                         // Check cart expiration via Livewire if on cart page
+                                         @if(request()->routeIs('patient.cart'))
+                                         if (typeof Livewire !== 'undefined' && @this) {
+                                             @this.call('checkAndClearExpiredCart').then(() => {
+                                                 setTimeout(() => {
+                                                     location.reload();
+                                                 }, 1000);
+                                             });
+                                         } else {
+                                             setTimeout(() => {
+                                                 location.reload();
+                                             }, 1000);
+                                         }
+                                         @else
+                                         // Just reload if not on cart page
                                          setTimeout(() => {
                                              location.reload();
                                          }, 1000);
+                                         @endif
                                      }
                                  }, 1000);
+                                 
+                                 // Periodically check cart expiration (every 30 seconds)
+                                 this.checkInterval = setInterval(() => {
+                                     @if(request()->routeIs('patient.cart'))
+                                     if (typeof Livewire !== 'undefined' && @this) {
+                                         @this.call('checkAndClearExpiredCart').then((expired) => {
+                                             if (expired) {
+                                                 clearInterval(this.timer);
+                                                 clearInterval(this.checkInterval);
+                                                 setTimeout(() => {
+                                                     location.reload();
+                                                 }, 1000);
+                                             }
+                                         });
+                                     }
+                                     @endif
+                                 }, 30000); // Check every 30 seconds
                              },
                              formatTime(seconds) {
                                  if (seconds <= 0) return '00:00:00';
@@ -216,11 +253,16 @@
                          x-data="{
                              remaining: {{ $remainingSeconds }},
                              timer: null,
+                             checkInterval: null,
                              init() {
-                                 // Clear any existing timer
+                                 // Clear any existing timers
                                  if (this.timer) {
                                      clearInterval(this.timer);
                                  }
+                                 if (this.checkInterval) {
+                                     clearInterval(this.checkInterval);
+                                 }
+                                 
                                  // Start the countdown timer
                                  this.timer = setInterval(() => {
                                      if (this.remaining > 0) {
@@ -228,12 +270,44 @@
                                      } else {
                                          this.remaining = 0;
                                          clearInterval(this.timer);
-                                         // Reload page when timer expires
+                                         // Check cart expiration via Livewire if on cart page
+                                         @if(request()->routeIs('patient.cart'))
+                                         if (typeof Livewire !== 'undefined' && @this) {
+                                             @this.call('checkAndClearExpiredCart').then(() => {
+                                                 setTimeout(() => {
+                                                     location.reload();
+                                                 }, 1000);
+                                             });
+                                         } else {
+                                             setTimeout(() => {
+                                                 location.reload();
+                                             }, 1000);
+                                         }
+                                         @else
+                                         // Just reload if not on cart page
                                          setTimeout(() => {
                                              location.reload();
                                          }, 1000);
+                                         @endif
                                      }
                                  }, 1000);
+                                 
+                                 // Periodically check cart expiration (every 30 seconds)
+                                 this.checkInterval = setInterval(() => {
+                                     @if(request()->routeIs('patient.cart'))
+                                     if (typeof Livewire !== 'undefined' && @this) {
+                                         @this.call('checkAndClearExpiredCart').then((expired) => {
+                                             if (expired) {
+                                                 clearInterval(this.timer);
+                                                 clearInterval(this.checkInterval);
+                                                 setTimeout(() => {
+                                                     location.reload();
+                                                 }, 1000);
+                                             }
+                                         });
+                                     }
+                                     @endif
+                                 }, 30000); // Check every 30 seconds
                              },
                              formatTime(seconds) {
                                  if (seconds <= 0) return '00:00:00';

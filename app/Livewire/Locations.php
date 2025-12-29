@@ -13,9 +13,10 @@ use App\Models\Category;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Title;
-use Auth;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Response;
+use Auth;
+
 
 class Locations extends Component
 {
@@ -28,6 +29,7 @@ class Locations extends Component
     public $teamId;
     public $locationId;
     public $userAuth;
+    public $perPage = 25; // Number of records per page
 
     public $copySettingsModal = false;
     public $targetLocationId; // The location you clicked copy for
@@ -50,7 +52,13 @@ class Locations extends Component
     public function updatedSearch($value)
         {
         //    $this->search =$value; // This will show the latest search input
+        $this->resetPage();
         }
+
+    public function updatingPerPage()
+    {
+        $this->resetPage(); // Reset pagination when per page changes
+    }
     public function deleteconfirmation($id)
     {
         $this->selectedId = $id;
@@ -246,7 +254,7 @@ public function copySettings()
             });
         });
 
-        $locations = $query->paginate(10);
+        $locations = $query->paginate($this->perPage);
 
         return view('livewire.locations', compact('locations'));
     }

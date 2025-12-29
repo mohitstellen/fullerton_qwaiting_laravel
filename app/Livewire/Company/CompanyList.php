@@ -5,11 +5,15 @@ namespace App\Livewire\Company;
 use App\Models\Company;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\WithPagination;
 use Illuminate\Support\Facades\Response;
 
 class CompanyList extends Component
 {
+    use WithPagination;
+
     public string $search = '';
+    public $perPage = 25; // Number of records per page
 
     public function confirmDelete(int $companyId): void
     {
@@ -25,7 +29,12 @@ class CompanyList extends Component
 
     public function updatingSearch()
     {
-        // Reset pagination when search changes (if pagination is added later)
+        $this->resetPage(); // Reset pagination when search changes
+    }
+
+    public function updatingPerPage()
+    {
+        $this->resetPage(); // Reset pagination when per page changes
     }
 
     public function exportCSV()
@@ -120,7 +129,7 @@ class CompanyList extends Component
                 });
             })
             ->orderBy('company_name')
-            ->get();
+            ->paginate($this->perPage);
 
         return view('livewire.company.company-list', compact('companies'));
     }

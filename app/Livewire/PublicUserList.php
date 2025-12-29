@@ -28,6 +28,7 @@ class PublicUserList extends Component
     public $searchName = '';
     public $searchEmail = '';
     public $searchCompany = '';
+    public int $perPage = 25; // Number of records per page
 
     protected $paginationTheme = 'tailwind';
 
@@ -55,6 +56,11 @@ class PublicUserList extends Component
         $this->searchName = '';
         $this->searchEmail = '';
         $this->searchCompany = '';
+        $this->resetPage();
+    }
+
+    public function updatingPerPage(): void
+    {
         $this->resetPage();
     }
 
@@ -169,7 +175,7 @@ class PublicUserList extends Component
             });
         }
 
-        $members = $query->with('company')->orderBy('created_at', 'desc')->paginate(10);
+        $members = $query->with('company')->orderBy('created_at', 'desc')->paginate($this->perPage);
 
         return view('livewire.public-user-list', [
             'members' => $members,

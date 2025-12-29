@@ -116,6 +116,12 @@ class PatientCart extends Component
     public function loadCartItems()
     {
         $cart = Session::get('patient_cart', []);
+        
+        // Check if cart timer has expired
+        $this->checkAndClearExpiredCart();
+        
+        // Reload cart after expiration check
+        $cart = Session::get('patient_cart', []);
         $this->cartItems = $cart;
         
         // Re-initialize payment settings when cart changes
@@ -126,6 +132,32 @@ class PatientCart extends Component
             $this->isFree = 0;
             $this->paymentStep = 0;
         }
+    }
+    
+    /**
+     * Check if cart timer has expired and clear cart if needed
+     * Can be called from JavaScript interval or Livewire polling
+     */
+    public function checkAndClearExpiredCart()
+    {
+        $cart = Session::get('patient_cart', []);
+        $cartTimerStart = Session::get('cart_timer_start');
+        $cartTimerDuration = Session::get('cart_timer_duration', 9900); // Default 2 hours 45 minutes
+        
+        if ($cartTimerStart && !empty($cart)) {
+            $elapsedSeconds = now()->timestamp - $cartTimerStart;
+            
+            // If timer has expired, clear the cart
+            if ($elapsedSeconds >= $cartTimerDuration) {
+                Session::forget('patient_cart');
+                Session::forget('cart_timer_start');
+                Session::forget('cart_timer_duration');
+                session()->flash('cart_error', 'Your cart has expired. Please add items again.');
+                return true; // Cart was expired
+            }
+        }
+        
+        return false; // Cart is still valid
     }
     
     public function removeFromCart($itemId)
@@ -295,7 +327,7 @@ class PatientCart extends Component
                 'category_id' => null, // For cart, we don't have a single category
                 'payment_intent_id' => $paymentIntent->id,
                 'customer_email' => $this->email,
-                'amount' => $paymentIntent->amount,
+                'amount' => $this->grandTotal,
                 'currency' => $paymentIntent->currency,
                 'status' => $paymentIntent->status,
                 'full_response' => $paymentIntent->toArray(),

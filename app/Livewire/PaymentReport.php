@@ -7,6 +7,7 @@ use Livewire\WithPagination;
 use App\Models\StripeResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Response;
 
 
 class PaymentReport extends Component
@@ -45,6 +46,8 @@ class PaymentReport extends Component
             ->whereBetween('created_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59'])
             ->where('status', 'succeeded');
 
+            // dd($query->get());
+
             $allTransactions = (clone $query)->get();
         $paginated = $query->latest()->paginate(4); // ✅ Paginated
 
@@ -80,5 +83,61 @@ class PaymentReport extends Component
             'transactions' => $paginated,
             'allTransactions' => $allTransactions,
         ]);
+    }
+
+    public function exportCSV()
+    {
+        $query = StripeResponse::query()
+            ->where('team_id', $this->team_id)
+            ->where('location_id', $this->location_id)
+            ->whereBetween('created_at', [$this->startDate . ' 00:00:00', $this->endDate . ' 23:59:59'])
+            ->where('status', 'succeeded')
+            ->latest();
+
+        $transactions = $query->get();
+
+        // Prepare CSV headers
+        $csvData = [];
+        $csvData[] = [
+            __('report.Txn ID'),
+            __('report.Token'),
+            __('report.name'),
+            __('report.contact'),
+            __('report.Date'),
+            __('report.Amount'),
+            __('report.Currency'),
+            __('report.Service'),
+        ];
+
+        // Add transaction data
+        foreach ($transactions as $txn) {
+            $csvData[] = [
+                $txn->payment_intent_id ?? '',
+                ($txn->queue?->start_acronym ?? '') . ' ' . ($txn->queue?->token ?? 'Booked'),
+                $txn->queue?->queueStorages->first()?->name ?? '',
+                $txn->queue?->queueStorages->first()?->phone ?? '',
+                Carbon::parse($txn->created_at)->format('Y-m-d'),
+                $txn->amount ?? '',
+                strtoupper($txn->currency ?? ''),
+                ucfirst($txn->category?->name ?? ''),
+            ];
+        }
+
+        // Generate filename with date range
+        $filename = 'payment_report_' . $this->startDate . '_to_' . $this->endDate . '_' . now()->format('Ymd_His') . '.csv';
+
+        // Create CSV content
+        $handle = fopen('php://temp', 'r+');
+        foreach ($csvData as $line) {
+            fputcsv($handle, $line);
+        }
+
+        rewind($handle);
+        $csvContent = stream_get_contents($handle);
+        fclose($handle);
+
+        return Response::streamDownload(function () use ($csvContent) {
+            echo $csvContent;
+        }, $filename);
     }
 }

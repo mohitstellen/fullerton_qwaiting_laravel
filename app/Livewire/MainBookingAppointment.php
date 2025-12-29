@@ -1679,7 +1679,7 @@ class MainBookingAppointment extends Component
                 'category_id' => $this->stripeCategory,
                 'payment_intent_id' => $paymentIntent->id,
                 'customer_email' => $this->email,
-                'amount' => $paymentIntent->amount,
+                'amount' => $this->amount,
                 'currency' => $paymentIntent->currency,
                 'status' => $paymentIntent->status,
                 'full_response' => $paymentIntent->toArray(),

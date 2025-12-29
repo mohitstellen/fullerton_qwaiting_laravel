@@ -136,6 +136,74 @@
 
         <!-- Import History Table -->
         <div class="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
+            <!-- Pagination above table -->
+            @if($imports->total() > 25)
+            <div class="mb-4 flex items-center justify-between flex-wrap gap-3 p-4">
+                <div class="flex items-center gap-0">
+                    @if($imports->onFirstPage())
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-l-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">First</button>
+                    @else
+                        <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">First</button>
+                    @endif
+                    
+                    @if($imports->onFirstPage())
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Previous</button>
+                    @else
+                        <button wire:click="previousPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Previous</button>
+                    @endif
+
+                    @php
+                        $currentPage = $imports->currentPage();
+                        $lastPage = $imports->lastPage();
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($lastPage, $currentPage + 2);
+                    @endphp
+
+                    @if($startPage > 1)
+                        <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">1</button>
+                        @if($startPage > 2)
+                            <span class="px-2 py-1.5 text-sm text-gray-500 bg-white border-t border-b border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
+                        @endif
+                    @endif
+
+                    @for($page = $startPage; $page <= $endPage; $page++)
+                        @if($page == $currentPage)
+                            <button class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 border-t border-b border-r border-blue-600 dark:bg-blue-500 dark:border-blue-500">{{ $page }}</button>
+                        @else
+                            <button wire:click="gotoPage({{ $page }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $page }}</button>
+                        @endif
+                    @endfor
+
+                    @if($endPage < $lastPage)
+                        @if($endPage < $lastPage - 1)
+                            <span class="px-2 py-1.5 text-sm text-gray-500 bg-white border-t border-b border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
+                        @endif
+                        <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $lastPage }}</button>
+                    @endif
+
+                    @if($imports->hasMorePages())
+                        <button wire:click="nextPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Next</button>
+                    @else
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Next</button>
+                    @endif
+
+                    @if($imports->hasMorePages())
+                        <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Last</button>
+                    @else
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-r-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Last</button>
+                    @endif
+                </div>
+                <div class="flex items-center gap-2">
+                    <select wire:model.live="perPage"
+                        class="bg-white dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-[36px] w-28 rounded-lg border border-gray-300 py-1.5 px-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="75">75</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+            @endif
             <div class="max-w-full overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-950">
@@ -213,9 +281,74 @@
                     </tbody>
                 </table>
             </div>
-            <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-                {{ $imports->links() }}
+            <!-- Pagination below table -->
+            @if($imports->total() > 25)
+            <div class="mt-4 flex items-center justify-between flex-wrap gap-3 p-4">
+                <div class="flex items-center gap-0">
+                    @if($imports->onFirstPage())
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-l-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">First</button>
+                    @else
+                        <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">First</button>
+                    @endif
+                    
+                    @if($imports->onFirstPage())
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Previous</button>
+                    @else
+                        <button wire:click="previousPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Previous</button>
+                    @endif
+
+                    @php
+                        $currentPage = $imports->currentPage();
+                        $lastPage = $imports->lastPage();
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($lastPage, $currentPage + 2);
+                    @endphp
+
+                    @if($startPage > 1)
+                        <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">1</button>
+                        @if($startPage > 2)
+                            <span class="px-2 py-1.5 text-sm text-gray-500 bg-white border-t border-b border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
+                        @endif
+                    @endif
+
+                    @for($page = $startPage; $page <= $endPage; $page++)
+                        @if($page == $currentPage)
+                            <button class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 border-t border-b border-r border-blue-600 dark:bg-blue-500 dark:border-blue-500">{{ $page }}</button>
+                        @else
+                            <button wire:click="gotoPage({{ $page }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $page }}</button>
+                        @endif
+                    @endfor
+
+                    @if($endPage < $lastPage)
+                        @if($endPage < $lastPage - 1)
+                            <span class="px-2 py-1.5 text-sm text-gray-500 bg-white border-t border-b border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
+                        @endif
+                        <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $lastPage }}</button>
+                    @endif
+
+                    @if($imports->hasMorePages())
+                        <button wire:click="nextPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Next</button>
+                    @else
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Next</button>
+                    @endif
+
+                    @if($imports->hasMorePages())
+                        <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Last</button>
+                    @else
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-r-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Last</button>
+                    @endif
+                </div>
+                <div class="flex items-center gap-2">
+                    <select wire:model.live="perPage"
+                        class="bg-white dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-[36px] w-28 rounded-lg border border-gray-300 py-1.5 px-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="75">75</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
             </div>
+            @endif
         </div>
     </div>
 </div>

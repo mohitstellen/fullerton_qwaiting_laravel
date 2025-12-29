@@ -1,16 +1,15 @@
-
 <div class="p-4">
     <div class="flex pb-3 gap-3 border-gray-500">
         <ul class="flex text-sm font-semibold text-center text-gray-500 tabs-nav">
-        <li><a href="javascript:void(0)" wire:click.prevent="setTab('1')"
-            class="p-2 inline-flex items-center gap-2 px-4 py-2 text-sm capitalize font-medium rounded-md h group hover:text-white hover:bg-brand-500 dark:hover:text-white text-gray-800 dark:text-white {{ $tab == 1 ? 'active-tab text-white bg-brand-500' : ''}}">{{ $level1 }}</a></li>
-        <li><a href="javascript:void(0)" wire:click.prevent="setTab('2')"
-            class="p-2 inline-flex items-center gap-2 px-4 py-2 text-sm capitalize font-medium rounded-md h group hover:text-white hover:bg-brand-500 dark:hover:text-white text-gray-800 dark:text-white {{ $tab == 2 ? 'active-tab text-white bg-brand-500' : ''}}">{{ $level2 }}
-            </a></li>
+            <li><a href="javascript:void(0)" wire:click.prevent="setTab('1')"
+                    class="p-2 inline-flex items-center gap-2 px-4 py-2 text-sm capitalize font-medium rounded-md h group hover:text-white hover:bg-brand-500 dark:hover:text-white text-gray-800 dark:text-white {{ $tab == 1 ? 'active-tab text-white bg-brand-500' : ''}}">{{ $level1 }}</a></li>
+            <li><a href="javascript:void(0)" wire:click.prevent="setTab('2')"
+                    class="p-2 inline-flex items-center gap-2 px-4 py-2 text-sm capitalize font-medium rounded-md h group hover:text-white hover:bg-brand-500 dark:hover:text-white text-gray-800 dark:text-white {{ $tab == 2 ? 'active-tab text-white bg-brand-500' : ''}}">{{ $level2 }}
+                </a></li>
             @if(!empty($level3))
-        <li><a href="javascript:void(0)" wire:click.prevent="setTab('3')"
-            class="p-2 inline-flex items-center gap-2 px-4 py-2 text-sm capitalize font-medium rounded-md h group hover:text-white hover:bg-brand-500  dark:hover:text-white text-gray-800 dark:text-white {{ $tab == 3 ? 'active-tab text-white bg-brand-500' : ''}}">{{ $level3 }}
-            </a></li>
+            <li><a href="javascript:void(0)" wire:click.prevent="setTab('3')"
+                    class="p-2 inline-flex items-center gap-2 px-4 py-2 text-sm capitalize font-medium rounded-md h group hover:text-white hover:bg-brand-500  dark:hover:text-white text-gray-800 dark:text-white {{ $tab == 3 ? 'active-tab text-white bg-brand-500' : ''}}">{{ $level3 }}
+                </a></li>
             @endif
         </ul>
     </div>
@@ -24,9 +23,9 @@
         <div>
             <h2 class="text-xl font-semibold dark:text-white/90">
                 @if($tab == 2)
-                    {{ __('text.Packages') }}
+                {{ __('text.Packages') }}
                 @else
-                    {{ __('text.Appointment Types') }}
+                {{ __('text.Appointment Types') }}
                 @endif
             </h2>
         </div>
@@ -39,11 +38,11 @@
             @if($tab == 2)
             <!-- Filter by Appointment Type (only for Packages) -->
             <div class="relative flex-shrink-0 w-[250px] lg:w-[300px]">
-                <select wire:model.live="appointmentTypeFilter" 
+                <select wire:model.live="appointmentTypeFilter"
                     class="bg-white dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-[42px] w-full rounded-lg border border-gray-300 py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">
                     <option value="">Filter by Appointment Type</option>
                     @foreach($appointmentTypes as $appointmentType)
-                        <option value="{{ $appointmentType->id }}">{{ $appointmentType->name }}</option>
+                    <option value="{{ $appointmentType->id }}">{{ $appointmentType->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -76,257 +75,394 @@
             @endif
         </div>
         <div class="flex flex-wrap gap-2 items-start">
-        <button wire:click="exportCSV" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white transition-colors rounded-lg bg-green-600 hover:bg-green-700 whitespace-nowrap">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-            Export to CSV
-        </button>
-        <button id="bulkDeleteBtn" class="bg-red-500 text-white px-2.5 py-1.5 text-xs rounded-md flex gap-x-1.5 hover:bg-red-600 whitespace-nowrap"><i class="ri-delete-bin-line text-sm"></i> {{__('text.Bulk Delete')}}</button>
-        @can('Service Add')
-        <div>
-            <a href="{{ route('tenant.category.create',['level'=>$tab]) }}"
-                 class="primary-btn py-1.5 px-2.5 text-xs font-medium text-white transition-colors rounded-md bg-brand-500 hover:bg-brand-600 flex gap-x-1.5 whitespace-nowrap"><i class="ri-add-circle-line text-sm"></i>@if($tab == 1) {{__('text.Add Appointment Type')}} @elseif($tab == 2) {{__('text.Add Package')}} @endif</a>
+            <button wire:click="exportCSV" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white transition-colors rounded-lg bg-green-600 hover:bg-green-700 whitespace-nowrap">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Export to CSV
+            </button>
+            <button id="bulkDeleteBtn" class="bg-red-500 text-white px-2.5 py-1.5 text-xs rounded-md flex gap-x-1.5 hover:bg-red-600 whitespace-nowrap"><i class="ri-delete-bin-line text-sm"></i> {{__('text.Bulk Delete')}}</button>
+            @can('Service Add')
+            <div>
+                <a href="{{ route('tenant.category.create',['level'=>$tab]) }}"
+                    class="primary-btn py-1.5 px-2.5 text-xs font-medium text-white transition-colors rounded-md bg-brand-500 hover:bg-brand-600 flex gap-x-1.5 whitespace-nowrap"><i class="ri-add-circle-line text-sm"></i>@if($tab == 1) {{__('text.Add Appointment Type')}} @elseif($tab == 2) {{__('text.Add Package')}} @endif</a>
 
+            </div>
+            @endcan
         </div>
-        @endcan
-</div>
     </div>
 
 
     <div>
 
-            <div
-                class="p-4 md:p-4 rounded-lg shadow border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-                <div class="max-w-full overflow-x-auto">
-                    <table class="min-w-full table-auto">
+        <div
+            class="p-4 md:p-4 rounded-lg shadow border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+            <!-- Pagination above table -->
+            @if($categories->total() > 25)
+            <div class="mb-4 flex items-center justify-between flex-wrap gap-3">
+                <div class="flex items-center gap-0">
+                    @if($categories->onFirstPage())
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-l-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">First</button>
+                    @else
+                        <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">First</button>
+                    @endif
+                    
+                    @if($categories->onFirstPage())
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Previous</button>
+                    @else
+                        <button wire:click="previousPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Previous</button>
+                    @endif
 
-                        <thead>
+                    @php
+                        $currentPage = $categories->currentPage();
+                        $lastPage = $categories->lastPage();
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($lastPage, $currentPage + 2);
+                    @endphp
 
-                            <tr class="border-b border-gray-100 dark:border-gray-800">
-                            <th class="px-5 py-3 sm:px-6" >
-                                    <input type="checkbox" id="selectAll" class="cursor-pointer">
-                            </th>
-                                @if($tab == 1)
-                                <th class="px-5 py-3 sm:px-6">
-                                            S.No
-                                </th>
-                                @endif
-                               
-                                <th class="px-5 py-3 sm:px-6">
-                                            {{ $tab == 1 ? 'Service Type Name' : __('text.name') }}
-                                </th>
-                                @if($tab == 1)
-                                <th class="px-5 py-3 sm:px-6">
-                                            Available Booking
-                                </th>
-                                <th class="px-5 py-3 sm:px-6">
-                                            Amount
-                                </th>
-                                <th class="px-5 py-3 sm:px-6">
-                                            Applicable for
-                                </th>
-                                <th class="px-5 py-3 sm:px-6">
-                                            Corporate
-                                </th>
-                                <th class="px-5 py-3 sm:px-6">
-                                            Status
-                                </th>
-                                @endif
-                                @if($tab==3)
-                                <th class="px-5 py-3 sm:px-6">
-                                            {{__('text.first parent')}}
-                                </th>
-                                @endif
-                                @if($tab == 3)
-                                <th class="px-5 py-3 sm:px-6">
-                                            {{__('text.parent') }}
-                                </th>
-                                @endif
-                                @if($tab == 2)
-                                <th class="px-5 py-3 sm:px-6">
-                                            Amount
-                                </th>
-                                @endif
-                                {{-- <th class="px-5 py-3 sm:px-6">
-                                            {{__('text.priority')}}
-                                </th>
-                                <th class="px-5 py-3 sm:px-6">
-                                            {{__('text.visitor in queue')}}
-                                </th> --}}
-                              
-                                {{-- <th class="px-5 py-3 sm:px-6">
-                                            {{__('text.display on')}}
-                                </th> --}}
-                               
-                                @if($tab != 1 && $tab != 2)
-                                <th class="px-5 py-3 sm:px-6">
-                                            {{__('text.created at')}}
-                                </th>
-                                @endif
-                                <th class="px-5 py-3 sm:px-6">
-                                             {{__('text.Actions')}}
-                                </th>
-                            </tr>
-                        </thead>
+                    @if($startPage > 1)
+                        <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">1</button>
+                        @if($startPage > 2)
+                            <span class="px-2 py-1.5 text-sm text-gray-500 bg-white border-t border-b border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
+                        @endif
+                    @endif
 
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                    @for($page = $startPage; $page <= $endPage; $page++)
+                        @if($page == $currentPage)
+                            <button class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 border-t border-b border-r border-blue-600 dark:bg-blue-500 dark:border-blue-500">{{ $page }}</button>
+                        @else
+                            <button wire:click="gotoPage({{ $page }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $page }}</button>
+                        @endif
+                    @endfor
 
-                            @if(count($categories) > 0 )
-                            @foreach($categories as $category)
-                            <tr>
-                        <td class="px-5 py-4 sm:px-6">
-                        <input type="checkbox" class="select-checkbox cursor-pointer" value="{{ $category->id }}">
-                    </td>
-                                @if($tab == 1)
-                                <td class="px-5 py-4 sm:px-6">
-                                            {{ $categories->firstItem() + $loop->index }}
-                                </td>
-                                @endif
-                                
-                                <td class="px-5 py-4 sm:px-6">
-                                            {{ $category->name ?? '' }}
-                                        </td>
-                                        @if($tab == 1)
-                                        <td class="px-5 py-4 sm:px-6">
-                                            {{ !empty($category->booking_category_show_for) ? 'Y' : 'N' }}
-                                        </td>
-                                        <td class="px-5 py-4 sm:px-6">
-                                            {{ $category->amount ?? '0' }}
-                                        </td>
-                                        <td class="px-5 py-4 sm:px-6">
-                                            {{ $category->companyAppointmentTypes->first()?->applicable_for ?? 'N/A' }}
-                                        </td>
-                                        <td class="px-5 py-4 sm:px-6">
-                                            {{ $category->company?->company_name ?? '' }}
-                                        </td>
-                                        <td class="px-5 py-4 sm:px-6">
-                                            {{ $category->deleted_at ? 'I' : 'A' }}
-                                        </td>
-                                        @endif
-                                        @if($tab==3)
-                                        <td class="px-5 py-4 sm:px-6">
-                                                   {{ $category->getparent?->getparent?->name ?? '' }}
-                                        </td>
-                                        @endif
-                                        @if($tab == 3)
-                                <td class="px-5 py-4 sm:px-6">
-                                           {{ $category->getparent?->name ?? '' }}
-                                </td>
-                                @endif
-                                @if($tab == 2)
-                                <td class="px-5 py-4 sm:px-6">
-                                            {{ $category->amount ?? '0' }}
-                                </td>
-                                @endif
-                                {{-- <td class="px-5 py-4 sm:px-6">
-                                            {{ $category->sort ?? '' }}
-                                </td>
-                                <td class="px-5 py-4 sm:px-6">
-                                            {{ $category->visitor_in_queue ?? '' }}
-                                </td> --}}
-                              
-                                {{-- <td class="px-5 py-4 sm:px-6">
-                                            {{ $category->display_on ?? '' }}
-                                </td> --}}
-                                
-                                @if($tab != 1 && $tab != 2)
-                                <td class="px-5 py-4 sm:px-6">
-                                            {{ $category->created_at ?? '' }}
-                                </td>
-                                @endif
-                                <td class="py-3 whitespace-nowrap">
+                    @if($endPage < $lastPage)
+                        @if($endPage < $lastPage - 1)
+                            <span class="px-2 py-1.5 text-sm text-gray-500 bg-white border-t border-b border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
+                        @endif
+                        <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $lastPage }}</button>
+                    @endif
 
-                                    <div class="flex items-center justify-center">
-                                        <div x-data="{openDropDown: false}" class="relative">
-                                            <button @click="openDropDown = !openDropDown"
-                                                class="text-gray-500 dark:text-gray-400  action-btn">
-                                                <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24"
-                                                    fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                                        d="M5.99902 10.245C6.96552 10.245 7.74902 11.0285 7.74902 11.995V12.005C7.74902 12.9715 6.96552 13.755 5.99902 13.755C5.03253 13.755 4.24902 12.9715 4.24902 12.005V11.995C4.24902 11.0285 5.03253 10.245 5.99902 10.245ZM17.999 10.245C18.9655 10.245 19.749 11.0285 19.749 11.995V12.005C19.749 12.9715 18.9655 13.755 17.999 13.755C17.0325 13.755 16.249 12.9715 16.249 12.005V11.995C16.249 11.0285 17.0325 10.245 17.999 10.245ZM13.749 11.995C13.749 11.0285 12.9655 10.245 11.999 10.245C11.0325 10.245 10.249 11.0285 10.249 11.995V12.005C10.249 12.9715 11.0325 13.755 11.999 13.755C12.9655 13.755 13.749 12.9715 13.749 12.005V11.995Z"
-                                                        fill="" />
-                                                </svg>
-                                            </button>
-                                            <div x-show="openDropDown" @click.outside="openDropDown = false"
-                                                class="dropdown-menu shadow-theme-lg dark:bg-gray-dark absolute top-full right-0 z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 dark:border-gray-800">
-                                                @if($siteSetting && $siteSetting->enable_time_slot == "category" && $siteSetting->category_slot_level == $tab)
-                                                <a
-                                                    href="{{ route('tenant.category.setting', ['level'=>$tab,'categoryId' => $category->id]) }}">
-                                                    <button
-                                                        class="text-theme-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
-                                                        {{__('text.Setting')}}
-                                                    </button>
+                    @if($categories->hasMorePages())
+                        <button wire:click="nextPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Next</button>
+                    @else
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Next</button>
+                    @endif
 
-                                                </a>
-                                                @endif
-                                                @can('Service Edit')
-                                                <a
-                                                    href="{{ route('tenant.category.edit', ['level'=>$tab,'categoryId' => $category->id]) }}">
-                                                    <button
-                                                        class="text-theme-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
-                                                        {{__('text.Edit')}}
-                                                    </button>
-                                                </a>
-                                                @endcan
-                                                @can('Service Add')
-                                                <button wire:click="duplicateCategory({{ $category->id }})"
-                                                    class="text-theme-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
-                                                    Duplicate
-                                                </button>
-                                                @endcan
-                                                @can('Service Delete')
-                                                <button wire:click="deleteCategory({{ $category->id }})"
-                                                    class="text-theme-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
-                                                    {{__('text.Delete')}}
-                                                </button>
-                                                @endcan
-
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </td>
-
-                            </tr>
-
-                            @endforeach
-                            @else
-                            <tr>
-                            <td colspan="{{ $tab == 1 ? '10' : '18' }}" class="text-center py-6">
-                                <img src="{{ url('images/no-record.jpg') }}" alt="No Records Found"
-                                    class="mx-auto h-30 w-30" style="">
-                            </td>
-                        </tr>
-                            @endif
-
-                        </tbody>
-                    </table>
-                    <div class="m-4">
-                        {{ $categories->links() }}
-                    </div>
+                    @if($categories->hasMorePages())
+                        <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Last</button>
+                    @else
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-r-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Last</button>
+                    @endif
+                </div>
+                <div class="flex items-center gap-2">
+                    <select wire:model.live="perPage"
+                        class="bg-white dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-[36px] w-28 rounded-lg border border-gray-300 py-1.5 px-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="75">75</option>
+                        <option value="100">100</option>
+                    </select>
                 </div>
             </div>
+            @endif
+            <div class="max-w-full overflow-x-auto">
+                <table class="min-w-full table-auto">
+
+                    <thead>
+
+                        <tr class="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                            <th class="px-5 py-3 sm:px-6 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                <input type="checkbox" id="selectAll" class="cursor-pointer">
+                            </th>
+                            @if($tab == 1 || $tab == 2)
+                            <th class="px-5 py-3 sm:px-6 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                S.No
+                            </th>
+                            @endif
+
+                            <th class="px-5 py-3 sm:px-6 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                {{ $tab == 1 ? 'Service Type Name' : __('text.name') }}
+                            </th>
+                            @if($tab == 1)
+                            <th class="px-5 py-3 sm:px-6 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                Available Booking
+                            </th>
+                            <th class="px-5 py-3 sm:px-6 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                Amount
+                            </th>
+                            <th class="px-5 py-3 sm:px-6 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                Applicable for
+                            </th>
+                            <th class="px-5 py-3 sm:px-6 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                Corporate
+                            </th>
+                            <th class="px-5 py-3 sm:px-6 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                Status
+                            </th>
+                            @endif
+                            @if($tab==3)
+                            <th class="px-5 py-3 sm:px-6 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                {{__('text.first parent')}}
+                            </th>
+                            @endif
+                            @if($tab == 3)
+                            <th class="px-5 py-3 sm:px-6 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                {{__('text.parent') }}
+                            </th>
+                            @endif
+                            @if($tab == 2)
+                            <th class="px-5 py-3 sm:px-6 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                Amount
+                            </th>
+                            @endif
+                            {{-- <th class="px-5 py-3 sm:px-6">
+                                            {{__('text.priority')}}
+                            </th>
+                            <th class="px-5 py-3 sm:px-6">
+                                {{__('text.visitor in queue')}}
+                            </th> --}}
+
+                            {{-- <th class="px-5 py-3 sm:px-6">
+                                            {{__('text.display on')}}
+                            </th> --}}
+
+                            @if($tab != 1 && $tab != 2)
+                            <th class="px-5 py-3 sm:px-6 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                {{__('text.created at')}}
+                            </th>
+                            @endif
+                            <th class="px-5 py-3 sm:px-6 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                {{__('text.Actions')}}
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+
+                        @if(count($categories) > 0 )
+                        @foreach($categories as $category)
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                            <td class="px-5 py-4 sm:px-6 text-sm text-gray-800 dark:text-gray-300">
+                                <input type="checkbox" class="select-checkbox cursor-pointer" value="{{ $category->id }}">
+                            </td>
+                            @if($tab == 1 || $tab == 2)
+                            <td class="px-5 py-4 sm:px-6 text-sm text-gray-800 dark:text-gray-300">
+                                {{ $categories->firstItem() + $loop->index }}
+                            </td>
+                            @endif
+
+                            <td class="px-5 py-4 sm:px-6 text-sm text-gray-800 dark:text-gray-300">
+                                {{ $category->name ?? '' }}
+                            </td>
+                            @if($tab == 1)
+                            <td class="px-5 py-4 sm:px-6 text-sm text-gray-800 dark:text-gray-300">
+                                {{ !empty($category->booking_category_show_for) ? 'Y' : 'N' }}
+                            </td>
+                            <td class="px-5 py-4 sm:px-6 text-sm text-gray-800 dark:text-gray-300">
+                                {{ $category->amount ?? '0' }}
+                            </td>
+                            <td class="px-5 py-4 sm:px-6 text-sm text-gray-800 dark:text-gray-300">
+                                {{ $category->companyAppointmentTypes->first()?->applicable_for ?? 'N/A' }}
+                            </td>
+                            <td class="px-5 py-4 sm:px-6 text-sm text-gray-800 dark:text-gray-300">
+                                {{ $category->company?->company_name ?? '' }}
+                            </td>
+                            <td class="px-5 py-4 sm:px-6 text-sm">
+                                <span class="px-2 py-1 rounded-full text-xs font-medium {{ $category->deleted_at ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' }}">
+                                    {{ $category->deleted_at ? 'I' : 'A' }}
+                                </span>
+                            </td>
+                            @endif
+                            @if($tab==3)
+                            <td class="px-5 py-4 sm:px-6 text-sm text-gray-800 dark:text-gray-300">
+                                {{ $category->getparent?->getparent?->name ?? '' }}
+                            </td>
+                            @endif
+                            @if($tab == 3)
+                            <td class="px-5 py-4 sm:px-6 text-sm text-gray-800 dark:text-gray-300">
+                                {{ $category->getparent?->name ?? '' }}
+                            </td>
+                            @endif
+                            @if($tab == 2)
+                            <td class="px-5 py-4 sm:px-6 text-sm text-gray-800 dark:text-gray-300">
+                                {{ $category->amount ?? '0' }}
+                            </td>
+                            @endif
+                            {{-- <td class="px-5 py-4 sm:px-6">
+                                            {{ $category->sort ?? '' }}
+                            </td>
+                            <td class="px-5 py-4 sm:px-6">
+                                {{ $category->visitor_in_queue ?? '' }}
+                            </td> --}}
+
+                            {{-- <td class="px-5 py-4 sm:px-6">
+                                            {{ $category->display_on ?? '' }}
+                            </td> --}}
+
+                            @if($tab != 1 && $tab != 2)
+                            <td class="px-5 py-4 sm:px-6 text-sm text-gray-800 dark:text-gray-300">
+                                {{ $category->created_at ?? '' }}
+                            </td>
+                            @endif
+                            <td class="px-5 py-4 sm:px-6 whitespace-nowrap">
+
+                                <div class="flex items-center justify-center">
+                                    <div x-data="{openDropDown: false}" class="relative">
+                                        <button @click="openDropDown = !openDropDown"
+                                            class="text-gray-500 dark:text-gray-400  action-btn">
+                                            <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24"
+                                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                                    d="M5.99902 10.245C6.96552 10.245 7.74902 11.0285 7.74902 11.995V12.005C7.74902 12.9715 6.96552 13.755 5.99902 13.755C5.03253 13.755 4.24902 12.9715 4.24902 12.005V11.995C4.24902 11.0285 5.03253 10.245 5.99902 10.245ZM17.999 10.245C18.9655 10.245 19.749 11.0285 19.749 11.995V12.005C19.749 12.9715 18.9655 13.755 17.999 13.755C17.0325 13.755 16.249 12.9715 16.249 12.005V11.995C16.249 11.0285 17.0325 10.245 17.999 10.245ZM13.749 11.995C13.749 11.0285 12.9655 10.245 11.999 10.245C11.0325 10.245 10.249 11.0285 10.249 11.995V12.005C10.249 12.9715 11.0325 13.755 11.999 13.755C12.9655 13.755 13.749 12.9715 13.749 12.005V11.995Z"
+                                                    fill="" />
+                                            </svg>
+                                        </button>
+                                        <div x-show="openDropDown" @click.outside="openDropDown = false"
+                                            class="dropdown-menu shadow-theme-lg dark:bg-gray-dark absolute top-full right-0 z-40 w-40 space-y-1 rounded-2xl border border-gray-200 bg-white p-2 dark:border-gray-800">
+                                            @if($siteSetting && $siteSetting->enable_time_slot == "category" && $siteSetting->category_slot_level == $tab)
+                                            <a
+                                                href="{{ route('tenant.category.setting', ['level'=>$tab,'categoryId' => $category->id]) }}">
+                                                <button
+                                                    class="text-theme-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
+                                                    {{__('text.Setting')}}
+                                                </button>
+
+                                            </a>
+                                            @endif
+                                            @can('Service Edit')
+                                            <a
+                                                href="{{ route('tenant.category.edit', ['level'=>$tab,'categoryId' => $category->id]) }}">
+                                                <button
+                                                    class="text-theme-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
+                                                    {{__('text.Edit')}}
+                                                </button>
+                                            </a>
+                                            @endcan
+                                            @can('Service Add')
+                                            <button wire:click="duplicateCategory({{ $category->id }})"
+                                                class="text-theme-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
+                                                Duplicate
+                                            </button>
+                                            @endcan
+                                            @can('Service Delete')
+                                            <button wire:click="deleteCategory({{ $category->id }})"
+                                                class="text-theme-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
+                                                {{__('text.Delete')}}
+                                            </button>
+                                            @endcan
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        @endforeach
+                        @else
+                        <tr>
+                            <td colspan="{{ $tab == 1 ? '10' : '18' }}" class="text-center py-6">
+                                <img src="{{ url('images/no-record.jpg') }}" alt="No Records Found"
+                                    class="mx-auto h-30 w-30">
+                            </td>
+                        </tr>
+                        @endif
+
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination below table -->
+            @if($categories->total() > 25)
+            <div class="mt-4 flex items-center justify-between flex-wrap gap-3">
+                <div class="flex items-center gap-0">
+                    @if($categories->onFirstPage())
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-l-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">First</button>
+                    @else
+                        <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">First</button>
+                    @endif
+                    
+                    @if($categories->onFirstPage())
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Previous</button>
+                    @else
+                        <button wire:click="previousPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Previous</button>
+                    @endif
+
+                    @php
+                        $currentPage = $categories->currentPage();
+                        $lastPage = $categories->lastPage();
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($lastPage, $currentPage + 2);
+                    @endphp
+
+                    @if($startPage > 1)
+                        <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">1</button>
+                        @if($startPage > 2)
+                            <span class="px-2 py-1.5 text-sm text-gray-500 bg-white border-t border-b border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
+                        @endif
+                    @endif
+
+                    @for($page = $startPage; $page <= $endPage; $page++)
+                        @if($page == $currentPage)
+                            <button class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 border-t border-b border-r border-blue-600 dark:bg-blue-500 dark:border-blue-500">{{ $page }}</button>
+                        @else
+                            <button wire:click="gotoPage({{ $page }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $page }}</button>
+                        @endif
+                    @endfor
+
+                    @if($endPage < $lastPage)
+                        @if($endPage < $lastPage - 1)
+                            <span class="px-2 py-1.5 text-sm text-gray-500 bg-white border-t border-b border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
+                        @endif
+                        <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $lastPage }}</button>
+                    @endif
+
+                    @if($categories->hasMorePages())
+                        <button wire:click="nextPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Next</button>
+                    @else
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Next</button>
+                    @endif
+
+                    @if($categories->hasMorePages())
+                        <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Last</button>
+                    @else
+                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-r-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Last</button>
+                    @endif
+                </div>
+                <div class="flex items-center gap-2">
+                    <select wire:model.live="perPage"
+                        class="bg-white dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-[36px] w-28 rounded-lg border border-gray-300 py-1.5 px-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="75">75</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+            @endif
+        </div>
 
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-    document.getElementById('selectAll').addEventListener('click', function () {
-        let checkboxes = document.querySelectorAll('.select-checkbox');
-        checkboxes.forEach(checkbox => checkbox.checked = this.checked);
-    });
+    <script>
+        document.getElementById('selectAll').addEventListener('click', function() {
+            let checkboxes = document.querySelectorAll('.select-checkbox');
+            checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+        });
 
-    document.getElementById('bulkDeleteBtn').addEventListener('click', function () {
-        let selectedIds = Array.from(document.querySelectorAll('.select-checkbox:checked')).map(cb => cb.value);
-        if (selectedIds.length > 0) {
-            Livewire.dispatch('bulkDelete', { 'ids' : selectedIds });
-        } else {
-            // alert('No Cateogry selected');
-            Livewire.dispatch('no-record-selected');
-        }
-    });
-</script>
+        document.getElementById('bulkDeleteBtn').addEventListener('click', function() {
+            let selectedIds = Array.from(document.querySelectorAll('.select-checkbox:checked')).map(cb => cb.value);
+            if (selectedIds.length > 0) {
+                Livewire.dispatch('bulkDelete', {
+                    'ids': selectedIds
+                });
+            } else {
+                // alert('No Cateogry selected');
+                Livewire.dispatch('no-record-selected');
+            }
+        });
+    </script>
 
 </div>

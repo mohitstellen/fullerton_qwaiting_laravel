@@ -24,6 +24,7 @@ class ImportMemberDetails extends Component
     public $enforcePasswordChange = 'Yes';
     public $file;
     public $activeTab = 'import'; // 'import' or 'download'
+    public int $perPage = 25; // Number of records per page
 
     protected function rules(): array
     {
@@ -92,6 +93,11 @@ class ImportMemberDetails extends Component
         $this->activeTab = $tab;
     }
 
+    public function updatingPerPage(): void
+    {
+        $this->resetPage();
+    }
+
     public function import()
     {
         $this->validate();
@@ -133,7 +139,7 @@ class ImportMemberDetails extends Component
         $imports = MemberImport::where('team_id', $this->teamId)
             ->with('company')
             ->orderBy('created_at', 'desc')
-            ->paginate(5);
+            ->paginate($this->perPage);
 
         return view('livewire.import-member-details', [
             'imports' => $imports,

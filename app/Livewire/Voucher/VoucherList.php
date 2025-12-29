@@ -14,8 +14,14 @@ class VoucherList extends Component
     use WithPagination;
 
     public string $search = '';
+    public int $perPage = 25; // Number of records per page
 
     public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPerPage(): void
     {
         $this->resetPage();
     }
@@ -96,7 +102,7 @@ class VoucherList extends Component
 
     public function render()
     {
-        $vouchers = $this->vouchersQuery()->paginate(10);
+        $vouchers = $this->vouchersQuery()->paginate($this->perPage);
 
         return view('livewire.voucher.voucher-list', compact('vouchers'));
     }
