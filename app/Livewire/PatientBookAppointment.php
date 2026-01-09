@@ -28,40 +28,42 @@ class PatientBookAppointment extends Component
 {
     public $teamId;
     public $member;
-    
+
     // Step 1: Appointment Type & Package
     public $appointmentTypeId = null;
     public $bookingFor = 'Self'; // Self or Dependent
+    public $dependentId = null; // Selected dependent
     public $packageId = null;
     public $showBookingFor = false;
     public $showPackage = false;
-    
+
     // Step 2: Location & Schedule
     public $locationId = null;
     public $appointmentDate = null;
     public $appointmentTime = null;
     public $additionalComments = '';
-    
+
     // Data
     public $appointmentTypes = [];
     public $packages;
+    public $dependents = []; // List of dependents
     public $locations = [];
     public $availableTimeSlots = [];
     public $selectedPackage = null;
     public $selectedLocation = null;
     public $locationBusinessHours = null;
     public $locationPhone = null;
-    
+
     // UI States
     public $step = 1; // 1: Type & Package, 2: Location & Schedule, 3: Confirmation
     public $successMessage = '';
-    
+
     // Cart functionality
     public $isPrivateCustomer = false;
-    
+
     public function mount()
     {
-        
+
         // Check if patient is logged in
         if (!Session::has('patient_member_id')) {
             $this->redirect(route('tenant.patient.login'), navigate: true);
@@ -70,7 +72,7 @@ class PatientBookAppointment extends Component
 
         $this->teamId = tenant('id');
         $memberId = Session::get('patient_member_id');
-        
+
         $this->member = Member::where('team_id', $this->teamId)
             ->where('id', $memberId)
             ->where('is_active', 1)
@@ -86,7 +88,7 @@ class PatientBookAppointment extends Component
         // Check if member is private customer
         // Private customer: customer_type is 'Private' OR company_id is null
         $this->isPrivateCustomer = Session::get('patient_customer_type') === 'Private';
-        
+
         // Store customer type in session for navigation
         if (!Session::has('patient_customer_type')) {
             Session::put('patient_customer_type', $this->isPrivateCustomer ? 'Private' : 'Corporate');
@@ -100,12 +102,12 @@ class PatientBookAppointment extends Component
                 ->whereNull('deleted_at')
                 ->get();
         }
-        
+
         // Get locations
         $this->locations = Location::where('team_id', $this->teamId)
             ->where('status', 1)
             ->get();
-            
+
         // Set timezone
         $siteDetail = SiteDetail::where('team_id', $this->teamId)->first();
         if ($siteDetail && $siteDetail->select_timezone) {
@@ -113,7 +115,7 @@ class PatientBookAppointment extends Component
             date_default_timezone_set($siteDetail->select_timezone);
         }
     }
-    
+
     public function updatedAppointmentTypeId($value)
     {
         $this->appointmentTypeId = $value;
@@ -121,7 +123,7 @@ class PatientBookAppointment extends Component
         $this->selectedPackage = null;
         $this->showPackage = false;
         $this->packages = collect([]);
-        
+
         if ($value) {
             $appointmentType = Category::find($value);
             if ($appointmentType && $appointmentType->package_for) {
@@ -139,7 +141,7 @@ class PatientBookAppointment extends Component
             } else {
                 $this->showBookingFor = false;
             }
-            
+
             // Load packages immediately when appointment type is selected
             $this->loadPackages();
         } else {
@@ -147,30 +149,49 @@ class PatientBookAppointment extends Component
             $this->packages = collect([]);
         }
     }
-    
+
     public function updatedBookingFor($value)
     {
+        $this->dependentId = null; // Reset dependent selection
+
+        // Load dependents if booking for dependent
+        if ($value === 'Dependent') {
+            $this->loadDependents();
+        }
+
         $this->loadPackages();
     }
-    
+
+    public function loadDependents()
+    {
+        // Load all active dependents for this member
+        $this->dependents = Member::where('team_id', $this->teamId)
+            ->where('primary_id', $this->member->id)
+            ->whereNull('deleted_at')
+            ->where('is_active', 1)
+            ->where('status', 'active')
+            ->orderBy('full_name')
+            ->get();
+    }
+
     public function loadPackages()
     {
         $this->packages = collect([]);
         $this->packageId = null;
         $this->selectedPackage = null;
         $this->showPackage = false;
-        
+
         if (!$this->appointmentTypeId) {
             return;
         }
-        
+
         // Use the existing Category method that handles booking filters correctly
         // This method filters by booking_category_show_for = 'Online' or 'Backend & Online Appointment Screen'
         $packagesResult = Category::getchildDetailBooking($this->appointmentTypeId, null);
-        
+
         // getchildDetailBooking returns a Collection, ensure we have it
         $this->packages = $packagesResult ?: collect([]);
-        
+
         // Also try direct query if the method doesn't return results
         if ($this->packages->isEmpty()) {
             $level2 = Level::getSecondRecord();
@@ -182,13 +203,13 @@ class PatientBookAppointment extends Component
                     ->get();
             }
         }
-        
+
         // Show package field if packages exist
         if ($this->packages->count() > 0) {
             $this->showPackage = true;
         }
     }
-    
+
     public function updatedPackageId($value)
     {
         if ($value) {
@@ -200,48 +221,54 @@ class PatientBookAppointment extends Component
             $this->selectedPackage = null;
         }
     }
-    
+
     public function nextToLocation()
     {
         $rules = [
             'appointmentTypeId' => 'required|exists:categories,id',
         ];
-        
+
         $messages = [
             'appointmentTypeId.required' => 'Please select an appointment type.',
         ];
-        
+
         // Only require bookingFor if appointment type is selected
         if ($this->appointmentTypeId) {
             $rules['bookingFor'] = 'required|in:Self,Dependent';
             $messages['bookingFor.required'] = 'Please select booking for Self or Dependent.';
             $messages['bookingFor.in'] = 'Booking for must be either Self or Dependent.';
         }
-        
+
+        // Require dependent selection if booking for dependent
+        if ($this->bookingFor === 'Dependent') {
+            $rules['dependentId'] = 'required|exists:members,id';
+            $messages['dependentId.required'] = 'Please select a dependent.';
+        }
+
         // Only require package if packages are available
         if (count($this->packages) > 0) {
             $rules['packageId'] = 'required|exists:categories,id';
             $messages['packageId.required'] = 'Please select a package.';
         }
-        
+
         $this->validate($rules, $messages);
-        
+
         $this->step = 2;
         $this->loadTimeSlots();
     }
-    
+
     public function updatedLocationId($value)
     {
         if ($value && !empty($value)) {
             $this->selectedLocation = Location::find($value);
             $this->appointmentTime = null;
             $this->availableTimeSlots = [];
-            
+
             // Load business hours for the selected location
             if ($this->selectedLocation) {
                 $this->loadLocationDetails($value);
             }
-            
+
             // Keep the date if already selected, so we can reload slots for new location
             // Reload slots if date is already selected
             if ($this->appointmentDate) {
@@ -256,7 +283,7 @@ class PatientBookAppointment extends Component
             $this->availableTimeSlots = [];
         }
     }
-    
+
     public function loadLocationDetails($locationId)
     {
         // Get business hours from AccountSetting
@@ -264,19 +291,19 @@ class PatientBookAppointment extends Component
             ->where('location_id', $locationId)
             ->where('slot_type', AccountSetting::LOCATION_SLOT)
             ->first();
-        
+
         if ($locationSlot && $locationSlot->business_hours) {
-            $this->locationBusinessHours = is_array($locationSlot->business_hours) 
-                ? $locationSlot->business_hours 
+            $this->locationBusinessHours = is_array($locationSlot->business_hours)
+                ? $locationSlot->business_hours
                 : json_decode($locationSlot->business_hours, true);
         }
-        
+
         // Get phone from location's user if available
         if ($this->selectedLocation && $this->selectedLocation->user) {
             $this->locationPhone = $this->selectedLocation->user->phone ?? null;
         }
     }
-    
+
     public function updatedAppointmentDate($value)
     {
         if ($value && $this->locationId) {
@@ -284,66 +311,68 @@ class PatientBookAppointment extends Component
             $this->loadTimeSlots();
         }
     }
-    
+
     public function loadTimeSlots()
     {
         $this->availableTimeSlots = [];
-        
+
         if (!$this->locationId || !$this->appointmentDate) {
             return;
         }
-        
+
         try {
             // Convert appointment date to Carbon object
             $carbonDate = Carbon::parse($this->appointmentDate);
             $dayOfWeek = $carbonDate->format('l');
-            
+
             // Get location slot settings (not booking slot)
             $locationSlot = AccountSetting::where('team_id', $this->teamId)
                 ->where('location_id', $this->locationId)
                 ->where('slot_type', AccountSetting::LOCATION_SLOT)
                 ->first();
-            
+
             if (!$locationSlot) {
                 return;
             }
-            
+
             // Get advance booking dates
             $getAdvanceBookingDates = AccountSetting::datesGet($locationSlot->allow_req_before ?? 30);
-            
+
             // Check for custom slots first
             $customSlot = \App\Models\CustomSlot::whereDate('selected_date', $carbonDate)
                 ->where('slots_type', AccountSetting::LOCATION_SLOT)
                 ->where('team_id', $this->teamId)
                 ->where('location_id', $this->locationId)
                 ->first();
-            
+
             $businessHoursArray = null;
             if ($customSlot) {
                 $businessHoursArray = json_decode($customSlot->business_hours, true);
             } else {
                 $businessHoursArray = json_decode($locationSlot->business_hours, true);
             }
-            
+
             if (!$businessHoursArray || !is_array($businessHoursArray)) {
                 return;
             }
-            
+
             // Index business hours by day name
             $indexedBusinessHours = array_column($businessHoursArray, null, 'day');
-            
+
             // Check if the day is open
-            if (!isset($indexedBusinessHours[$dayOfWeek]) || 
-                $indexedBusinessHours[$dayOfWeek]['is_closed'] !== \App\Models\ServiceSetting::SERVICE_OPEN) {
+            if (
+                !isset($indexedBusinessHours[$dayOfWeek]) ||
+                $indexedBusinessHours[$dayOfWeek]['is_closed'] !== \App\Models\ServiceSetting::SERVICE_OPEN
+            ) {
                 return;
             }
-            
+
             // Check if date is within advance booking range
             $dateFormatted = date('d-m-Y', strtotime($carbonDate));
             if (!in_array($dateFormatted, $getAdvanceBookingDates)) {
                 return;
             }
-            
+
             // Get available slots using location slot settings
             $breakHours = [];
             $availableSlots = AccountSetting::getAvailableSlots(
@@ -355,7 +384,7 @@ class PatientBookAppointment extends Component
                 'location',
                 $locationSlot
             );
-            
+
             // Extract slots from result
             if ($availableSlots instanceof \Illuminate\Support\Collection) {
                 $this->availableTimeSlots = $availableSlots->toArray();
@@ -364,7 +393,7 @@ class PatientBookAppointment extends Component
             } else {
                 $this->availableTimeSlots = [];
             }
-            
+
             // Filter out past time slots if the selected date is today
             if ($carbonDate->isToday()) {
                 $now = Carbon::now();
@@ -380,19 +409,19 @@ class PatientBookAppointment extends Component
                 });
                 $this->availableTimeSlots = array_values($this->availableTimeSlots);
             }
-            
+
         } catch (\Exception $e) {
             // Log error for debugging
             Log::error('Error loading time slots for location ' . $this->locationId . ' and date ' . $this->appointmentDate . ': ' . $e->getMessage());
             $this->availableTimeSlots = [];
         }
     }
-    
+
     public function selectTimeSlot($timeSlot)
     {
         $this->appointmentTime = $timeSlot;
     }
-    
+
     public function goBack()
     {
         if ($this->step > 1) {
@@ -405,7 +434,7 @@ class PatientBookAppointment extends Component
             }
         }
     }
-    
+
     public function addToCart()
     {
         $this->validate([
@@ -418,13 +447,22 @@ class PatientBookAppointment extends Component
             'appointmentDate.after_or_equal' => 'Please select a valid date.',
             'appointmentTime.required' => 'Please select a time slot.',
         ]);
-        
+
         try {
+            // Get the person for whom the booking is being made
+            $bookingPerson = $this->member; // Default to self
+            if ($this->bookingFor === 'Dependent' && $this->dependentId) {
+                $bookingPerson = Member::find($this->dependentId);
+                if (!$bookingPerson) {
+                    throw new \Exception('Selected dependent not found.');
+                }
+            }
+
             // Parse time slot and convert to 24-hour format
             $timeParts = explode('-', $this->appointmentTime);
             $startTime12h = trim($timeParts[0] ?? '');
             $endTime12h = trim($timeParts[1] ?? $startTime12h);
-            
+
             // Convert from 12-hour format (e.g., "2:30PM") to 24-hour format (e.g., "14:30")
             try {
                 $startTimeCarbon = Carbon::createFromFormat('h:i A', $startTime12h);
@@ -434,7 +472,7 @@ class PatientBookAppointment extends Component
                 $startTimeCarbon = Carbon::createFromFormat('h:iA', $startTime12h);
                 $startTime = $startTimeCarbon->format('H:i');
             }
-            
+
             try {
                 $endTimeCarbon = Carbon::createFromFormat('h:i A', $endTime12h);
                 $endTime = $endTimeCarbon->format('H:i');
@@ -443,15 +481,15 @@ class PatientBookAppointment extends Component
                 $endTimeCarbon = Carbon::createFromFormat('h:iA', $endTime12h);
                 $endTime = $endTimeCarbon->format('H:i');
             }
-            
+
             // Get appointment type and package names
             $appointmentType = Category::find($this->appointmentTypeId);
             $package = $this->packageId ? Category::find($this->packageId) : null;
             $location = Location::find($this->locationId);
-            
+
             // Get package price (use package amount if available, otherwise 0)
             $packageAmount = $package && isset($package->amount) ? (float) $package->amount : 0.00;
-            
+
             // Build service name matching screenshot format: "Appointment Type - Location - Package Name"
             $serviceName = $appointmentType->name ?? '';
             if ($location) {
@@ -460,10 +498,10 @@ class PatientBookAppointment extends Component
             if ($package) {
                 $serviceName .= ' - ' . $package->name;
             }
-            
+
             // Format date and time for display
             $bookingDateTime = Carbon::parse($this->appointmentDate)->format('d/m/Y') . ' ' . Carbon::parse($startTime12h)->format('h:iA');
-            
+
             // Prepare cart item
             $cartItem = [
                 'id' => uniqid('cart_', true),
@@ -481,34 +519,35 @@ class PatientBookAppointment extends Component
                 'start_time' => $startTime,
                 'end_time' => $endTime,
                 'booking_date_time' => $bookingDateTime,
-                'name' => ($this->member->salutation ? $this->member->salutation . ' ' : '') . $this->member->full_name,
-                'date_of_birth' => $this->member->date_of_birth ? Carbon::parse($this->member->date_of_birth)->format('d/m/Y') : '',
-                'nric_fin_passport' => $this->member->nric_fin ?? $this->member->passport ?? '',
-                'gender' => $this->member->gender ?? '',
+                'name' => ($bookingPerson->salutation ? $bookingPerson->salutation . ' ' : '') . $bookingPerson->full_name,
+                'date_of_birth' => $bookingPerson->date_of_birth ? Carbon::parse($bookingPerson->date_of_birth)->format('d/m/Y') : '',
+                'nric_fin_passport' => $bookingPerson->nric_fin ?? $bookingPerson->passport ?? '',
+                'gender' => $bookingPerson->gender ?? '',
                 'additional_comments' => $this->additionalComments,
                 'booking_for' => $this->bookingFor,
                 'member_id' => $this->member->id,
+                'dependent_id' => $this->bookingFor === 'Dependent' ? $this->dependentId : null,
                 'created_at' => now()->toDateTimeString(),
             ];
-            
+
             // Get existing cart items
             $cart = Session::get('patient_cart', []);
-            
+
             // Add new item to cart
             $cart[] = $cartItem;
-            
+
             // Store in session
             Session::put('patient_cart', $cart);
-            
+
             // Start cart timer if not already started (2 hours 45 minutes = 9900 seconds)
             if (!Session::has('cart_timer_start')) {
                 Session::put('cart_timer_start', now()->timestamp);
                 Session::put('cart_timer_duration', 9900); // 2 hours 45 minutes in seconds
             }
-            
+
             // Show success message
             session()->flash('cart_success', 'Appointment added to cart successfully!');
-            
+
             // Reset form and go back to step 1
             $this->step = 1;
             $this->locationId = null;
@@ -516,16 +555,16 @@ class PatientBookAppointment extends Component
             $this->appointmentTime = null;
             $this->availableTimeSlots = [];
             $this->additionalComments = '';
-            
+
             // Redirect to cart page
             $this->redirect(route('tenant.patient.cart'), navigate: true);
-            
+
         } catch (\Exception $e) {
             Log::error('Error adding to cart: ' . $e->getMessage());
             $this->addError('cart', 'Failed to add appointment to cart. Please try again.');
         }
     }
-    
+
     public function bookAppointment()
     {
         $this->validate([
@@ -538,15 +577,24 @@ class PatientBookAppointment extends Component
             'appointmentDate.after_or_equal' => 'Please select a valid date.',
             'appointmentTime.required' => 'Please select a time slot.',
         ]);
-        
+
         try {
             DB::beginTransaction();
-            
+
+            // Get the person for whom the booking is being made
+            $bookingPerson = $this->member; // Default to self
+            if ($this->bookingFor === 'Dependent' && $this->dependentId) {
+                $bookingPerson = Member::find($this->dependentId);
+                if (!$bookingPerson) {
+                    throw new \Exception('Selected dependent not found.');
+                }
+            }
+
             // Parse time slot and convert to 24-hour format
             $timeParts = explode('-', $this->appointmentTime);
             $startTime12h = trim($timeParts[0] ?? '');
             $endTime12h = trim($timeParts[1] ?? $startTime12h);
-            
+
             // Convert from 12-hour format (e.g., "2:30PM") to 24-hour format (e.g., "14:30")
             try {
                 $startTimeCarbon = Carbon::createFromFormat('h:i A', $startTime12h);
@@ -556,7 +604,7 @@ class PatientBookAppointment extends Component
                 $startTimeCarbon = Carbon::createFromFormat('h:iA', $startTime12h);
                 $startTime = $startTimeCarbon->format('H:i');
             }
-            
+
             try {
                 $endTimeCarbon = Carbon::createFromFormat('h:i A', $endTime12h);
                 $endTime = $endTimeCarbon->format('H:i');
@@ -565,13 +613,13 @@ class PatientBookAppointment extends Component
                 $endTimeCarbon = Carbon::createFromFormat('h:iA', $endTime12h);
                 $endTime = $endTimeCarbon->format('H:i');
             }
-              
+
             // Format booking_time in 24-hour format (e.g., "14:30-15:30")
             $bookingTime24h = $startTime . ($endTime !== $startTime ? '-' . $endTime : '');
-                
+
             // Generate refID
             $refID = time();
-            
+
             // Create booking first
             $bookingData = [
                 'team_id' => $this->teamId,
@@ -586,19 +634,24 @@ class PatientBookAppointment extends Component
                 'status' => Booking::STATUS_RESERVED,
                 'is_private_customer' => true,
                 'booking_for' => $this->bookingFor ?? 'Self',
-                'name' => ($this->member->salutation ? $this->member->salutation . ' ' : '') . $this->member->full_name,
-                'email' => $this->member->email,
-                'phone' => $this->member->mobile_number,
-                'phone_code' => $this->member->mobile_country_code ?? '+65',
-                'date_of_birth' => $this->member->date_of_birth,
-                'gender' => $this->member->gender ?? '',
-                'nationality' => $this->member->nationality,
-                'identification_type' => $this->member->identification_type,
+                'name' => ($bookingPerson->salutation ? $bookingPerson->salutation . ' ' : '') . $bookingPerson->full_name,
+                'email' => $bookingPerson->email ?? $this->member->email,
+                'phone' => $bookingPerson->mobile_number ?? $this->member->mobile_number,
+                'phone_code' => $bookingPerson->mobile_country_code ?? $this->member->mobile_country_code ?? '+65',
+                'date_of_birth' => $bookingPerson->date_of_birth,
+                'gender' => $bookingPerson->gender ?? '',
+                'nationality' => $bookingPerson->nationality ?? $this->member->nationality,
+                'identification_type' => $bookingPerson->identification_type ?? $this->member->identification_type,
                 'additional_comments' => $this->additionalComments,
             ];
-            
+
+            // Add dependent_id if booking for dependent
+            if ($this->bookingFor === 'Dependent' && $this->dependentId) {
+                $bookingData['dependent_id'] = $this->dependentId;
+            }
+
             $booking = Booking::create($bookingData);
-            
+
             // Create one order (appointment data is stored in bookings table)
             $order = Order::create([
                 'team_id' => $this->teamId,
@@ -609,7 +662,7 @@ class PatientBookAppointment extends Component
                 'gst_amount' => 0.00,
                 'grand_total' => 0.00,
             ]);
-            
+
             // Link booking to order via pivot table (use insertOrIgnore to prevent duplicates)
             DB::table('booking_order')->insertOrIgnore([
                 'booking_id' => $booking->id,
@@ -617,14 +670,14 @@ class PatientBookAppointment extends Component
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
-            
+
             DB::commit();
-            
+
             // Send appointment confirmation email
             try {
                 // Get appointment type for email data
                 $appointmentType = Category::find($this->appointmentTypeId);
-                
+
                 // Prepare email data
                 $emailData = [
                     'to_mail' => $this->member->email,
@@ -649,24 +702,24 @@ class PatientBookAppointment extends Component
                 // Log error but don't fail the booking
                 Log::error('Failed to send appointment confirmation email: ' . $e->getMessage());
             }
-            
+
             $this->successMessage = 'Appointment booked successfully! Your order number is ' . $order->order_number;
             $this->step = 3;
-            
+
             // Dispatch success event with order details
             $this->dispatch('booking-success', [
-                'refID' => time(), 
+                'refID' => time(),
                 'booking_id' => $booking->id,
                 'order_number' => $order->order_number,
                 'message' => $this->successMessage
             ]);
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             $this->addError('booking', 'Failed to book appointment. Please try again.');
         }
     }
-    
+
     public function render()
     {
         return view('livewire.patient-book-appointment');

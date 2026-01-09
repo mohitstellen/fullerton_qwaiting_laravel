@@ -65,6 +65,46 @@
                             </div>
                         @endif
 
+                        <!-- Choose Dependent Name -->
+                        @if($bookingFor === 'Dependent')
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Choose Dependent Name <span class="text-red-500">*</span>
+                                </label>
+                                @if(count($dependents) > 0)
+                                    <div class="relative">
+                                        <select wire:model.live="dependentId" 
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                            <option value="">Please Choose</option>
+                                            @foreach($dependents as $dependent)
+                                                <option value="{{ $dependent->id }}">
+                                                    {{ $dependent->full_name }} 
+                                                    @if($dependent->relationship)
+                                                        ({{ $dependent->relationship }})
+                                                    @endif
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <span class="absolute right-3 top-2.5 text-gray-400 pointer-events-none">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                @else
+                                    <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                                        <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                                            No dependents found. Please add a dependent first from the 
+                                            <a href="{{ route('tenant.patient.dependents') }}" class="underline font-semibold">Dependents</a> page.
+                                        </p>
+                                    </div>
+                                @endif
+                                @error('dependentId') 
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p> 
+                                @enderror
+                            </div>
+                        @endif
+
                         <!-- Package -->
                         @if($appointmentTypeId)
                             <div>
