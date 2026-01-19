@@ -230,9 +230,6 @@ class AuthController extends Controller
 
         // ✅ Only set location session if domain does NOT require location page
         if (Auth::check() && !empty(Auth::user()->locations)) {
-            $domain = Domain::where('team_id', tenant('id'))->first(); // or however you're fetching domain
-
-            if ($domain && $domain->enable_location_page != 1) {
                 $location = Auth::user()->locations;
                 Session::put('selectedLocation', $location[0]);
 
@@ -285,7 +282,6 @@ class AuthController extends Controller
                         return redirect()->route('verify.otp');
                     }
                 }
-            }
         }
 
         if (Auth::check() && empty(Auth::user()->locations)) {
