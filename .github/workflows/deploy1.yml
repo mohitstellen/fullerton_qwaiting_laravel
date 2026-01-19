@@ -13,61 +13,57 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 🧾 Checkout code
-      uses: actions/checkout@v3
+      - name: 🧾 Checkout code
+        uses: actions/checkout@v3
 
-    - name: ⚙️ Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.2'
-        extensions: mbstring, bcmath, mysql
-        tools: composer
+      - name: ⚙️ Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, bcmath, mysql
+          tools: composer
 
-    - name: 📦 Cache Composer packages
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-composer-
+      - name: 📦 Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
-    - name: 🛠️ Prepare Laravel storage paths
-      run: |
-        mkdir -p storage/framework/views
-        mkdir -p storage/framework/cache
-        mkdir -p storage/logs
+      - name: 🛠️ Prepare Laravel storage paths
+        run: |
+          mkdir -p storage/framework/views
+          mkdir -p storage/framework/cache
+          mkdir -p storage/logs
 
-    - name: 📦 Install Dependencies
-      run: composer install --prefer-dist --no-progress
+      - name: 📦 Install Dependencies
+        run: composer install --prefer-dist --no-progress
 
+      - name: 🔍 Check SSH Secrets (Safe)
+        run: |
+          if [ -z "${{ secrets.SSH_HOST }}" ]; then echo "SSH_HOST is EMPTY"; else echo "SSH_HOST is SET"; fi
+          if [ -z "${{ secrets.SSH_USER }}" ]; then echo "SSH_USER is EMPTY"; else echo "SSH_USER is SET"; fi
+          if [ -z "${{ secrets.SSH_PASSWORD }}" ]; then echo "SSH_PASSWORD is EMPTY"; else echo "SSH_PASSWORD is SET"; fi
+          if [ -z "${{ secrets.SSH_PORT }}" ]; then echo "SSH_PORT is EMPTY"; else echo "SSH_PORT is SET"; fi
+      - name: 🚀 Deploy via SSH
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /home/fullertonthevist/public_html
 
-    - name: 🔍 Check SSH Secrets (Safe)
-      run: |
-        if [ -z "${{ secrets.SSH_HOST }}" ]; then echo "SSH_HOST is EMPTY"; else echo "SSH_HOST is SET"; fi
-        if [ -z "${{ secrets.SSH_USER }}" ]; then echo "SSH_USER is EMPTY"; else echo "SSH_USER is SET"; fi
-        if [ -z "${{ secrets.SSH_PASSWORD }}" ]; then echo "SSH_PASSWORD is EMPTY"; else echo "SSH_PASSWORD is SET"; fi
-        if [ -z "${{ secrets.SSH_PORT }}" ]; then echo "SSH_PORT is EMPTY"; else echo "SSH_PORT is SET"; fi
-    - name: 🚀 Deploy via SSH
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        password: ${{ secrets.SSH_PASSWORD }}
-        port: ${{ secrets.SSH_PORT }}
-        script: |
-          cd /home/fullertonthevist/public_html
-        
-          # Git setup
-          git config --global user.email "mohitstelleninfotech@gmail.com"
-          git config --global user.name "mohitstellen"
-          git config pull.rebase false
+            # Git setup
+            git config --global user.email "mohitstelleninfotech@gmail.com"
+            git config --global user.name "mohitstellen"
+            git config pull.rebase false
 
-          git pull origin main
+            git pull origin main
 
-          # Clear all caches
-          php artisan o:clear
-          
-         
-          
-      
+            # Clear all caches
+            php artisan o:clear
+            php artisan storage:link
