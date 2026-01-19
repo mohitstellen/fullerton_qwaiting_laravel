@@ -66,4 +66,6 @@ jobs:
 
             # Clear all caches
             php artisan o:clear
+
+            # link storage
             php artisan storage:link
