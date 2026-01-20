@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
+// Web Routes
 Route::group(['domain' => config('tenancy.central_domains.0')], function () {
 
     Route::get('/', function () {
