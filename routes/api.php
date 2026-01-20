@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\StaffController;
 |
 */
 
+// API Routes
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
