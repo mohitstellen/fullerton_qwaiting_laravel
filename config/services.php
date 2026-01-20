@@ -36,12 +36,12 @@ return [
     ],
 
 
- 'stripe' => [
-            'secret' => env('STRIPE_SECRET'),
-            'key' => env('STRIPE_KEY'),
+    'stripe' => [
+        'secret' => env('STRIPE_SECRET'),
+        'key' => env('STRIPE_KEY'),
     ],
 
-     'microsoft' => [
+    'microsoft' => [
         'client_id' => env('MICROSOFT_CLIENT_ID'),
         'client_secret' => env('MICROSOFT_CLIENT_SECRET'),
         'tenant' => 'common',
@@ -52,10 +52,10 @@ return [
         'client_id'     => env('OKTA_CLIENT_ID'),
         'client_secret' => env('OKTA_CLIENT_SECRET'),
         'redirect'      => env('OKTA_REDIRECT_URI'),
-        'base_url'      => env('OKTA_BASE_URL'), // required for SocialiteProviders
+        'base_url'      => env('OKTA_BASE_URL'),
     ],
     'openai' => [
-         'key' => env('OPENAI_API_KEY'),
+        'key' => env('OPENAI_API_KEY'),
     ],
 
     'gupshup' => [
@@ -64,10 +64,18 @@ return [
     ],
 
     'salesforce' => [
-    'client_id' => env('SALESFORCE_CLIENT_ID'),
-    'client_secret' => env('SALESFORCE_CLIENT_SECRET'),
-    'username' => env('SALESFORCE_USERNAME'),
-    'password' => env('SALESFORCE_PASSWORD'),
-],
+        'client_id' => env('SALESFORCE_CLIENT_ID'),
+        'client_secret' => env('SALESFORCE_CLIENT_SECRET'),
+        'username' => env('SALESFORCE_USERNAME'),
+        'password' => env('SALESFORCE_PASSWORD'),
+    ],
+
+    'dara_api' => [
+        'access_token' => env('DARA_API_ACCESS_TOKEN'),
+    ],
+
+    'plato_api' => [
+        'token' => env('PLATO_API_TOKEN')
+    ]
 
 ];

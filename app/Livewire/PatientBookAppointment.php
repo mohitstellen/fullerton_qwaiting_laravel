@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use Exception;
 use Livewire\Component;
 use App\Models\{
     Category,
@@ -21,6 +22,9 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\DaraAPIService;
+use App\Mail\AppointmentQuestionnaire;
+use Illuminate\Support\Facades\Mail;
 
 #[Layout('components.layouts.patient-layout')]
 #[Title('Book Appointment')]
@@ -63,7 +67,6 @@ class PatientBookAppointment extends Component
 
     public function mount()
     {
-
         // Check if patient is logged in
         if (!Session::has('patient_member_id')) {
             $this->redirect(route('tenant.patient.login'), navigate: true);
@@ -409,7 +412,6 @@ class PatientBookAppointment extends Component
                 });
                 $this->availableTimeSlots = array_values($this->availableTimeSlots);
             }
-
         } catch (\Exception $e) {
             // Log error for debugging
             Log::error('Error loading time slots for location ' . $this->locationId . ' and date ' . $this->appointmentDate . ': ' . $e->getMessage());
@@ -558,7 +560,6 @@ class PatientBookAppointment extends Component
 
             // Redirect to cart page
             $this->redirect(route('tenant.patient.cart'), navigate: true);
-
         } catch (\Exception $e) {
             Log::error('Error adding to cart: ' . $e->getMessage());
             $this->addError('cart', 'Failed to add appointment to cart. Please try again.');
@@ -650,28 +651,97 @@ class PatientBookAppointment extends Component
                 $bookingData['dependent_id'] = $this->dependentId;
             }
 
-            $booking = Booking::create($bookingData);
+            // Dara API
+            $daraApi = new DaraAPIService();
+            $generateTokenPair = $daraApi->getTokenPair();
 
-            // Create one order (appointment data is stored in bookings table)
-            $order = Order::create([
-                'team_id' => $this->teamId,
-                'member_id' => $this->member->id,
-                'order_number' => Order::generateOrderNumber(),
-                'status' => Order::STATUS_PENDING,
-                'total_amount' => 0.00,
-                'gst_amount' => 0.00,
-                'grand_total' => 0.00,
-            ]);
+            if ($generateTokenPair['success'] == 'true') {
 
-            // Link booking to order via pivot table (use insertOrIgnore to prevent duplicates)
-            DB::table('booking_order')->insertOrIgnore([
-                'booking_id' => $booking->id,
-                'order_id' => $order->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+                Log::info('Token Pair API Run Successfully', [
+                    'generateTokenPair' => $generateTokenPair,
+                ]);
 
-            DB::commit();
+                $getRefreshTokenFromPair = $generateTokenPair['data']['refresh_token'];
+                $getAccessTokenFromPair = $generateTokenPair['data']['access_token'];
+
+                $getAccessTokenRes = $daraApi->refreshToken($getRefreshTokenFromPair);
+
+                if ($getAccessTokenRes['success'] == 'true') {
+                    Log::info('Refresh Token API Run Successfully', ['getAccessTokenRes' => $getAccessTokenRes]);
+                    $getAccessToken = $getAccessTokenRes['data']['access_token'];
+
+                    $daraApiBooking = [
+                        'sampleid' => $bookingPerson->nric_fin,
+                        'email' => $bookingPerson->email ?? $this->member->email,
+                        'phone' => $bookingPerson->mobile_number ?? $this->member->mobile_number,
+                        'name' => $bookingPerson->full_name,
+                        'appointmentdate' => $this->appointmentDate . 'T' .  $startTime . ':00',
+                        'additional_info' => [
+                            'key' => 'value'
+                        ]
+                    ];
+
+                    $createAppointment = $daraApi->createAppointment($getAccessToken, $daraApiBooking);
+
+                    if ($createAppointment['success'] == 'true') {
+
+                        Log::info('Patient Appointment Booking Successfully', [
+                            'bookingData' => $bookingData,
+                            'createAppointment' => $createAppointment,
+                        ]);
+
+                        $booking = Booking::create($bookingData);
+
+                        // Create one order (appointment data is stored in bookings table)
+                        $order = Order::create([
+                            'team_id' => $this->teamId,
+                            'member_id' => $this->member->id,
+                            'order_number' => Order::generateOrderNumber(),
+                            'status' => Order::STATUS_PENDING,
+                            'total_amount' => 0.00,
+                            'gst_amount' => 0.00,
+                            'grand_total' => 0.00,
+                        ]);
+
+                        // Link booking to order via pivot table (use insertOrIgnore to prevent duplicates)
+                        DB::table('booking_order')->insertOrIgnore([
+                            'booking_id' => $booking->id,
+                            'order_id' => $order->id,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+
+                        $url = "https://q.meshbio.com/fullerton-questionnaire/index.html?token=" . $createAppointment['data']['token'];
+
+                        try {
+                            $siteDetail = SiteDetail::where('team_id', $this->teamId)
+                                ->where('location_id', $this->locationId)
+                                ->select('business_logo')
+                                ->first();
+
+                            $logo = isset($siteDetail) && $siteDetail->business_logo
+                                ? url('storage/' . $siteDetail->business_logo)
+                                : '';
+
+                            $recipientEmail = $bookingPerson->email ?? $this->member->email;
+                            $recipientName = ($bookingPerson->salutation ? $bookingPerson->salutation . ' ' : '') . $bookingPerson->full_name;
+
+                            Mail::to($recipientEmail)->send(new AppointmentQuestionnaire($recipientName, $url, $logo));
+
+                            Log::info('Questionnaire email sent successfully', ['email' => $recipientEmail]);
+                        } catch (\Exception $e) {
+                            Log::error('Failed to send questionnaire email', ['error' => $e->getMessage()]);
+                        }
+
+                        DB::commit();
+                    } else {
+                        Log::error('Patient Book Appointment failed', [
+                            'error' => $e->getMessage(),
+                            'api_response' => $createAppointment ?? null,
+                        ]);
+                    }
+                }
+            }
 
             // Send appointment confirmation email
             try {
@@ -713,7 +783,6 @@ class PatientBookAppointment extends Component
                 'order_number' => $order->order_number,
                 'message' => $this->successMessage
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             $this->addError('booking', 'Failed to book appointment. Please try again.');
@@ -725,4 +794,3 @@ class PatientBookAppointment extends Component
         return view('livewire.patient-book-appointment');
     }
 }
-

@@ -8,7 +8,7 @@ use App\Models\Location;
 use App\Models\Queue;
 use App\Models\SmtpDetails;
 use Illuminate\Support\Facades\Session;
-use Livewire\Attributes\On; 
+use Livewire\Attributes\On;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Title;
@@ -25,10 +25,10 @@ class LocationSelector extends Component
 
     public function mount()
     {
-        $this->teamId =tenant('id');
+        $this->teamId = tenant('id');
         $user = Auth::user();
         $locations = User::getSelectLocations(); // This should return key => value of active locations
-        
+
         // Check if user has no active locations
         if ($user && !$user->hasRole('Admin')) {
             $userLocationKeys = is_array($user->locations) ? $user->locations : [];
@@ -41,13 +41,12 @@ class LocationSelector extends Component
             }
         }
 
-       
-      if (!Session::has('selectedLocation') || Session::get('selectedLocation') == "") {
-        
-           Session::put('selectedLocation', User::getDefaultLocation()); 
-            $this->selectedLocationUser =User::getDefaultLocation();
-           
-        }else{
+
+        if (!Session::has('selectedLocation') || Session::get('selectedLocation') == "") {
+
+            Session::put('selectedLocation', User::getDefaultLocation());
+            $this->selectedLocationUser = User::getDefaultLocation();
+        } else {
 
             $this->selectedLocationUser = Session::get('selectedLocation');
         }
@@ -56,15 +55,14 @@ class LocationSelector extends Component
 
         // Set the initial value of $selectedOption from session
     }
-  
+
 
     public function updatedselectedLocationUser($value)
     {
         Session::put('selectedLocation', $value);
-        $this->selectedLocationUser =$value;
+        $this->selectedLocationUser = $value;
         Location::setConfig($this->teamId, $this->selectedLocationUser);
         $this->dispatch('locationUpdated', $value);
-  
     }
 
     // protected function setConfig(){
@@ -86,7 +84,7 @@ class LocationSelector extends Component
     //                 Config::set('mail.mailers.smtp.password', trim($details->password));
     //                 Config::set('mail.from.address', trim($details->from_email));
     //                 Config::set('mail.from.name', trim($details->from_name));
-                       
+
     //     }
 
 
@@ -98,15 +96,13 @@ class LocationSelector extends Component
     {
         $this->selectedLocationUser = $value;
         $this->redirect(request()->header('Referer'));
-
     }
- 
+
     public function render()
     {
-   
+
         return view('livewire.location-selector', [
             'locations' => User::getSelectLocations(),
         ]);
     }
 }
-
