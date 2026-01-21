@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Log;
 use App\Services\DaraAPIService;
 use App\Mail\AppointmentQuestionnaire;
 use Illuminate\Support\Facades\Mail;
+use App\Models\IntegrationToken;
 
 #[Layout('components.layouts.patient-layout')]
 #[Title('Book Appointment')]
@@ -653,93 +654,124 @@ class PatientBookAppointment extends Component
 
             // Dara API
             $daraApi = new DaraAPIService();
-            $generateTokenPair = $daraApi->getTokenPair();
+            $getAccessToken = null;
 
-            if ($generateTokenPair['success'] == 'true') {
+            // Check for stored token
+            $storedToken = IntegrationToken::where('service_name', 'dara')->first();
 
-                Log::info('Token Pair API Run Successfully', [
-                    'generateTokenPair' => $generateTokenPair,
-                ]);
+            if ($storedToken) {
+                try {
+                    $getAccessTokenRes = $daraApi->refreshToken($storedToken->refresh_token);
 
-                $getRefreshTokenFromPair = $generateTokenPair['data']['refresh_token'];
-                $getAccessTokenFromPair = $generateTokenPair['data']['access_token'];
+                    if (isset($getAccessTokenRes['success']) && $getAccessTokenRes['success'] == 'true') {
+                        Log::info('Refresh Token API Run Successfully via DB token', ['getAccessTokenRes' => $getAccessTokenRes]);
+                        $getAccessToken = $getAccessTokenRes['data']['access_token'];
 
-                $getAccessTokenRes = $daraApi->refreshToken($getRefreshTokenFromPair);
+                        // Update token if refresh token is new provided or keep existing
+                        $newRefreshToken = $getAccessTokenRes['data']['refresh_token'] ?? $storedToken->refresh_token;
 
-                if ($getAccessTokenRes['success'] == 'true') {
-                    Log::info('Refresh Token API Run Successfully', ['getAccessTokenRes' => $getAccessTokenRes]);
-                    $getAccessToken = $getAccessTokenRes['data']['access_token'];
-
-                    $daraApiBooking = [
-                        'sampleid' => $bookingPerson->nric_fin,
-                        'email' => $bookingPerson->email ?? $this->member->email,
-                        'phone' => $bookingPerson->mobile_number ?? $this->member->mobile_number,
-                        'name' => $bookingPerson->full_name,
-                        'appointmentdate' => $this->appointmentDate . 'T' .  $startTime . ':00',
-                        'additional_info' => [
-                            'key' => 'value'
-                        ]
-                    ];
-
-                    $createAppointment = $daraApi->createAppointment($getAccessToken, $daraApiBooking);
-
-                    if ($createAppointment['success'] == 'true') {
-
-                        Log::info('Patient Appointment Booking Successfully', [
-                            'bookingData' => $bookingData,
-                            'createAppointment' => $createAppointment,
-                        ]);
-
-                        $booking = Booking::create($bookingData);
-
-                        // Create one order (appointment data is stored in bookings table)
-                        $order = Order::create([
-                            'team_id' => $this->teamId,
-                            'member_id' => $this->member->id,
-                            'order_number' => Order::generateOrderNumber(),
-                            'status' => Order::STATUS_PENDING,
-                            'total_amount' => 0.00,
-                            'gst_amount' => 0.00,
-                            'grand_total' => 0.00,
-                        ]);
-
-                        // Link booking to order via pivot table (use insertOrIgnore to prevent duplicates)
-                        DB::table('booking_order')->insertOrIgnore([
-                            'booking_id' => $booking->id,
-                            'order_id' => $order->id,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-
-                        $url = "https://q.meshbio.com/fullerton-questionnaire/index.html?token=" . $createAppointment['data']['token'];
-
-                        try {
-                            $siteDetail = SiteDetail::where('team_id', $this->teamId)
-                                ->where('location_id', $this->locationId)
-                                ->select('business_logo')
-                                ->first();
-
-                            $logo = isset($siteDetail) && $siteDetail->business_logo
-                                ? url('storage/' . $siteDetail->business_logo)
-                                : '';
-
-                            $recipientEmail = $bookingPerson->email ?? $this->member->email;
-                            $recipientName = ($bookingPerson->salutation ? $bookingPerson->salutation . ' ' : '') . $bookingPerson->full_name;
-
-                            Mail::to($recipientEmail)->send(new AppointmentQuestionnaire($recipientName, $url, $logo));
-
-                            Log::info('Questionnaire email sent successfully', ['email' => $recipientEmail]);
-                        } catch (\Exception $e) {
-                            Log::error('Failed to send questionnaire email', ['error' => $e->getMessage()]);
-                        }
-
-                        DB::commit();
-                    } else {
-                        Log::error('Patient Book Appointment failed', [
-                            'error' => $e->getMessage(),
-                            'api_response' => $createAppointment ?? null,
+                        $storedToken->update([
+                            'refresh_token' => $newRefreshToken,
+                            'access_token' => $getAccessToken
                         ]);
                     }
+                } catch (\Exception $ex) {
+                    Log::error('Failed to refresh token using stored token', ['error' => $ex->getMessage()]);
+                }
+            }
+
+            // If no access token yet, fetch new pair
+            if (!$getAccessToken) {
+                $generateTokenPair = $daraApi->getTokenPair();
+
+                if (isset($generateTokenPair['success']) && $generateTokenPair['success'] == 'true') {
+                    Log::info('Token Pair API Run Successfully', [
+                        'generateTokenPair' => $generateTokenPair,
+                    ]);
+
+                    $getAccessToken = $generateTokenPair['data']['access_token'];
+                    $getRefreshToken = $generateTokenPair['data']['refresh_token'];
+
+                    IntegrationToken::updateOrCreate(
+                        ['service_name' => 'dara'],
+                        [
+                            'refresh_token' => $getRefreshToken,
+                            'access_token' => $getAccessToken
+                        ]
+                    );
+                }
+            }
+
+            if ($getAccessToken) {
+                $daraApiBooking = [
+                    'sampleid' => $bookingPerson->nric_fin,
+                    'email' => $bookingPerson->email ?? $this->member->email,
+                    'phone' => $bookingPerson->mobile_number ?? $this->member->mobile_number,
+                    'name' => $bookingPerson->full_name,
+                    'appointmentdate' => $this->appointmentDate . 'T' .  $startTime . ':00',
+                    'additional_info' => [
+                        'key' => 'value'
+                    ]
+                ];
+
+                $createAppointment = $daraApi->createAppointment($getAccessToken, $daraApiBooking);
+
+                if (isset($createAppointment['success']) && $createAppointment['success'] == 'true') {
+
+                    Log::info('Patient Appointment Booking Successfully', [
+                        'bookingData' => $bookingData,
+                        'createAppointment' => $createAppointment,
+                    ]);
+
+                    $booking = Booking::create($bookingData);
+
+                    // Create one order (appointment data is stored in bookings table)
+                    $order = Order::create([
+                        'team_id' => $this->teamId,
+                        'member_id' => $this->member->id,
+                        'order_number' => Order::generateOrderNumber(),
+                        'status' => Order::STATUS_PENDING,
+                        'total_amount' => 0.00,
+                        'gst_amount' => 0.00,
+                        'grand_total' => 0.00,
+                    ]);
+
+                    // Link booking to order via pivot table (use insertOrIgnore to prevent duplicates)
+                    DB::table('booking_order')->insertOrIgnore([
+                        'booking_id' => $booking->id,
+                        'order_id' => $order->id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                    $url = "https://testquestionaire.s3-ap-southeast-1.amazonaws.com/fullerton-questionnaire/index.html?token=" . $createAppointment['data']['token'];
+
+                    try {
+                        $siteDetail = SiteDetail::where('team_id', $this->teamId)
+                            ->where('location_id', $this->locationId)
+                            ->select('business_logo')
+                            ->first();
+
+                        $logo = isset($siteDetail) && $siteDetail->business_logo
+                            ? url('storage/' . $siteDetail->business_logo)
+                            : '';
+
+                        $recipientEmail = $bookingPerson->email ?? $this->member->email;
+                        $recipientName = ($bookingPerson->salutation ? $bookingPerson->salutation . ' ' : '') . $bookingPerson->full_name;
+
+                        Mail::to($recipientEmail)->send(new AppointmentQuestionnaire($recipientName, $url, $logo));
+
+                        Log::info('Questionnaire email sent successfully', ['email' => $recipientEmail]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to send questionnaire email', ['error' => $e->getMessage()]);
+                    }
+
+                    DB::commit();
+                } else {
+                    Log::error('Patient Book Appointment failed', [
+                        'error' => 'API Error',
+                        'api_response' => $createAppointment ?? null,
+                    ]);
                 }
             }
 

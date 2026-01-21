@@ -4,12 +4,14 @@ namespace App\Livewire;
 
 use App\Models\Member;
 use App\Models\SiteDetail;
+use App\Models\SmtpDetails;
 use App\Models\Location;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log as LogFacade;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\PatientLoginOtp;
@@ -111,25 +113,43 @@ class PatientLogin extends Component
                     ->whereNotNull('business_logo')
                     ->where('business_logo', '!=', '')
                     ->first();
-                
+
                 if ($siteDetail) {
-                     $logoUrl = asset('storage/' . $siteDetail->business_logo);
+                    $logoUrl = asset('storage/' . $siteDetail->business_logo);
                 } else {
-                     // Fallback to searching without team_id or default logic if needed, but for now stick to team
-                     // Or check for null location specifically if multiple locations exist but one has global settings
-                     $logoPath = SiteDetail::viewImage(SiteDetail::FIELD_BUSINESS_LOGO, $this->teamId);
-                     $logoUrl = asset($logoPath);
+                    // Fallback to searching without team_id or default logic if needed, but for now stick to team
+                    // Or check for null location specifically if multiple locations exist but one has global settings
+                    $logoPath = SiteDetail::viewImage(SiteDetail::FIELD_BUSINESS_LOGO, $this->teamId);
+                    $logoUrl = asset($logoPath);
                 }
+
+                // Get SMTP details for the team
+                $smtpDetails = SmtpDetails::where('team_id', $this->teamId)->first();
+
+                if (!$smtpDetails || empty($smtpDetails->hostname)) {
+                    LogFacade::warning('SMTP details not configured for team: ' . $this->teamId);
+                    session()->flash('error', 'SMTP details not configured.');
+                    return;
+                }
+
+                // Configure mail settings
+                Config::set('mail.mailers.smtp.transport', 'smtp');
+                Config::set('mail.mailers.smtp.host', trim($smtpDetails->hostname));
+                Config::set('mail.mailers.smtp.port', trim($smtpDetails->port));
+                Config::set('mail.mailers.smtp.encryption', trim($smtpDetails->encryption ?? 'ssl'));
+                Config::set('mail.mailers.smtp.username', trim($smtpDetails->username));
+                Config::set('mail.mailers.smtp.password', trim($smtpDetails->password));
+                Config::set('mail.from.address', trim($smtpDetails->from_email));
+                Config::set('mail.from.name', trim($smtpDetails->from_name));
 
                 Mail::to($member->email)->send(new PatientLoginOtp($this->generatedOtp, $member->name, $logoUrl));
             } else {
                 // Phone OTP logic (WhatsApp/SMS) - skipped as per user request for now
                 // if ($this->otpMethod === 'whatsapp') ...
             }
-            
+
             $this->otpSent = true;
             session()->flash('message', 'OTP sent successfully!');
-
         } catch (\Exception $e) {
             LogFacade::error('OTP Send error: ' . $e->getMessage());
             session()->flash('error', 'Failed to send OTP. Please try again.');
