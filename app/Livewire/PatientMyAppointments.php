@@ -32,7 +32,7 @@ class PatientMyAppointments extends Component
     public $selectedBooking = null;
     public $selectedBookingOrders = [];
     public $showOrderDetails = false;
-    
+
     // Reschedule modal properties
     public $showRescheduleModal = false;
     public $rescheduleBookingId = null;
@@ -55,7 +55,7 @@ class PatientMyAppointments extends Component
 
         $this->teamId = tenant('id');
         $memberId = Session::get('patient_member_id');
-        
+
         $this->member = Member::where('team_id', $this->teamId)
             ->where('id', $memberId)
             ->where('is_active', 1)
@@ -68,7 +68,7 @@ class PatientMyAppointments extends Component
         }
 
         $this->loadAppointments();
-        
+
         // Set timezone
         $siteDetail = SiteDetail::where('team_id', $this->teamId)->first();
         if ($siteDetail && $siteDetail->select_timezone) {
@@ -84,22 +84,23 @@ class PatientMyAppointments extends Component
             ->where('member_id', $this->member->id)
             ->orderBy('created_at', 'desc')
             ->get();
-        
+
         $this->appointments = [];
-        
+        $seenBookingIds = [];
+
         foreach ($orders as $order) {
             // Get all bookings linked to this order via pivot table
             $bookingIds = DB::table('booking_order')
                 ->where('order_id', $order->id)
                 ->pluck('booking_id')
                 ->toArray();
-            
+
             $bookings = Booking::whereIn('id', $bookingIds)
                 ->with(['categories', 'sub_category', 'location'])
                 ->orderBy('booking_date', 'asc')
                 ->orderBy('start_time', 'asc')
                 ->get();
-            
+
             // Create a separate row for EACH booking
             foreach ($bookings as $booking) {
                 // Build service name from booking categories
@@ -113,7 +114,7 @@ class PatientMyAppointments extends Component
                         $serviceName .= ' - ' . $booking->location->location_name;
                     }
                 }
-                
+
                 // Format booking date/time
                 $appointmentDateTime = '';
                 if ($booking->booking_date) {
@@ -129,7 +130,13 @@ class PatientMyAppointments extends Component
                         }
                     }
                 }
-                
+
+                // Check if this booking has already been added
+                if (in_array($booking->id, $seenBookingIds)) {
+                    continue;
+                }
+                $seenBookingIds[] = $booking->id;
+
                 // Create a row for each booking
                 $this->appointments[] = [
                     'id' => $booking->id, // Use booking ID for actions
@@ -152,9 +159,9 @@ class PatientMyAppointments extends Component
                 ];
             }
         }
-        
+
         // Sort appointments by booking date and time
-        usort($this->appointments, function($a, $b) {
+        usort($this->appointments, function ($a, $b) {
             $dateA = $a['booking_date'] ?? '';
             $dateB = $b['booking_date'] ?? '';
             if ($dateA === $dateB) {
@@ -171,24 +178,24 @@ class PatientMyAppointments extends Component
         $order = Order::where('id', $orderId)
             ->where('member_id', $this->member->id)
             ->first();
-            
+
         if ($order) {
             // Get ALL bookings linked to this order via pivot table
             $bookingIds = DB::table('booking_order')
                 ->where('order_id', $order->id)
                 ->pluck('booking_id')
                 ->toArray();
-            
+
             $bookings = Booking::whereIn('id', $bookingIds)
                 ->with(['categories', 'sub_category', 'location'])
                 ->orderBy('booking_date', 'asc')
                 ->orderBy('start_time', 'asc')
                 ->get();
-            
+
             // Get patient name from first booking
             $firstBooking = $bookings->first();
             $patientName = $firstBooking->name ?? '';
-            
+
             $this->selectedBooking = (object) [
                 'order' => $order,
                 'order_number' => $order->order_number,
@@ -229,23 +236,23 @@ class PatientMyAppointments extends Component
         $this->rescheduleAppointmentDate = $booking->booking_date ?? null;
         $this->rescheduleAppointmentTime = $booking->booking_time ?? null;
         $this->rescheduleAdditionalComments = $booking->additional_comments ?? '';
-        
+
         // Load locations
         $this->rescheduleLocations = Location::where('team_id', $this->teamId)
             ->where('status', 1)
             ->get();
-        
+
         // Load selected location details
         if ($this->rescheduleLocationId) {
             $this->rescheduleSelectedLocation = Location::find($this->rescheduleLocationId);
             $this->loadRescheduleLocationDetails($this->rescheduleLocationId);
         }
-        
+
         // Load time slots for the current date
         if ($this->rescheduleAppointmentDate) {
             $this->loadRescheduleTimeSlots();
         }
-        
+
         $this->showRescheduleModal = true;
     }
 
@@ -269,11 +276,11 @@ class PatientMyAppointments extends Component
             $this->rescheduleSelectedLocation = Location::find($value);
             $this->rescheduleAppointmentTime = null;
             $this->rescheduleAvailableTimeSlots = [];
-            
+
             if ($this->rescheduleSelectedLocation) {
                 $this->loadRescheduleLocationDetails($value);
             }
-            
+
             if ($this->rescheduleAppointmentDate) {
                 $this->loadRescheduleTimeSlots();
             }
@@ -301,13 +308,13 @@ class PatientMyAppointments extends Component
             ->where('location_id', $locationId)
             ->where('slot_type', AccountSetting::LOCATION_SLOT)
             ->first();
-        
+
         if ($locationSlot && $locationSlot->business_hours) {
-            $this->rescheduleLocationBusinessHours = is_array($locationSlot->business_hours) 
-                ? $locationSlot->business_hours 
+            $this->rescheduleLocationBusinessHours = is_array($locationSlot->business_hours)
+                ? $locationSlot->business_hours
                 : json_decode($locationSlot->business_hours, true);
         }
-        
+
         if ($this->rescheduleSelectedLocation && $this->rescheduleSelectedLocation->user) {
             $this->rescheduleLocationPhone = $this->rescheduleSelectedLocation->user->phone ?? null;
         }
@@ -316,55 +323,57 @@ class PatientMyAppointments extends Component
     public function loadRescheduleTimeSlots()
     {
         $this->rescheduleAvailableTimeSlots = [];
-        
+
         if (!$this->rescheduleLocationId || !$this->rescheduleAppointmentDate) {
             return;
         }
-        
+
         try {
             $carbonDate = Carbon::parse($this->rescheduleAppointmentDate);
             $dayOfWeek = $carbonDate->format('l');
-            
+
             $locationSlot = AccountSetting::where('team_id', $this->teamId)
                 ->where('location_id', $this->rescheduleLocationId)
                 ->where('slot_type', AccountSetting::LOCATION_SLOT)
                 ->first();
-            
+
             if (!$locationSlot) {
                 return;
             }
-            
+
             $getAdvanceBookingDates = AccountSetting::datesGet($locationSlot->allow_req_before ?? 30);
-            
+
             $customSlot = \App\Models\CustomSlot::whereDate('selected_date', $carbonDate)
                 ->where('slots_type', AccountSetting::LOCATION_SLOT)
                 ->where('team_id', $this->teamId)
                 ->where('location_id', $this->rescheduleLocationId)
                 ->first();
-            
+
             $businessHoursArray = null;
             if ($customSlot) {
                 $businessHoursArray = json_decode($customSlot->business_hours, true);
             } else {
                 $businessHoursArray = json_decode($locationSlot->business_hours, true);
             }
-            
+
             if (!$businessHoursArray || !is_array($businessHoursArray)) {
                 return;
             }
-            
+
             $indexedBusinessHours = array_column($businessHoursArray, null, 'day');
-            
-            if (!isset($indexedBusinessHours[$dayOfWeek]) || 
-                $indexedBusinessHours[$dayOfWeek]['is_closed'] !== \App\Models\ServiceSetting::SERVICE_OPEN) {
+
+            if (
+                !isset($indexedBusinessHours[$dayOfWeek]) ||
+                $indexedBusinessHours[$dayOfWeek]['is_closed'] !== \App\Models\ServiceSetting::SERVICE_OPEN
+            ) {
                 return;
             }
-            
+
             $dateFormatted = date('d-m-Y', strtotime($carbonDate));
             if (!in_array($dateFormatted, $getAdvanceBookingDates)) {
                 return;
             }
-            
+
             $breakHours = [];
             $availableSlots = AccountSetting::getAvailableSlots(
                 $carbonDate,
@@ -375,7 +384,7 @@ class PatientMyAppointments extends Component
                 'location',
                 $locationSlot
             );
-            
+
             if ($availableSlots instanceof \Illuminate\Support\Collection) {
                 $this->rescheduleAvailableTimeSlots = $availableSlots->toArray();
             } elseif (is_array($availableSlots)) {
@@ -383,7 +392,7 @@ class PatientMyAppointments extends Component
             } else {
                 $this->rescheduleAvailableTimeSlots = [];
             }
-            
+
             // Filter out past time slots if the selected date is today
             if ($carbonDate->isToday()) {
                 $now = Carbon::now();
@@ -399,7 +408,6 @@ class PatientMyAppointments extends Component
                 });
                 $this->rescheduleAvailableTimeSlots = array_values($this->rescheduleAvailableTimeSlots);
             }
-            
         } catch (\Exception $e) {
             Log::error('Error loading reschedule time slots: ' . $e->getMessage());
             $this->rescheduleAvailableTimeSlots = [];
@@ -426,7 +434,7 @@ class PatientMyAppointments extends Component
 
         try {
             DB::beginTransaction();
-            
+
             // Find the booking
             $booking = Booking::where('team_id', $this->teamId)
                 ->where('id', $this->rescheduleBookingId)
@@ -442,7 +450,7 @@ class PatientMyAppointments extends Component
             $timeParts = explode('-', $this->rescheduleAppointmentTime);
             $startTime12h = trim($timeParts[0] ?? '');
             $endTime12h = trim($timeParts[1] ?? $startTime12h);
-            
+
             try {
                 $startTimeCarbon = Carbon::createFromFormat('h:i A', $startTime12h);
                 $startTime = $startTimeCarbon->format('H:i');
@@ -450,7 +458,7 @@ class PatientMyAppointments extends Component
                 $startTimeCarbon = Carbon::createFromFormat('h:iA', $startTime12h);
                 $startTime = $startTimeCarbon->format('H:i');
             }
-            
+
             try {
                 $endTimeCarbon = Carbon::createFromFormat('h:i A', $endTime12h);
                 $endTime = $endTimeCarbon->format('H:i');
@@ -458,9 +466,9 @@ class PatientMyAppointments extends Component
                 $endTimeCarbon = Carbon::createFromFormat('h:iA', $endTime12h);
                 $endTime = $endTimeCarbon->format('H:i');
             }
-            
+
             $bookingTime24h = $startTime . ($endTime !== $startTime ? '-' . $endTime : '');
-            
+
             // Update the booking
             $booking->update([
                 'location_id' => $this->rescheduleLocationId,
@@ -471,16 +479,16 @@ class PatientMyAppointments extends Component
                 'additional_comments' => $this->rescheduleAdditionalComments,
                 'is_rescheduled' => 1,
             ]);
-            
+
             // Order doesn't store appointment data anymore - all data is in bookings table
-            
+
             DB::commit();
-            
+
             // Send appointment reschedule email
             try {
                 // Get appointment type
                 $appointmentType = Category::find($booking->category_id);
-                
+
                 // Prepare email data
                 $emailData = [
                     'to_mail' => $booking->email,
@@ -505,29 +513,28 @@ class PatientMyAppointments extends Component
                 // Log error but don't fail the reschedule
                 Log::error('Failed to send appointment reschedule email: ' . $e->getMessage());
             }
-            
+
             // Reload appointments
             $this->loadAppointments();
-            
+
             // Close modal
             $this->closeRescheduleModal();
-            
+
             // Dispatch event to show SweetAlert success message
             $this->dispatch('appointment-rescheduled', [
                 'message' => 'Appointment has been rescheduled successfully.'
             ]);
-            
+
             session()->flash('success', 'Appointment has been rescheduled successfully.');
-            
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error rescheduling appointment: ' . $e->getMessage());
-            
+
             // Dispatch event to show SweetAlert error message
             $this->dispatch('appointment-reschedule-error', [
                 'message' => 'Failed to reschedule appointment. Please try again.'
             ]);
-            
+
             session()->flash('error', 'Failed to reschedule appointment. Please try again.');
         }
     }
@@ -563,13 +570,13 @@ class PatientMyAppointments extends Component
             'cancel_reason' => 'Cancelled by patient',
             'cancel_remark' => 'Cancelled by patient through My Appointments page',
         ]);
-        
+
         // Also update the order if it exists (for display purposes)
         $orderIds = DB::table('booking_order')
             ->where('booking_id', $booking->id)
             ->pluck('order_id')
             ->toArray();
-        
+
         if (!empty($orderIds)) {
             $order = Order::find($orderIds[0]);
             if ($order) {
@@ -578,11 +585,11 @@ class PatientMyAppointments extends Component
                     ->where('order_id', $order->id)
                     ->pluck('booking_id')
                     ->toArray();
-                
+
                 $allCancelled = Booking::whereIn('id', $allBookingIds)
                     ->where('status', '!=', Booking::STATUS_CANCELLED)
                     ->count() === 0;
-                
+
                 if ($allCancelled) {
                     // If all bookings are cancelled, cancel the order
                     $order->update([
@@ -597,11 +604,11 @@ class PatientMyAppointments extends Component
         try {
             // Get appointment type
             $appointmentType = Category::find($booking->category_id);
-            
+
             // Parse time slot for display
             $timeParts = explode('-', $booking->booking_time);
             $startTime12h = trim($timeParts[0] ?? '');
-            
+
             // Prepare email data
             $emailData = [
                 'to_mail' => $booking->email,
@@ -629,7 +636,7 @@ class PatientMyAppointments extends Component
 
         // Reload appointments
         $this->loadAppointments();
-        
+
         session()->flash('success', 'Appointment has been cancelled successfully.');
     }
 
@@ -639,12 +646,12 @@ class PatientMyAppointments extends Component
         // Livewire 3 passes event data as the first parameter
         // The bookingId might come directly or wrapped in an array/object
         $id = null;
-        
+
         if ($bookingId === null) {
             Log::error('No bookingId received in cancellation event');
             return;
         }
-        
+
         // Handle different data formats
         if (is_numeric($bookingId)) {
             // Direct numeric value
@@ -658,7 +665,7 @@ class PatientMyAppointments extends Component
         } else {
             $id = $bookingId;
         }
-        
+
         if ($id) {
             $this->cancelAppointment($id);
         } else {
@@ -674,4 +681,3 @@ class PatientMyAppointments extends Component
         return view('livewire.patient-my-appointments');
     }
 }
-

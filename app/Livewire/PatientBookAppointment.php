@@ -23,7 +23,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\DaraAPIService;
-use App\Mail\AppointmentQuestionnaire;
+use App\Services\PlatoAPIService;
+use App\Mail\PatientAppointmentConfirmation;
 use Illuminate\Support\Facades\Mail;
 use App\Models\IntegrationToken;
 
@@ -616,6 +617,10 @@ class PatientBookAppointment extends Component
                 $endTime = $endTimeCarbon->format('H:i');
             }
 
+            // Get appointment type and package
+            $appointmentType = Category::find($this->appointmentTypeId);
+            $package = $this->packageId ? Category::find($this->packageId) : null;
+
             // Format booking_time in 24-hour format (e.g., "14:30-15:30")
             $bookingTime24h = $startTime . ($endTime !== $startTime ? '-' . $endTime : '');
 
@@ -759,11 +764,130 @@ class PatientBookAppointment extends Component
                         $recipientEmail = $bookingPerson->email ?? $this->member->email;
                         $recipientName = ($bookingPerson->salutation ? $bookingPerson->salutation . ' ' : '') . $bookingPerson->full_name;
 
-                        Mail::to($recipientEmail)->send(new AppointmentQuestionnaire($recipientName, $url, $logo));
+                        $appointmentDetails = [
+                            'booking_date' => Carbon::parse($this->appointmentDate)->format('d/m/Y'),
+                            'booking_time' => $startTime12h,
+                            'location' => Location::find($this->locationId)->location_name ?? '',
+                            'service_name' => $appointmentType->name ?? '' . ($package ? ' - ' . $package->name : ''),
+                        ];
 
-                        Log::info('Questionnaire email sent successfully', ['email' => $recipientEmail]);
+                        Mail::to($recipientEmail)->send(new PatientAppointmentConfirmation($recipientName, $url, $logo, $appointmentDetails));
+
+                        Log::info('Appointment confirmation email sent successfully', ['email' => $recipientEmail]);
                     } catch (\Exception $e) {
-                        Log::error('Failed to send questionnaire email', ['error' => $e->getMessage()]);
+                        Log::error('Failed to send appointment confirmation email', ['error' => $e->getMessage()]);
+                    }
+
+                    // Plato API Integration - Search and Create Patient
+                    try {
+                        $platoApi = new PlatoAPIService();
+
+                        // Get NRIC for search
+                        $nric = $bookingPerson->nric_fin ?? $bookingPerson->passport ?? '';
+
+                        if (!empty($nric)) {
+                            // Search for patient in Plato
+                            $searchResponse = $platoApi->searchPatient($nric);
+                            $searchData = $searchResponse->json();
+
+                            Log::info('Plato API - Search Patient Response', [
+                                'nric' => $nric,
+                                'status' => $searchResponse->status(),
+                                'response' => $searchData
+                            ]);
+
+                            // Check if patient exists
+                            // Patient not found: API returns 200 OK with empty array []
+                            // Patient found: API returns 200 OK with array containing patient data
+                            $patientExists = $searchResponse->successful() &&
+                                is_array($searchData) &&
+                                count($searchData) > 0;
+
+                            if (!$patientExists) {
+                                // Patient not found - create new patient
+                                Log::info('Patient not found in Plato, creating new patient', ['nric' => $nric]);
+
+                                // Prepare patient data with ALL fields from Plato API
+                                // Basic information fields are populated, rest are empty
+                                $patientData = [
+                                    // Basic Information (populated)
+                                    'name' => $bookingPerson->full_name,
+                                    'nric' => $nric,
+                                    'dob' => $bookingPerson->date_of_birth ? Carbon::parse($bookingPerson->date_of_birth)->format('Y-m-d') : '',
+                                    'marital_status' => $bookingPerson->marital_status ?? '',
+                                    'sex' => $bookingPerson->gender ?? '',
+                                    'nationality' => $bookingPerson->nationality ?? '',
+                                    'email' => $bookingPerson->email ?? $this->member->email ?? '',
+                                    'telephone' => $bookingPerson->mobile_number ?? $this->member->mobile_number ?? '',
+                                    'nric_type' => $bookingPerson->identification_type ?? 'NRIC',
+                                    'title' => $bookingPerson->salutation ?? '',
+
+                                    // Additional fields (empty)
+                                    'given_id' => '',
+                                    'allergies_select' => 'No',
+                                    'allergies' => '',
+                                    'food_allergies_select' => 'No',
+                                    'food_allergies' => '',
+                                    'g6pd' => 'No',
+                                    'alerts' => '',
+                                    'address' => '',
+                                    'postal' => '',
+                                    'unit_no' => '',
+                                    'telephone2' => '',
+                                    'telephone3' => '',
+                                    'dnd' => '0',
+                                    'occupation' => '',
+                                    'doctor' => [],
+                                    'notes' => '',
+                                    'custom' => (object)[],
+                                    'referred_by' => '',
+                                    'nok' => [],
+                                    'tag' => [],
+                                    'corporate' => [],
+                                    'other' => (object)[],
+                                ];
+
+                                // Create patient in Plato
+                                $createResponse = $platoApi->createPatient($patientData);
+
+                                Log::info('Plato API - Create Patient Response', [
+                                    'patient_data' => $patientData,
+                                    'status' => $createResponse->status(),
+                                    'response' => $createResponse->json()
+                                ]);
+
+                                if ($createResponse->successful()) {
+                                    Log::info('Patient created successfully in Plato', [
+                                        'nric' => $nric,
+                                        'patient_id' => $createResponse->json()['_id'] ?? 'N/A'
+                                    ]);
+                                } else {
+                                    Log::error('Failed to create patient in Plato', [
+                                        'nric' => $nric,
+                                        'status' => $createResponse->status(),
+                                        'error' => $createResponse->body()
+                                    ]);
+                                }
+                            } else {
+                                // Patient found - log the existing patient info
+                                $existingPatient = $searchData[0] ?? [];
+                                Log::info('Patient already exists in Plato', [
+                                    'nric' => $nric,
+                                    'patient_id' => $existingPatient['_id'] ?? 'N/A',
+                                    'patient_name' => $existingPatient['name'] ?? 'N/A'
+                                ]);
+                            }
+                        } else {
+                            Log::warning('No NRIC/Passport found for Plato API integration', [
+                                'booking_person_id' => $bookingPerson->id
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        // Log error but don't fail the booking
+                        Log::error('Plato API integration failed', [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
                     }
 
                     DB::commit();
@@ -773,36 +897,6 @@ class PatientBookAppointment extends Component
                         'api_response' => $createAppointment ?? null,
                     ]);
                 }
-            }
-
-            // Send appointment confirmation email
-            try {
-                // Get appointment type for email data
-                $appointmentType = Category::find($this->appointmentTypeId);
-
-                // Prepare email data
-                $emailData = [
-                    'to_mail' => $this->member->email,
-                    'name' => ($this->member->salutation ? $this->member->salutation . ' ' : '') . $this->member->full_name,
-                    'booking_id' => $refID,
-                    'booking_date' => Carbon::parse($this->appointmentDate)->format('d/m/Y'),
-                    'booking_time' => $startTime12h,
-                    'refID' => $refID,
-                    'category_name' => $appointmentType->name ?? '',
-                    'service_name' => $appointmentType->name ?? '',
-                    'locations_id' => $this->locationId,
-                ];
-
-                // Send email
-                SmtpDetails::sendAppointmentConfirmationEmail(
-                    $emailData,
-                    $this->teamId,
-                    $this->locationId,
-                    $this->appointmentTypeId
-                );
-            } catch (\Exception $e) {
-                // Log error but don't fail the booking
-                Log::error('Failed to send appointment confirmation email: ' . $e->getMessage());
             }
 
             $this->successMessage = 'Appointment booked successfully! Your order number is ' . $order->order_number;
@@ -819,6 +913,38 @@ class PatientBookAppointment extends Component
             DB::rollBack();
             $this->addError('booking', 'Failed to book appointment. Please try again.');
         }
+    }
+
+    /**
+     * Send appointment notification (email/SMS)
+     * Similar to Queue.php's sendNotification method
+     *
+     * @param array $data Notification data
+     * @param string $type Notification type
+     * @param array $logData Log data for tracking
+     * @return void
+     */
+    public function sendAppointmentNotification($data, $type, $logData = [])
+    {
+        // Ensure locations_id is set
+        $data['locations_id'] = $this->locationId;
+
+        // Send email if email is provided
+        if (isset($data['to_mail']) && $data['to_mail'] != '') {
+            SmtpDetails::sendAppointmentNotification(
+                $data,
+                $type,
+                $this->teamId,
+                $this->locationId,
+                $this->appointmentTypeId,
+                $logData
+            );
+        }
+
+        // TODO: Add SMS notification support if needed
+        // if (!empty($data['phone'])) {
+        //     SmsAPI::sendSms($this->teamId, $data, $type, $type, $logData);
+        // }
     }
 
     public function render()
