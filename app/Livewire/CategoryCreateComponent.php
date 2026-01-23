@@ -80,12 +80,12 @@ class CategoryCreateComponent extends Component
     public $selectedVariableConfirmation = '';
     public $selectedVariableRescheduling = '';
     public $selectedVariableCancel = '';
-    
+
     // Variable selection for SMS templates
     public $selectedVariableConfirmationSms = '';
     public $selectedVariableReschedulingSms = '';
     public $selectedVariableCancelSms = '';
-    
+
     public $variables = [];
 
     public function mount($level = null, $categoryId = null)
@@ -195,6 +195,24 @@ class CategoryCreateComponent extends Component
         }
     }
 
+    public function updatedName($value)
+    {
+        if ($this->tab == 1) {
+            $this->confirmationTitle = 'Appointment Confirmation - ' . $value;
+            $this->reschedulingTitle = 'Appointment Rescheduled - ' . $value;
+            $this->cancelTitle = 'Appointment Cancelled - ' . $value;
+        } elseif ($this->tab == 2) {
+            // For packages, we might want a different format or none? 
+            // The request said "appointment type name". Tab 1 is Appointment Type. Tab 2 is Package.
+            // "On changing appointment type name... in add and edit appointment type"
+            // Title sets specifically "Appointment Type" (Tab 1).
+            // But the user might mean both?
+            // The code distinguishes:
+            // if($tab == 1) { saveEmailTemplates... }
+            // So changes only matter for Tab 1 anyway regarding email templates as they are only saved for Tab 1 (lines 587-593).
+        }
+    }
+
     public function selectCompany($companyId, $companyName)
     {
         $this->company_id = $companyId;
@@ -252,10 +270,10 @@ class CategoryCreateComponent extends Component
 
         // Load email templates
         $this->loadEmailTemplates();
-        
+
         // Load SMS templates
         $this->loadSmsTemplates();
-        
+
         // Load attachments
         $this->loadAttachments();
     }
@@ -274,15 +292,16 @@ class CategoryCreateComponent extends Component
         if ($template) {
             if ($template->appointment_confirmation_email) {
                 $this->confirmationTitle = $template->appointment_confirmation_email['subject'] ?? '';
-                $this->confirmationContent = $template->appointment_confirmation_email['body'] ?? '';
+                // Check for 'template' first (as seen in DB), then fallback to 'body'
+                $this->confirmationContent = $template->appointment_confirmation_email['template'] ?? ($template->appointment_confirmation_email['body'] ?? '');
             }
             if ($template->appointment_rescheduling_email) {
                 $this->reschedulingTitle = $template->appointment_rescheduling_email['subject'] ?? '';
-                $this->reschedulingContent = $template->appointment_rescheduling_email['body'] ?? '';
+                $this->reschedulingContent = $template->appointment_rescheduling_email['template'] ?? ($template->appointment_rescheduling_email['body'] ?? '');
             }
             if ($template->appointment_cancel_email) {
                 $this->cancelTitle = $template->appointment_cancel_email['subject'] ?? '';
-                $this->cancelContent = $template->appointment_cancel_email['body'] ?? '';
+                $this->cancelContent = $template->appointment_cancel_email['template'] ?? ($template->appointment_cancel_email['body'] ?? '');
             }
         }
     }
@@ -338,10 +357,10 @@ class CategoryCreateComponent extends Component
         if ($this->attachmentFile) {
             // Store the file
             $path = $this->attachmentFile->store('notification-attachments', 'public');
-            
+
             // Get original filename
             $originalName = $this->attachmentFile->getClientOriginalName();
-            
+
             // Add to attachments array
             $this->attachments[] = [
                 'path' => $path,
@@ -357,12 +376,12 @@ class CategoryCreateComponent extends Component
     {
         if (isset($this->attachments[$index])) {
             $attachment = $this->attachments[$index];
-            
+
             // Delete file from storage if it exists
             if (isset($attachment['path']) && Storage::disk('public')->exists($attachment['path'])) {
                 Storage::disk('public')->delete($attachment['path']);
             }
-            
+
             // Remove from array
             unset($this->attachments[$index]);
             $this->attachments = array_values($this->attachments); // Re-index array
@@ -586,7 +605,7 @@ class CategoryCreateComponent extends Component
         // Save email templates only for appointment types (tab == 1)
         if ($this->tab == 1) {
             $this->saveEmailTemplates($categoryDetail->id);
-            
+
             // Save SMS templates only for appointment types (tab == 1)
             $this->saveSmsTemplates($categoryDetail->id);
         }
@@ -619,7 +638,7 @@ class CategoryCreateComponent extends Component
         if ($existingTemplate && $existingTemplate->attachments) {
             $oldAttachments = $existingTemplate->attachments;
             $currentPaths = array_column($this->attachments, 'path');
-            
+
             foreach ($oldAttachments as $oldAttachment) {
                 if (isset($oldAttachment['path']) && !in_array($oldAttachment['path'], $currentPaths)) {
                     if (Storage::disk('public')->exists($oldAttachment['path'])) {
@@ -676,6 +695,7 @@ class CategoryCreateComponent extends Component
         if ($this->selectedVariableConfirmation) {
             $this->confirmationTitle .= ' ' . $this->selectedVariableConfirmation;
             $this->selectedVariableConfirmation = '';
+            $this->dispatch('reset-select', field: 'selectedVariableConfirmation');
         }
     }
 
@@ -687,13 +707,13 @@ class CategoryCreateComponent extends Component
         if ($this->selectedVariableConfirmation) {
             // Update Livewire property directly as fallback
             $this->confirmationContent .= ' ' . $this->selectedVariableConfirmation;
-            
+
             // Also dispatch to Quill editor
             $this->dispatch('append-to-editor', [
                 'editor' => 'confirmation-editor',
                 'text' => ' ' . $this->selectedVariableConfirmation
             ]);
-            
+
             $this->selectedVariableConfirmation = '';
         }
     }
@@ -706,6 +726,7 @@ class CategoryCreateComponent extends Component
         if ($this->selectedVariableRescheduling) {
             $this->reschedulingTitle .= ' ' . $this->selectedVariableRescheduling;
             $this->selectedVariableRescheduling = '';
+            $this->dispatch('reset-select', field: 'selectedVariableRescheduling');
         }
     }
 
@@ -717,13 +738,13 @@ class CategoryCreateComponent extends Component
         if ($this->selectedVariableRescheduling) {
             // Update Livewire property directly as fallback
             $this->reschedulingContent .= ' ' . $this->selectedVariableRescheduling;
-            
+
             // Also dispatch to Quill editor
             $this->dispatch('append-to-editor', [
                 'editor' => 'rescheduling-editor',
                 'text' => ' ' . $this->selectedVariableRescheduling
             ]);
-            
+
             $this->selectedVariableRescheduling = '';
         }
     }
@@ -736,6 +757,7 @@ class CategoryCreateComponent extends Component
         if ($this->selectedVariableCancel) {
             $this->cancelTitle .= ' ' . $this->selectedVariableCancel;
             $this->selectedVariableCancel = '';
+            $this->dispatch('reset-select', field: 'selectedVariableCancel');
         }
     }
 
@@ -747,13 +769,13 @@ class CategoryCreateComponent extends Component
         if ($this->selectedVariableCancel) {
             // Update Livewire property directly as fallback
             $this->cancelContent .= ' ' . $this->selectedVariableCancel;
-            
+
             // Also dispatch to Quill editor
             $this->dispatch('append-to-editor', [
                 'editor' => 'cancel-editor',
                 'text' => ' ' . $this->selectedVariableCancel
             ]);
-            
+
             $this->selectedVariableCancel = '';
         }
     }
@@ -766,6 +788,7 @@ class CategoryCreateComponent extends Component
         if ($this->selectedVariableConfirmationSms) {
             $this->confirmationSms .= ' ' . $this->selectedVariableConfirmationSms;
             $this->selectedVariableConfirmationSms = '';
+            $this->dispatch('reset-select', field: 'selectedVariableConfirmationSms');
         }
     }
 
@@ -777,6 +800,7 @@ class CategoryCreateComponent extends Component
         if ($this->selectedVariableReschedulingSms) {
             $this->reschedulingSms .= ' ' . $this->selectedVariableReschedulingSms;
             $this->selectedVariableReschedulingSms = '';
+            $this->dispatch('reset-select', field: 'selectedVariableReschedulingSms');
         }
     }
 
@@ -788,6 +812,7 @@ class CategoryCreateComponent extends Component
         if ($this->selectedVariableCancelSms) {
             $this->cancelSms .= ' ' . $this->selectedVariableCancelSms;
             $this->selectedVariableCancelSms = '';
+            $this->dispatch('reset-select', field: 'selectedVariableCancelSms');
         }
     }
 

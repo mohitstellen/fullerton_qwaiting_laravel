@@ -17,6 +17,7 @@ class Voucher extends Model
         'valid_to',
         'discount_percentage',
         'no_of_redemption',
+        'category_id',
         'card_types',
     ];
 
@@ -27,4 +28,8 @@ class Voucher extends Model
         'no_of_redemption' => 'integer',
         'card_types' => 'array',
     ];
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 }

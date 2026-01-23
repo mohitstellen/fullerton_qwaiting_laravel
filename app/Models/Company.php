@@ -16,8 +16,7 @@ class Company extends Model
         'location_id',
         'company_name',
         'address',
-        'billing_address',
-        'is_billing_same_as_company',
+        'billing_code',
         'remarks',
         'account_manager_id',
         'status',
@@ -25,9 +24,6 @@ class Company extends Model
         'contact_person1_name',
         'contact_person1_phone',
         'contact_person1_email',
-        'contact_person2_name',
-        'contact_person2_phone',
-        'contact_person2_email',
     ];
 
     public function companyPackages(): HasMany

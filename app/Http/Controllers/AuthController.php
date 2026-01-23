@@ -229,14 +229,14 @@ class AuthController extends Controller
         }
 
         // ✅ Only set location session if domain does NOT require location page
-        if (Auth::check() && !empty(Auth::user()->locations)) {
-            $location = Auth::user()->locations;
-            Session::put('selectedLocation', $location[0]);
+        if (Auth::check()) {
+            $location = Location::first()->id;
+            Session::put('selectedLocation', $location);
 
             $timezone = 'UTC';
             if (Session::has('selectedLocation')) {
                 $locationId = Session::get('selectedLocation');
-                $siteDetails = SiteDetail::where('location_id', $locationId)->first();
+                $siteDetails = SiteDetail::where('team_id', tenant('id'))->where('location_id', $locationId)->first();
                 if ($siteDetails && $siteDetails->select_timezone) {
                     $timezone = $siteDetails->select_timezone;
                     Session::put('timezone_set', $timezone);
@@ -351,7 +351,20 @@ class AuthController extends Controller
             Auth::login($user);
             session()->regenerate();
 
+            // Auto-set location to session if user has locations
+            if (!empty($user->locations) && is_array($user->locations) && count($user->locations) > 0) {
+                Session::put('selectedLocation', Location::first()->id);
 
+                // Set timezone based on location
+                $locationId = Location::first()->id;
+                $siteDetails = SiteDetail::where('team_id', tenant('id'))->where('location_id', $locationId)->first();
+                if ($siteDetails && $siteDetails->select_timezone) {
+                    $timezone = $siteDetails->select_timezone;
+                    Session::put('timezone_set', $timezone);
+                    Config::set('app.timezone', $timezone);
+                    date_default_timezone_set($timezone);
+                }
+            }
 
             return redirect()->route('tenant.dashboard');
         } catch (\Exception $e) {

@@ -41,12 +41,12 @@ class VoucherList extends Component
     private function vouchersQuery()
     {
         $teamId = tenant('id') ?? (Auth::user()->team_id ?? null);
-        
-        return Voucher::where('team_id', $teamId)
+
+        return Voucher::with('category')->where('team_id', $teamId)
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('voucher_name', 'like', '%' . $this->search . '%')
-                      ->orWhere('voucher_code', 'like', '%' . $this->search . '%');
+                        ->orWhere('voucher_code', 'like', '%' . $this->search . '%');
                 });
             })
             ->orderBy('created_at', 'desc');
@@ -61,6 +61,7 @@ class VoucherList extends Component
             'S.No',
             'Voucher Name',
             'Voucher Code',
+            'Appointment Type',
             'Valid From',
             'Valid To',
             'Discount (%)',
@@ -73,6 +74,7 @@ class VoucherList extends Component
                 $index + 1,
                 $voucher->voucher_name,
                 $voucher->voucher_code,
+                $voucher->category?->name ?? '-',
                 $voucher->valid_from->format('d-m-Y'),
                 $voucher->valid_to->format('d-m-Y'),
                 $voucher->discount_percentage,

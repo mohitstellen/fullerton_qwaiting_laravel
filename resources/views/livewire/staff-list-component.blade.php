@@ -1,19 +1,19 @@
 <div class="p-4">
     <div>
 
-            @if (session()->has('message'))
-            <div class="mb-4">
+        @if (session()->has('message'))
+        <div class="mb-4">
             <div class="alert alert-success">{{ session('message') }}</div>
-            </div>
-            @endif
+        </div>
+        @endif
 
 
         <div class="mb-4 flex justify-between mb-4">
             <div>
-        <h2 class="text-xl font-semibold dark:text-white/90">
-            {{ __('text.staff') }}
-        </h2>
-    </div>
+                <h2 class="text-xl font-semibold dark:text-white/90">
+                    {{ __('text.staff') }}
+                </h2>
+            </div>
 
 
         </div>
@@ -34,16 +34,19 @@
                     class="bg-white dark:bg-dark-900 bg-white shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-[42px] w-full rounded-lg border border-gray-300 py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden xl:w-[300px] dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
             </div>
             <div class="flex items-center gap-x-2">
-            @can('Staff Delete')
-            <button id="bulkDeleteBtn"  class="danger-btn bg-red-500 text-white px-3 py-2 rounded-md flex gap-x-2 hover:bg-red-600 flex gap-x-2"><i class="ri-delete-bin-line"></i> {{ __('text.Bulk Delete') }}</button>
-            @endcan
+                @can('Staff Delete')
+                <button id="bulkDeleteBtn" class="danger-btn bg-red-500 text-white px-3 py-2 rounded-md flex gap-x-2 hover:bg-red-600 flex gap-x-2"><i class="ri-delete-bin-line"></i> {{ __('text.Bulk Delete') }}</button>
+                @endcan
 
+                <button wire:click="exportCSV" class="primary-btn text-white px-3 py-2 rounded-md bg-green-500 hover:bg-green-600 flex gap-x-2">
+                    <i class="ri-file-excel-line"></i> {{ __('text.Export') }}
+                </button>
 
                 @can('Staff Add')
-                    <a href="{{ route('tenant.staff.create') }}"
-                        class="primary-btn py-2 px-3 font-medium text-white transition-colors rounded-md bg-brand-500 hover:bg-brand-600 flex gap-x-2">
-                        <i class="ri-add-circle-line"></i> {{ __('text.Add') }}
-                    </a>
+                <a href="{{ route('tenant.staff.create') }}"
+                    class="primary-btn py-2 px-3 font-medium text-white transition-colors rounded-md bg-brand-500 hover:bg-brand-600 flex gap-x-2">
+                    <i class="ri-add-circle-line"></i> {{ __('text.Add') }}
+                </a>
                 @endcan
 
                 <a href="{{ url('roles') }}" class="primary-btn text-white px-3 py-2 rounded-md bg-brand-500 hover:bg-brand-600 flex gap-x-2"><i class="ri-user-add-line"></i> {{ __('text.Roles') }}</a>
@@ -58,37 +61,37 @@
                     <!-- table header start -->
                     <thead>
                         <tr class="border-b border-gray-100 dark:border-gray-200 text-gray-800 dark:text-white">
-                        <th class="px-5 py-3 sm:px-6">
-                                    <input type="checkbox" id="selectAll" class="cursor-pointer rounded bg-white rounded border border-gray-400 dark:border-gray-500 dark:bg-gray-700">
+                            <th class="px-5 py-3 sm:px-6">
+                                <input type="checkbox" id="selectAll" class="cursor-pointer rounded bg-white rounded border border-gray-400 dark:border-gray-500 dark:bg-gray-700">
                             </th>
                             <th class="px-5 py-3 sm:px-6">
-                                       {{ __('text.name') }}
+                                {{ __('text.name') }}
                             </th>
                             <th class="px-5 py-3 sm:px-6">
-                                         {{ __('text.Username') }}
+                                {{ __('text.Username') }}
                             </th>
                             <th class="px-5 py-3 sm:px-6">
-                                        {{ __('text.contact') }}
-                            </th>
-                            <th class="px-5 py-3 sm:px-6">
-
-                                        {{ __('text.Email') }}
+                                {{ __('text.contact') }}
                             </th>
                             <th class="px-5 py-3 sm:px-6">
 
-                                        {{ __('text.role') }}
+                                {{ __('text.Email') }}
                             </th>
                             <th class="px-5 py-3 sm:px-6">
 
-                                        {{ __('text.location') }}
+                                {{ __('text.role') }}
                             </th>
                             <th class="px-5 py-3 sm:px-6">
 
-                                        {{ __('text.created at') }}
+                                {{ __('text.location') }}
                             </th>
                             <th class="px-5 py-3 sm:px-6">
 
-                                        {{ __('text.Actions') }}
+                                {{ __('text.created at') }}
+                            </th>
+                            <th class="px-5 py-3 sm:px-6">
+
+                                {{ __('text.Actions') }}
                             </th>
                         </tr>
                     </thead>
@@ -98,9 +101,9 @@
                         @if($staffs->count() > 0)
                         @foreach($staffs as $staff)
                         <tr>
-                        <td class="px-5 py-4 sm:px-6">
-                        <input type="checkbox" class="staff-checkbox cursor-pointer bg-white rounded border border-gray-400 dark:border-gray-500 dark:bg-gray-700" value="{{ $staff->id }}">
-                    </td>
+                            <td class="px-5 py-4 sm:px-6">
+                                <input type="checkbox" class="staff-checkbox cursor-pointer bg-white rounded border border-gray-400 dark:border-gray-500 dark:bg-gray-700" value="{{ $staff->id }}">
+                            </td>
                             <td class="px-5 py-4 sm:px-6">
                                 <div class="flex items-center">
                                     <div class="flex items-center gap-3">
@@ -180,13 +183,13 @@
                                             <span
                                                 class="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
                                                 <?php
-                     $locations = $staff->locations != '' ? App\Models\Location::whereIn('id',$staff->locations)->pluck('location_name')->toArray() : [];
+                                                $locations = $staff->locations != '' ? App\Models\Location::whereIn('id', $staff->locations)->pluck('location_name')->toArray() : [];
 
-                        if(!empty($locations)){
-                            $loc = implode(',',$locations);
-                            echo $loc;
-                        }
-                     ?>
+                                                if (!empty($locations)) {
+                                                    $loc = implode(',', $locations);
+                                                    echo $loc;
+                                                }
+                                                ?>
 
                                             </span>
 
@@ -202,11 +205,11 @@
                                         <div>
                                             <span
                                                 class="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                                                <?php  $datetimeFormat = App\Models\AccountSetting::showDateTimeFormat(); // Fallback to default format
-                          // Return the formatted date based on the format from AccountSetting table
-                          echo $created = \Carbon\Carbon::parse($staff->created_at)->format($datetimeFormat) ?? '';
+                                                <?php $datetimeFormat = App\Models\AccountSetting::showDateTimeFormat(); // Fallback to default format
+                                                // Return the formatted date based on the format from AccountSetting table
+                                                echo $created = \Carbon\Carbon::parse($staff->created_at)->format($datetimeFormat) ?? '';
 
-                          ?>
+                                                ?>
 
                                             </span>
 
@@ -236,10 +239,10 @@
                                                 </button>
 
                                             </a>
-                                             @can('Staff Password Change')
+                                            @can('Staff Password Change')
                                             <button wire:click="openPasswordModal({{ $staff->id }})"
                                                 class="text-theme-xs flex w-full rounded-lg px-3 py-2 text-left font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300">
-                                                 {{ __('text.Change Password') }}
+                                                {{ __('text.Change Password') }}
                                             </button>
                                             @endcan
                                             @can('Staff Edit')
@@ -267,8 +270,8 @@
                         @endforeach
                         @else
                         <tr>
-                           <td colspan="15" class="text-center py-3">
-                              <p class="text-center"><strong>{{ __('text.No records found.') }}</strong></p>
+                            <td colspan="15" class="text-center py-3">
+                                <p class="text-center"><strong>{{ __('text.No records found.') }}</strong></p>
                             </td>
                         </tr>
                         @endif
@@ -316,72 +319,72 @@
                             <input type="password" wire:model="oldPassword"
                                 class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
                             @error('oldPassword') <span class="text-danger">{{ $message }}</span> @enderror
-                        </div> --}}
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                {{ __('text.New Password') }}
-                            </label>
-                            <input type="password" wire:model="newPassword"
-                                class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                            @error('newPassword') <span class="text-danger">{{ $message }}</span> @enderror
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                {{ __('text.Confirm Password') }}
-                            </label>
-                            <input type="password" wire:model="confirmPassword"
-                                class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                            @error('confirmPassword') <span class="text-danger">{{ $message }}</span> @enderror
-                        </div>
-                    </div>
-
+                    </div> --}}
                     <div>
-                        <div class="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-                            <button wire:click="$set('showPasswordModal', false)" type="button"
-                                class="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto">
-                                {{ __('text.Close') }}
-                            </button>
-                            <button type="button"
-                                class="flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
-                                wire:click.prevent="updatePassword">
-                                {{ __('text.Save') }}
-                            </button>
-                        </div>
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                            {{ __('text.New Password') }}
+                        </label>
+                        <input type="password" wire:model="newPassword"
+                            class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                        @error('newPassword') <span class="text-danger">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                            {{ __('text.Confirm Password') }}
+                        </label>
+                        <input type="password" wire:model="confirmPassword"
+                            class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
+                        @error('confirmPassword') <span class="text-danger">{{ $message }}</span> @enderror
                     </div>
                 </div>
-            </form>
-        </div>
-    </div>
-    @endif
 
-    <!-- Delete Confirmation Modal -->
-    @if ($showDeleteConfirm)
-    test
-    <div class="modal fade show fixed inset-0 flex items-center justify-center p-5 overflow-y-auto modal z-99999"
-        tabindex="-1">
-        <div class="modal-dialog relative w-full max-w-[600px] rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirm Delete</h5>
-                    <button type="button" class="close" wire:click="$set('showDeleteConfirm', false)">×</button>
+                <div>
+                    <div class="flex items-center gap-3 px-2 mt-6 lg:justify-end">
+                        <button wire:click="$set('showPasswordModal', false)" type="button"
+                            class="flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] sm:w-auto">
+                            {{ __('text.Close') }}
+                        </button>
+                        <button type="button"
+                            class="flex w-full justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 sm:w-auto"
+                            wire:click.prevent="updatePassword">
+                            {{ __('text.Save') }}
+                        </button>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    Are you sure you want to delete this staff?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary"
-                        wire:click="$set('showDeleteConfirm', false)">Cancel</button>
-                    <button type="button" class="btn btn-danger" wire:click="confirmDelete">Delete</button>
-                </div>
+        </div>
+        </form>
+    </div>
+</div>
+@endif
+
+<!-- Delete Confirmation Modal -->
+@if ($showDeleteConfirm)
+test
+<div class="modal fade show fixed inset-0 flex items-center justify-center p-5 overflow-y-auto modal z-99999"
+    tabindex="-1">
+    <div class="modal-dialog relative w-full max-w-[600px] rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="close" wire:click="$set('showDeleteConfirm', false)">×</button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this staff?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                    wire:click="$set('showDeleteConfirm', false)">Cancel</button>
+                <button type="button" class="btn btn-danger" wire:click="confirmDelete">Delete</button>
             </div>
         </div>
     </div>
-    @endif
+</div>
+@endif
 
 
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
     document.addEventListener("DOMContentLoaded", function() {
         $(document).ready(function() {
             $('.multiple').select2();
@@ -392,19 +395,21 @@
 
         });
     });
-    </script>
+</script>
 
 <script>
-    document.getElementById('selectAll').addEventListener('click', function () {
+    document.getElementById('selectAll').addEventListener('click', function() {
         let checkboxes = document.querySelectorAll('.staff-checkbox');
         checkboxes.forEach(checkbox => checkbox.checked = this.checked);
     });
 
-    document.getElementById('bulkDeleteBtn').addEventListener('click', function () {
+    document.getElementById('bulkDeleteBtn').addEventListener('click', function() {
         let selectedIds = Array.from(document.querySelectorAll('.staff-checkbox:checked')).map(cb => cb.value);
-      console.log(selectedIds);
+        console.log(selectedIds);
         if (selectedIds.length > 0) {
-            Livewire.dispatch('bulkDeleteStaff', { 'ids' : selectedIds });
+            Livewire.dispatch('bulkDeleteStaff', {
+                'ids': selectedIds
+            });
         } else {
             Livewire.dispatch('no-record-selected');
         }

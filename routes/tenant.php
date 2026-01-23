@@ -450,6 +450,11 @@ Route::middleware([
         Route::get('/import/queues', [ImportQueueController::class, 'showForm'])->name('import-queues.form');
         Route::post('/import/queues', [ImportQueueController::class, 'upload'])->name('import-queues.upload');
 
+        // Excel Import Data (Categories, Locations)
+        Route::get('/import/data', [\App\Http\Controllers\ExcelDataImportController::class, 'index'])->name('import.data');
+        Route::post('/import/categories', [\App\Http\Controllers\ExcelDataImportController::class, 'importCategories'])->name('import.categories');
+        Route::post('/import/locations', [\App\Http\Controllers\ExcelDataImportController::class, 'importLocations'])->name('import.locations');
+
         // Import Member Details
         Route::get('/import/member-details', ImportMemberDetails::class)->name('import-member-details');
         Route::get('/import/member-details/download-template', function () {

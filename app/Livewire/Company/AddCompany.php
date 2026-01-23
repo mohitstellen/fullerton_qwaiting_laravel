@@ -23,7 +23,7 @@ class AddCompany extends Component
     protected array $messages = [
         'company.company_name.required' => 'The company name field is required.',
         'company.address.required' => 'The address field is required.',
-        'company.billing_address.required' => 'The billing address field is required.',
+        'company.billing_code.required' => 'The billing code field is required.',
         'company.ehs_appointments_per_year.required' => 'The EHS appointments per year field is required.',
         'company.ehs_appointments_per_year.min' => 'The EHS appointments per year must be at least 1.',
         'company.contact_person1_name.required' => 'The primary contact name field is required.',
@@ -34,7 +34,7 @@ class AddCompany extends Component
         return [
             'company.company_name' => ['required', 'string', 'max:255'],
             'company.address' => ['required', 'string'],
-            'company.billing_address' => ['required', 'string'],
+            'company.billing_code' => ['required', 'string', 'max:100'],
             'company.ehs_appointments_per_year' => ['required', 'integer', 'min:1'],
             'company.contact_person1_name' => ['required', 'string', 'max:255'],
             'company.contact_person1_phone' => ['nullable', 'string', 'max:30'],
@@ -55,7 +55,6 @@ class AddCompany extends Component
         ];
         $this->accountManagerSearch = '';
         $this->company['account_manager_id'] = null;
-        $this->showAccountManagerDropdown = false;
     }
 
     public function selectAccountManager(int $userId, string $userName): void
@@ -68,7 +67,7 @@ class AddCompany extends Component
     public function updatedAccountManagerSearch(): void
     {
         $this->showAccountManagerDropdown = !empty($this->accountManagerSearch);
-        
+
         // If search matches exactly with a selected manager, keep it selected
         if (!empty($this->company['account_manager_id'])) {
             $selectedManager = collect($this->accountManagers)->firstWhere('id', (int) $this->company['account_manager_id']);
@@ -76,26 +75,12 @@ class AddCompany extends Component
                 return;
             }
         }
-        
+
         // Clear selection if search doesn't match
         $this->company['account_manager_id'] = null;
     }
 
-    public function updatedCompanyIsBillingSameAsCompany($value): void
-    {
-        if ($value) {
-            // When checked, copy company address to billing address
-            $this->company['billing_address'] = $this->company['address'] ?? '';
-        }
-    }
 
-    public function updatedCompanyAddress($value): void
-    {
-        // If checkbox is checked, update billing address when company address changes
-        if (!empty($this->company['is_billing_same_as_company'])) {
-            $this->company['billing_address'] = $value ?? '';
-        }
-    }
 
     public function getFilteredAccountManagersProperty(): array
     {
@@ -105,8 +90,8 @@ class AddCompany extends Component
 
         $search = strtolower($this->accountManagerSearch);
         return array_values(array_filter($this->accountManagers, function ($manager) use ($search) {
-            return str_contains(strtolower($manager['name']), $search) || 
-                   str_contains(strtolower($manager['email'] ?? ''), $search);
+            return str_contains(strtolower($manager['name']), $search) ||
+                str_contains(strtolower($manager['email'] ?? ''), $search);
         }));
     }
 
@@ -120,13 +105,13 @@ class AddCompany extends Component
             })
             ->where(function ($query) {
                 $query->where('is_admin', 1)
-                      ->orWhereHas('roles', function ($q) {
-                          $q->where('name', User::ROLE_ADMIN);
-                      });
+                    ->orWhereHas('roles', function ($q) {
+                        $q->where('name', User::ROLE_ADMIN);
+                    });
             })
             ->orderBy('name')
             ->get(['id', 'name', 'email', 'team_id'])
-            ->map(fn ($user) => [
+            ->map(fn($user) => [
                 'id' => (int) $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
@@ -146,8 +131,7 @@ class AddCompany extends Component
             'location_id' => $locationId,
             'company_name' => $this->company['company_name'] ?? null,
             'address' => $this->company['address'] ?? null,
-            'billing_address' => $this->company['billing_address'] ?? null,
-            'is_billing_same_as_company' => (bool)($this->company['is_billing_same_as_company'] ?? false),
+            'billing_code' => $this->company['billing_code'] ?? null,
             'remarks' => $this->company['remarks'] ?? null,
             'account_manager_id' => $this->company['account_manager_id'] ?? null,
             'status' => $this->company['status'] ?? 'active',
@@ -155,9 +139,6 @@ class AddCompany extends Component
             'contact_person1_name' => $this->company['contact_person1_name'] ?? null,
             'contact_person1_phone' => $this->company['contact_person1_phone'] ?? null,
             'contact_person1_email' => $this->company['contact_person1_email'] ?? null,
-            'contact_person2_name' => $this->company['contact_person2_name'] ?? null,
-            'contact_person2_phone' => $this->company['contact_person2_phone'] ?? null,
-            'contact_person2_email' => $this->company['contact_person2_email'] ?? null,
         ]);
 
         session()->flash('message', 'Company created successfully.');

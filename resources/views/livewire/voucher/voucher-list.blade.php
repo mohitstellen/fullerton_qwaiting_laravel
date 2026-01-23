@@ -3,16 +3,16 @@
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Vouchers</h2>
             <a href="{{ route('tenant.vouchers.create') }}"
-               class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
+                class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
                 New Voucher
             </a>
         </div>
 
         @if (session()->has('message'))
-            <div
-                class="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-200">
-                {{ session('message') }}
-            </div>
+        <div
+            class="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-200">
+            {{ session('message') }}
+        </div>
         @endif
 
         <div class="flex items-center gap-4 justify-between flex-wrap">
@@ -23,9 +23,9 @@
                     </svg>
                 </span>
                 <input type="text"
-                       wire:model.live.debounce.300ms="search"
-                       placeholder="Search Voucher"
-                       class="bg-white dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Search Voucher"
+                    class="bg-white dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-4 pl-[42px] text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">
             </div>
             <div class="flex gap-x-3">
                 <button wire:click="exportCSV" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-colors rounded-lg bg-green-600 hover:bg-green-700">
@@ -44,57 +44,57 @@
             <div class="mb-4 flex items-center justify-between flex-wrap gap-3 p-4">
                 <div class="flex items-center gap-0">
                     @if($vouchers->onFirstPage())
-                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-l-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">First</button>
+                    <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-l-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">First</button>
                     @else
-                        <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">First</button>
+                    <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">First</button>
                     @endif
-                    
+
                     @if($vouchers->onFirstPage())
-                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Previous</button>
+                    <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Previous</button>
                     @else
-                        <button wire:click="previousPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Previous</button>
+                    <button wire:click="previousPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Previous</button>
                     @endif
 
                     @php
-                        $currentPage = $vouchers->currentPage();
-                        $lastPage = $vouchers->lastPage();
-                        $startPage = max(1, $currentPage - 2);
-                        $endPage = min($lastPage, $currentPage + 2);
+                    $currentPage = $vouchers->currentPage();
+                    $lastPage = $vouchers->lastPage();
+                    $startPage = max(1, $currentPage - 2);
+                    $endPage = min($lastPage, $currentPage + 2);
                     @endphp
 
                     @if($startPage > 1)
-                        <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">1</button>
-                        @if($startPage > 2)
-                            <span class="px-2 py-1.5 text-sm text-gray-500 bg-white border-t border-b border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
-                        @endif
+                    <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">1</button>
+                    @if($startPage > 2)
+                    <span class="px-2 py-1.5 text-sm text-gray-500 bg-white border-t border-b border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
+                    @endif
                     @endif
 
                     @for($page = $startPage; $page <= $endPage; $page++)
-                        @if($page == $currentPage)
-                            <button class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 border-t border-b border-r border-blue-600 dark:bg-blue-500 dark:border-blue-500">{{ $page }}</button>
+                        @if($page==$currentPage)
+                        <button class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 border-t border-b border-r border-blue-600 dark:bg-blue-500 dark:border-blue-500">{{ $page }}</button>
                         @else
-                            <button wire:click="gotoPage({{ $page }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $page }}</button>
+                        <button wire:click="gotoPage({{ $page }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $page }}</button>
                         @endif
-                    @endfor
+                        @endfor
 
-                    @if($endPage < $lastPage)
-                        @if($endPage < $lastPage - 1)
+                        @if($endPage < $lastPage)
+                            @if($endPage < $lastPage - 1)
                             <span class="px-2 py-1.5 text-sm text-gray-500 bg-white border-t border-b border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
-                        @endif
-                        <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $lastPage }}</button>
-                    @endif
+                            @endif
+                            <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $lastPage }}</button>
+                            @endif
 
-                    @if($vouchers->hasMorePages())
-                        <button wire:click="nextPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Next</button>
-                    @else
-                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Next</button>
-                    @endif
+                            @if($vouchers->hasMorePages())
+                            <button wire:click="nextPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Next</button>
+                            @else
+                            <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Next</button>
+                            @endif
 
-                    @if($vouchers->hasMorePages())
-                        <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Last</button>
-                    @else
-                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-r-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Last</button>
-                    @endif
+                            @if($vouchers->hasMorePages())
+                            <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Last</button>
+                            @else
+                            <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-r-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Last</button>
+                            @endif
                 </div>
                 <div class="flex items-center gap-2">
                     <select wire:model.live="perPage"
@@ -110,32 +110,35 @@
             <div class="max-w-full overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-950">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                            S.No
-                        </th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                            Voucher Name
-                        </th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                            Voucher Code
-                        </th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                            Valid From
-                        </th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                            Valid To
-                        </th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                            Discount (%)
-                        </th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                            Actions
-                        </th>
-                    </tr>
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                S.No
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                Voucher Name
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                Voucher Code
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                Appointment Type
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                Valid From
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                Valid To
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                Discount (%)
+                            </th>
+                            <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                Actions
+                            </th>
+                        </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-gray-900">
-                    @forelse ($vouchers as $index => $voucher)
+                        @forelse ($vouchers as $index => $voucher)
                         <tr>
                             <td class="whitespace-nowrap px-4 py-3 text-gray-700 dark:text-gray-200">
                                 {{ $vouchers->firstItem() + $index }}
@@ -145,6 +148,9 @@
                             </td>
                             <td class="whitespace-nowrap px-4 py-3 text-gray-700 dark:text-gray-200">
                                 {{ $voucher->voucher_code }}
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3 text-gray-700 dark:text-gray-200">
+                                {{ $voucher->category?->name ?? '-' }}
                             </td>
                             <td class="whitespace-nowrap px-4 py-3 text-gray-700 dark:text-gray-200">
                                 {{ $voucher->valid_from->format('d-m-Y') }}
@@ -157,23 +163,23 @@
                             </td>
                             <td class="whitespace-nowrap px-4 py-3 text-right space-x-2">
                                 <a href="{{ route('tenant.vouchers.edit', $voucher) }}"
-                                   class="inline-flex items-center rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
+                                    class="inline-flex items-center rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
                                     Edit
                                 </a>
                                 <button type="button"
-                                        wire:click="confirmDelete({{ $voucher->id }})"
-                                        class="inline-flex items-center rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
+                                    wire:click="confirmDelete({{ $voucher->id }})"
+                                    class="inline-flex items-center rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 focus:ring-offset-white dark:focus:ring-offset-gray-900">
                                     Delete
                                 </button>
                             </td>
                         </tr>
-                    @empty
+                        @empty
                         <tr>
                             <td colspan="7" class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
                                 No vouchers found.
                             </td>
                         </tr>
-                    @endforelse
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -182,57 +188,57 @@
             <div class="mt-4 flex items-center justify-between flex-wrap gap-3 p-4">
                 <div class="flex items-center gap-0">
                     @if($vouchers->onFirstPage())
-                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-l-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">First</button>
+                    <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-l-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">First</button>
                     @else
-                        <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">First</button>
+                    <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">First</button>
                     @endif
-                    
+
                     @if($vouchers->onFirstPage())
-                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Previous</button>
+                    <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Previous</button>
                     @else
-                        <button wire:click="previousPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Previous</button>
+                    <button wire:click="previousPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Previous</button>
                     @endif
 
                     @php
-                        $currentPage = $vouchers->currentPage();
-                        $lastPage = $vouchers->lastPage();
-                        $startPage = max(1, $currentPage - 2);
-                        $endPage = min($lastPage, $currentPage + 2);
+                    $currentPage = $vouchers->currentPage();
+                    $lastPage = $vouchers->lastPage();
+                    $startPage = max(1, $currentPage - 2);
+                    $endPage = min($lastPage, $currentPage + 2);
                     @endphp
 
                     @if($startPage > 1)
-                        <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">1</button>
-                        @if($startPage > 2)
-                            <span class="px-2 py-1.5 text-sm text-gray-500 bg-white border-t border-b border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
-                        @endif
+                    <button wire:click="gotoPage(1)" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">1</button>
+                    @if($startPage > 2)
+                    <span class="px-2 py-1.5 text-sm text-gray-500 bg-white border-t border-b border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
+                    @endif
                     @endif
 
                     @for($page = $startPage; $page <= $endPage; $page++)
-                        @if($page == $currentPage)
-                            <button class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 border-t border-b border-r border-blue-600 dark:bg-blue-500 dark:border-blue-500">{{ $page }}</button>
+                        @if($page==$currentPage)
+                        <button class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 border-t border-b border-r border-blue-600 dark:bg-blue-500 dark:border-blue-500">{{ $page }}</button>
                         @else
-                            <button wire:click="gotoPage({{ $page }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $page }}</button>
+                        <button wire:click="gotoPage({{ $page }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $page }}</button>
                         @endif
-                    @endfor
+                        @endfor
 
-                    @if($endPage < $lastPage)
-                        @if($endPage < $lastPage - 1)
+                        @if($endPage < $lastPage)
+                            @if($endPage < $lastPage - 1)
                             <span class="px-2 py-1.5 text-sm text-gray-500 bg-white border-t border-b border-r border-gray-300 dark:bg-gray-800 dark:border-gray-700">...</span>
-                        @endif
-                        <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $lastPage }}</button>
-                    @endif
+                            @endif
+                            <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ $lastPage }}</button>
+                            @endif
 
-                    @if($vouchers->hasMorePages())
-                        <button wire:click="nextPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Next</button>
-                    @else
-                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Next</button>
-                    @endif
+                            @if($vouchers->hasMorePages())
+                            <button wire:click="nextPage" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border-t border-b border-r border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Next</button>
+                            @else
+                            <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border-t border-b border-r border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Next</button>
+                            @endif
 
-                    @if($vouchers->hasMorePages())
-                        <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Last</button>
-                    @else
-                        <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-r-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Last</button>
-                    @endif
+                            @if($vouchers->hasMorePages())
+                            <button wire:click="gotoPage({{ $lastPage }})" class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">Last</button>
+                            @else
+                            <button disabled class="px-3 py-1.5 text-sm font-medium text-gray-400 bg-white border border-gray-300 rounded-r-md cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500">Last</button>
+                            @endif
                 </div>
                 <div class="flex items-center gap-2">
                     <select wire:model.live="perPage"
@@ -252,7 +258,9 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('livewire:init', () => {
-        Livewire.on('confirm-voucher-delete', ({ voucherId }) => {
+        Livewire.on('confirm-voucher-delete', ({
+            voucherId
+        }) => {
             Swal.fire({
                 title: 'Delete voucher?',
                 text: 'This action cannot be undone.',
@@ -263,7 +271,9 @@
                 focusCancel: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Livewire.dispatch('delete-voucher-confirmed', { voucherId });
+                    Livewire.dispatch('delete-voucher-confirmed', {
+                        voucherId
+                    });
                 }
             });
         });

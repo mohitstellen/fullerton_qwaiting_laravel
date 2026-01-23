@@ -56,7 +56,7 @@ use Illuminate\Support\Facades\Storage;
                                 </label>
                                 <input
                                     type="text"
-                                    wire:model="name"
+                                    wire:model.live.debounce.500ms="name"
                                     class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                                 @error('name') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
@@ -408,24 +408,22 @@ use Illuminate\Support\Facades\Storage;
 
                             @error('note') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                         </div>
+                        @if($tab == 2)
                         <div class="w-full px-2.5 xl:w-1/2">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                 {{__('text.description')}}
                             </label>
-                            @if($tab == 2)
-                                {{-- Rich text editor for packages --}}
-                                <div wire:ignore>
-                                    <div
-                                        id="description-editor"
-                                        class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-                                        style="height: 200px; overflow-y: auto;"></div>
-                                </div>
-                            @else
-                                {{-- Plain textarea for appointment types --}}
-                                <textarea wire:model="description" row="5" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"></textarea>
-                            @endif
+                            {{-- Rich text editor for packages --}}
+                            <div wire:ignore>
+                                <div
+                                    id="description-editor"
+                                    class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                                    style="height: 200px; overflow-y: auto;"></div>
+                            </div>
+
                             @error('description') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                         </div>
+                        @endif
 
                         <div class="w-full px-2.5 xl:w-1/2">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
@@ -576,159 +574,159 @@ use Illuminate\Support\Facades\Storage;
 
                             {{-- Email Templates in Column Layout --}}
                             <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
-                            {{-- Confirmation Communication --}}
-                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
-                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                    {{ __('text.Confirmation Communication') }} <span class="text-red-500">*</span>
-                                </label>
-                                
-                                {{-- Variable Selector for Confirmation --}}
-                                <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                                    <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
-                                        {{ __('text.Select Variable') }}
+                                {{-- Confirmation Communication --}}
+                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                        {{ __('text.Confirmation Communication') }} <span class="text-red-500">*</span>
                                     </label>
-                                    <div class="relative">
-                                        <select 
-                                            wire:model="selectedVariableConfirmation"
-                                            class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
-                                            <option value="">{{ __('text.Select Variable') }}</option>
-                                            @foreach($variables as $key => $value)
+
+                                    {{-- Variable Selector for Confirmation --}}
+                                    <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                        <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                            {{ __('text.Select Variable') }}
+                                        </label>
+                                        <div class="relative">
+                                            <select
+                                                wire:model="selectedVariableConfirmation"
+                                                class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                                                <option value="">{{ __('text.Select Variable') }}</option>
+                                                @foreach($variables as $key => $value)
                                                 <option value="{{ $key }}">{{ $value }}</option>
-                                            @endforeach
-                                        </select>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mt-2 flex gap-2">
+                                            <button
+                                                type="button"
+                                                wire:click="appendToConfirmationSubject"
+                                                onclick="this.blur()"
+                                                class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
+                                                {{ __('text.Append to Subject') }}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onclick="this.blur(); var container = this.closest('.mb-3'); var select = container.querySelector('select'); if(select && select.value) { appendVariableToQuill('confirmation-editor', select.value); select.value = ''; } return false;"
+                                                class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
+                                                {{ __('text.Append to Body') }}
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div class="mt-2 flex gap-2">
-                                        <button 
-                                            type="button"
-                                            wire:click="appendToConfirmationSubject"
-                                            onclick="this.blur()"
-                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
-                                            {{ __('text.Append to Subject') }}
-                                        </button>
-                                        <button 
-                                            type="button"
-                                            onclick="this.blur(); var container = this.closest('.mb-3'); var select = container.querySelector('select'); if(select && select.value) { appendVariableToQuill('confirmation-editor', select.value); @this.call('appendToConfirmationBody'); } return false;"
-                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
-                                            {{ __('text.Append to Body') }}
-                                        </button>
+
+                                    <input
+                                        type="text"
+                                        wire:model.live="confirmationTitle"
+                                        placeholder="{{ __('text.Email Subject') }}"
+                                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                                    @error('confirmationTitle') <span class="text-red-500 text-sm mt-1 block mb-3">{{ $message }}</span> @enderror
+                                    <div wire:ignore class="@if(!$errors->has('confirmationTitle')) mt-3 @endif">
+                                        <div
+                                            id="confirmation-editor"
+                                            class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                                            style="height: 250px; overflow-y: auto;"></div>
                                     </div>
                                 </div>
 
-                                <input
-                                    type="text"
-                                    wire:model.live="confirmationTitle"
-                                    placeholder="{{ __('text.Email Subject') }}"
-                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                                @error('confirmationTitle') <span class="text-red-500 text-sm mt-1 block mb-3">{{ $message }}</span> @enderror
-                                <div wire:ignore class="@if(!$errors->has('confirmationTitle')) mt-3 @endif">
-                                    <div
-                                        id="confirmation-editor"
-                                        class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-                                        style="height: 250px; overflow-y: auto;"></div>
-                                </div>
-                            </div>
-
-                            {{-- Rescheduling Communication --}}
-                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
-                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                    {{ __('text.Rescheduling Communication') }}
-                                </label>
-                                
-                                {{-- Variable Selector for Rescheduling --}}
-                                <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                                    <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
-                                        {{ __('text.Select Variable') }}
+                                {{-- Rescheduling Communication --}}
+                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                        {{ __('text.Rescheduling Communication') }}
                                     </label>
-                                    <div class="relative">
-                                        <select 
-                                            wire:model="selectedVariableRescheduling"
-                                            class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
-                                            <option value="">{{ __('text.Select Variable') }}</option>
-                                            @foreach($variables as $key => $value)
+
+                                    {{-- Variable Selector for Rescheduling --}}
+                                    <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                        <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                            {{ __('text.Select Variable') }}
+                                        </label>
+                                        <div class="relative">
+                                            <select
+                                                wire:model="selectedVariableRescheduling"
+                                                class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                                                <option value="">{{ __('text.Select Variable') }}</option>
+                                                @foreach($variables as $key => $value)
                                                 <option value="{{ $key }}">{{ $value }}</option>
-                                            @endforeach
-                                        </select>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mt-2 flex gap-2">
+                                            <button
+                                                type="button"
+                                                wire:click="appendToReschedulingSubject"
+                                                class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
+                                                {{ __('text.Append to Subject') }}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onclick="this.blur(); var container = this.closest('.mb-3'); var select = container.querySelector('select'); if(select && select.value) { appendVariableToQuill('rescheduling-editor', select.value); select.value = ''; @this.set('selectedVariableRescheduling', ''); } return false;"
+                                                class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
+                                                {{ __('text.Append to Body') }}
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div class="mt-2 flex gap-2">
-                                        <button 
-                                            type="button"
-                                            wire:click="appendToReschedulingSubject"
-                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
-                                            {{ __('text.Append to Subject') }}
-                                        </button>
-                                        <button 
-                                            type="button"
-                                            onclick="this.blur(); var container = this.closest('.mb-3'); var select = container.querySelector('select'); if(select && select.value) { appendVariableToQuill('rescheduling-editor', select.value); select.value = ''; @this.set('selectedVariableRescheduling', ''); } return false;"
-                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
-                                            {{ __('text.Append to Body') }}
-                                        </button>
+
+                                    <input
+                                        type="text"
+                                        wire:model.live="reschedulingTitle"
+                                        placeholder="{{ __('text.Email Subject') }}"
+                                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                                    @error('reschedulingTitle') <span class="text-red-500 text-sm mt-1 block mb-3">{{ $message }}</span> @enderror
+                                    <div wire:ignore class="@if(!$errors->has('reschedulingTitle')) mt-3 @endif">
+                                        <div
+                                            id="rescheduling-editor"
+                                            class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                                            style="height: 250px; overflow-y: auto;"></div>
                                     </div>
                                 </div>
 
-                                <input
-                                    type="text"
-                                    wire:model.live="reschedulingTitle"
-                                    placeholder="{{ __('text.Email Subject') }}"
-                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                                @error('reschedulingTitle') <span class="text-red-500 text-sm mt-1 block mb-3">{{ $message }}</span> @enderror
-                                <div wire:ignore class="@if(!$errors->has('reschedulingTitle')) mt-3 @endif">
-                                    <div
-                                        id="rescheduling-editor"
-                                        class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-                                        style="height: 250px; overflow-y: auto;"></div>
-                                </div>
-                            </div>
-
-                            {{-- Cancel Communication --}}
-                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
-                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                    {{ __('text.Cancel Communication') }}
-                                </label>
-                                
-                                {{-- Variable Selector for Cancel --}}
-                                <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                                    <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
-                                        {{ __('text.Select Variable') }}
+                                {{-- Cancel Communication --}}
+                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                        {{ __('text.Cancel Communication') }}
                                     </label>
-                                    <div class="relative">
-                                        <select 
-                                            wire:model="selectedVariableCancel"
-                                            class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
-                                            <option value="">{{ __('text.Select Variable') }}</option>
-                                            @foreach($variables as $key => $value)
-                                                <option value="{{ $key }}">{{ $value }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="mt-2 flex gap-2">
-                                        <button 
-                                            type="button"
-                                            wire:click="appendToCancelSubject"
-                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
-                                            {{ __('text.Append to Subject') }}
-                                        </button>
-                                        <button 
-                                            type="button"
-                                            onclick="this.blur(); var container = this.closest('.mb-3'); var select = container.querySelector('select'); if(select && select.value) { appendVariableToQuill('cancel-editor', select.value); select.value = ''; @this.set('selectedVariableCancel', ''); } return false;"
-                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
-                                            {{ __('text.Append to Body') }}
-                                        </button>
-                                    </div>
-                                </div>
 
-                                <input
-                                    type="text"
-                                    wire:model.live="cancelTitle"
-                                    placeholder="{{ __('text.Email Subject') }}"
-                                    class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                                @error('cancelTitle') <span class="text-red-500 text-sm mt-1 block mb-3">{{ $message }}</span> @enderror
-                                <div wire:ignore class="@if(!$errors->has('cancelTitle')) mt-3 @endif">
-                                    <div
-                                        id="cancel-editor"
-                                        class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-                                        style="height: 250px; overflow-y: auto;"></div>
+                                    {{-- Variable Selector for Cancel --}}
+                                    <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                        <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                            {{ __('text.Select Variable') }}
+                                        </label>
+                                        <div class="relative">
+                                            <select
+                                                wire:model="selectedVariableCancel"
+                                                class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                                                <option value="">{{ __('text.Select Variable') }}</option>
+                                                @foreach($variables as $key => $value)
+                                                <option value="{{ $key }}">{{ $value }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mt-2 flex gap-2">
+                                            <button
+                                                type="button"
+                                                wire:click="appendToCancelSubject"
+                                                class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
+                                                {{ __('text.Append to Subject') }}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onclick="this.blur(); var container = this.closest('.mb-3'); var select = container.querySelector('select'); if(select && select.value) { appendVariableToQuill('cancel-editor', select.value); select.value = ''; @this.set('selectedVariableCancel', ''); } return false;"
+                                                class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
+                                                {{ __('text.Append to Body') }}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <input
+                                        type="text"
+                                        wire:model.live="cancelTitle"
+                                        placeholder="{{ __('text.Email Subject') }}"
+                                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
+                                    @error('cancelTitle') <span class="text-red-500 text-sm mt-1 block mb-3">{{ $message }}</span> @enderror
+                                    <div wire:ignore class="@if(!$errors->has('cancelTitle')) mt-3 @endif">
+                                        <div
+                                            id="cancel-editor"
+                                            class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent text-sm text-gray-800 shadow-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                                            style="height: 250px; overflow-y: auto;"></div>
+                                    </div>
                                 </div>
-                            </div>
                             </div>
                         </div>
                         @endif
@@ -740,123 +738,123 @@ use Illuminate\Support\Facades\Storage;
 
                             {{-- SMS Templates in Column Layout --}}
                             <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
-                            {{-- Confirmation SMS --}}
-                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
-                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                    {{ __('text.Confirm SMS') }}
-                                </label>
-                                
-                                {{-- Variable Selector for Confirmation SMS --}}
-                                <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                                    <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
-                                        {{ __('text.Select Variable') }}
+                                {{-- Confirmation SMS --}}
+                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                        {{ __('text.Confirm SMS') }}
                                     </label>
-                                    <div class="relative">
-                                        <select 
-                                            wire:model="selectedVariableConfirmationSms"
-                                            class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
-                                            <option value="">{{ __('text.Select Variable') }}</option>
-                                            @foreach($variables as $key => $value)
+
+                                    {{-- Variable Selector for Confirmation SMS --}}
+                                    <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                        <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                            {{ __('text.Select Variable') }}
+                                        </label>
+                                        <div class="relative">
+                                            <select
+                                                wire:model="selectedVariableConfirmationSms"
+                                                class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                                                <option value="">{{ __('text.Select Variable') }}</option>
+                                                @foreach($variables as $key => $value)
                                                 <option value="{{ $key }}">{{ $value }}</option>
-                                            @endforeach
-                                        </select>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mt-2 flex gap-2">
+                                            <button
+                                                type="button"
+                                                wire:click="appendToConfirmationSms"
+                                                onclick="this.blur()"
+                                                class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
+                                                {{ __('text.Append to Body') }}
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div class="mt-2 flex gap-2">
-                                        <button 
-                                            type="button"
-                                            wire:click="appendToConfirmationSms"
-                                            onclick="this.blur()"
-                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
-                                            {{ __('text.Append to Body') }}
-                                        </button>
-                                    </div>
+
+                                    <textarea
+                                        wire:model.live="confirmationSms"
+                                        placeholder="{{ __('text.SMS Message') }}"
+                                        rows="6"
+                                        class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                        style="resize: vertical;"></textarea>
                                 </div>
 
-                                <textarea
-                                    wire:model.live="confirmationSms"
-                                    placeholder="{{ __('text.SMS Message') }}"
-                                    rows="6"
-                                    class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                                    style="resize: vertical;"></textarea>
-                            </div>
-
-                            {{-- Rescheduling SMS --}}
-                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
-                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                    {{ __('text.Reschedule SMS') }}
-                                </label>
-                                
-                                {{-- Variable Selector for Rescheduling SMS --}}
-                                <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                                    <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
-                                        {{ __('text.Select Variable') }}
+                                {{-- Rescheduling SMS --}}
+                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                        {{ __('text.Reschedule SMS') }}
                                     </label>
-                                    <div class="relative">
-                                        <select 
-                                            wire:model="selectedVariableReschedulingSms"
-                                            class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
-                                            <option value="">{{ __('text.Select Variable') }}</option>
-                                            @foreach($variables as $key => $value)
+
+                                    {{-- Variable Selector for Rescheduling SMS --}}
+                                    <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                        <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                            {{ __('text.Select Variable') }}
+                                        </label>
+                                        <div class="relative">
+                                            <select
+                                                wire:model="selectedVariableReschedulingSms"
+                                                class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                                                <option value="">{{ __('text.Select Variable') }}</option>
+                                                @foreach($variables as $key => $value)
                                                 <option value="{{ $key }}">{{ $value }}</option>
-                                            @endforeach
-                                        </select>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mt-2 flex gap-2">
+                                            <button
+                                                type="button"
+                                                wire:click="appendToReschedulingSms"
+                                                class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
+                                                {{ __('text.Append to Body') }}
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div class="mt-2 flex gap-2">
-                                        <button 
-                                            type="button"
-                                            wire:click="appendToReschedulingSms"
-                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
-                                            {{ __('text.Append to Body') }}
-                                        </button>
-                                    </div>
+
+                                    <textarea
+                                        wire:model.live="reschedulingSms"
+                                        placeholder="{{ __('text.SMS Message') }}"
+                                        rows="6"
+                                        class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                        style="resize: vertical;"></textarea>
                                 </div>
 
-                                <textarea
-                                    wire:model.live="reschedulingSms"
-                                    placeholder="{{ __('text.SMS Message') }}"
-                                    rows="6"
-                                    class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                                    style="resize: vertical;"></textarea>
-                            </div>
-
-                            {{-- Cancel SMS --}}
-                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
-                                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
-                                    {{ __('text.Cancel SMS') }}
-                                </label>
-                                
-                                {{-- Variable Selector for Cancel SMS --}}
-                                <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                                    <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
-                                        {{ __('text.Select Variable') }}
+                                {{-- Cancel SMS --}}
+                                <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 shadow-sm">
+                                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                        {{ __('text.Cancel SMS') }}
                                     </label>
-                                    <div class="relative">
-                                        <select 
-                                            wire:model="selectedVariableCancelSms"
-                                            class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
-                                            <option value="">{{ __('text.Select Variable') }}</option>
-                                            @foreach($variables as $key => $value)
-                                                <option value="{{ $key }}">{{ $value }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="mt-2 flex gap-2">
-                                        <button 
-                                            type="button"
-                                            wire:click="appendToCancelSms"
-                                            class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
-                                            {{ __('text.Append to Body') }}
-                                        </button>
-                                    </div>
-                                </div>
 
-                                <textarea
-                                    wire:model.live="cancelSms"
-                                    placeholder="{{ __('text.SMS Message') }}"
-                                    rows="6"
-                                    class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                                    style="resize: vertical;"></textarea>
-                            </div>
+                                    {{-- Variable Selector for Cancel SMS --}}
+                                    <div class="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                        <label class="mb-2 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                                            {{ __('text.Select Variable') }}
+                                        </label>
+                                        <div class="relative">
+                                            <select
+                                                wire:model="selectedVariableCancelSms"
+                                                class="dark:bg-dark-900 h-10 w-full rounded-lg border border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800">
+                                                <option value="">{{ __('text.Select Variable') }}</option>
+                                                @foreach($variables as $key => $value)
+                                                <option value="{{ $key }}">{{ $value }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mt-2 flex gap-2">
+                                            <button
+                                                type="button"
+                                                wire:click="appendToCancelSms"
+                                                class="flex-1 px-2 py-1.5 text-xs font-medium text-white rounded bg-blue-600 hover:bg-blue-700 transition-colors">
+                                                {{ __('text.Append to Body') }}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <textarea
+                                        wire:model.live="cancelSms"
+                                        placeholder="{{ __('text.SMS Message') }}"
+                                        rows="6"
+                                        class="dark:bg-dark-900 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                        style="resize: vertical;"></textarea>
+                                </div>
                             </div>
                         </div>
                         @endif
@@ -865,25 +863,25 @@ use Illuminate\Support\Facades\Storage;
                         @if($tab == '1')
                         <div class="w-full px-2.5">
                             <h3 class="text-lg font-semibold dark:text-white/90 mb-4 mt-6">{{ __('text.Attachments') }}</h3>
-                            
+
                             <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                                 <div class="flex gap-3 items-end">
                                     <div class="flex-1">
                                         <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                             {{ __('text.Select File') }}
                                         </label>
-                                        <input 
-                                            type="file" 
-                                            wire:model="attachmentFile" 
+                                        <input
+                                            type="file"
+                                            wire:model="attachmentFile"
                                             accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.odt,.ods,.odp"
                                             class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
-                                        @error('attachmentFile') 
-                                            <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> 
+                                        @error('attachmentFile')
+                                        <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span>
                                         @enderror
                                     </div>
                                     <div>
-                                        <button 
-                                            type="button" 
+                                        <button
+                                            type="button"
                                             wire:click="addAttachment"
                                             class="px-4 py-2.5 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 transition-colors">
                                             {{ __('text.Add Attachment') }}
@@ -907,8 +905,8 @@ use Illuminate\Support\Facades\Storage;
                                         </div>
                                         <div class="flex items-center gap-2">
                                             @if(isset($attachment['path']))
-                                            <a 
-                                                href="{{ Storage::disk('public')->url($attachment['path']) }}" 
+                                            <a
+                                                href="{{ Storage::disk('public')->url($attachment['path']) }}"
                                                 target="_blank"
                                                 class="p-2 text-gray-600 dark:text-gray-400 hover:text-brand-500 dark:hover:text-brand-400 transition-colors"
                                                 title="{{ __('text.View') }}">
@@ -918,8 +916,8 @@ use Illuminate\Support\Facades\Storage;
                                                 </svg>
                                             </a>
                                             @endif
-                                            <button 
-                                                type="button" 
+                                            <button
+                                                type="button"
                                                 wire:click="removeAttachment({{ $index }})"
                                                 class="p-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors"
                                                 title="{{ __('text.Remove') }}">
@@ -1015,14 +1013,26 @@ use Illuminate\Support\Facades\Storage;
             window.quillInstances[editorId] = quill;
             editorElement._quill = quill;
 
-            // Set initial content
-            let content = @this.get(propertyName) || '';
-            if (content) {
-                quill.root.innerHTML = content;
-            }
+            // Set initial content with retry logic for better loading
+            const setInitialContent = () => {
+                let content = @this.get(propertyName) || '';
+                if (content && content !== quill.root.innerHTML) {
+                    quill.root.innerHTML = content;
+                    return true;
+                }
+                return false;
+            };
+
+            // Try to set content immediately
+            setInitialContent();
+
+            // Retry after delays to ensure content is loaded (for edit mode)
+            setTimeout(() => setInitialContent(), 300);
+            setTimeout(() => setInitialContent(), 600);
+            setTimeout(() => setInitialContent(), 1000);
 
             // Watch for Livewire property changes and update Quill
-            let lastContent = content;
+            let lastContent = @this.get(propertyName) || '';
             setInterval(() => {
                 let currentContent = @this.get(propertyName) || '';
                 if (currentContent !== lastContent && currentContent !== quill.root.innerHTML) {
@@ -1049,7 +1059,9 @@ use Illuminate\Support\Facades\Storage;
                         isUpdating = true;
                         lastContent = quill.root.innerHTML;
                         @this.set(propertyName, quill.root.innerHTML);
-                        setTimeout(() => { isUpdating = false; }, 50);
+                        setTimeout(() => {
+                            isUpdating = false;
+                        }, 50);
                     }
                 }, 100);
             });
@@ -1066,21 +1078,28 @@ use Illuminate\Support\Facades\Storage;
     }
 
     function initQuillEditors() {
-        // Confirmation email editor - QuillEditor
-        initQuillEditor('confirmation-editor', 'confirmationContent');
+        // Only initialize if element exists and hasn't been initialized yet
+        const confirmationEl = document.getElementById('confirmation-editor');
+        if (confirmationEl && !confirmationEl._quill) {
+            initQuillEditor('confirmation-editor', 'confirmationContent');
+        }
 
-        // Rescheduling email editor - QuillEditor
-        initQuillEditor('rescheduling-editor', 'reschedulingContent');
+        const reschedulingEl = document.getElementById('rescheduling-editor');
+        if (reschedulingEl && !reschedulingEl._quill) {
+            initQuillEditor('rescheduling-editor', 'reschedulingContent');
+        }
 
-        // Cancel email editor - QuillEditor
-        initQuillEditor('cancel-editor', 'cancelContent');
+        const cancelEl = document.getElementById('cancel-editor');
+        if (cancelEl && !cancelEl._quill) {
+            initQuillEditor('cancel-editor', 'cancelContent');
+        }
 
         // Description editor for packages - QuillEditor (check if element exists)
         const descriptionEditorEl = document.getElementById('description-editor');
         if (descriptionEditorEl && !descriptionEditorEl._quill) {
             try {
                 initQuillEditor('description-editor', 'description');
-            } catch(e) {
+            } catch (e) {
                 console.error('Error initializing description editor:', e);
             }
         }
@@ -1110,7 +1129,7 @@ use Illuminate\Support\Facades\Storage;
         if (typeof Livewire !== 'undefined' && typeof Livewire.off === 'function') {
             Livewire.off('append-to-editor');
         }
-        
+
         Livewire.on('append-to-editor', (data) => {
             // Handle both array and object formats
             let editorId, text;
@@ -1123,36 +1142,36 @@ use Illuminate\Support\Facades\Storage;
             } else {
                 return;
             }
-            
+
             if (!editorId || !text) {
                 return;
             }
-            
+
             // Wait a bit to ensure Quill is ready
             setTimeout(() => {
                 if (!window.quillInstances || !window.quillInstances[editorId]) {
                     return;
                 }
-                
+
                 const quill = window.quillInstances[editorId];
-                
+
                 // Prevent multiple insertions with a flag
                 if (quill._isAppending) {
                     return;
                 }
                 quill._isAppending = true;
-                
+
                 try {
                     const range = quill.getSelection(true);
                     const index = range ? range.index : (quill.getLength() > 1 ? quill.getLength() - 1 : 0);
-                    
+
                     // Set flag to prevent sync during programmatic insertion
                     quill._isProgrammaticInsert = true;
-                    
+
                     // Insert text at cursor position (only once)
                     quill.insertText(index, text);
                     quill.setSelection(index + text.length);
-                    
+
                     // Update Livewire property after insertion
                     setTimeout(() => {
                         const propertyMap = {
@@ -1195,32 +1214,32 @@ use Illuminate\Support\Facades\Storage;
         if (!text || !editorId) {
             return;
         }
-        
+
         setTimeout(() => {
             if (!window.quillInstances || !window.quillInstances[editorId]) {
                 console.log('Quill instance not found:', editorId);
                 return;
             }
-            
+
             const quill = window.quillInstances[editorId];
-            
+
             // Prevent multiple insertions
             if (quill._isAppending) {
                 return;
             }
             quill._isAppending = true;
-            
+
             try {
                 const range = quill.getSelection(true);
                 const index = range ? range.index : (quill.getLength() > 1 ? quill.getLength() - 1 : 0);
-                
+
                 // Set flag to prevent sync during programmatic insertion
                 quill._isProgrammaticInsert = true;
-                
+
                 // Insert text at cursor position
                 quill.insertText(index, ' ' + text);
                 quill.setSelection(index + text.length + 1);
-                
+
                 // Update Livewire property
                 setTimeout(() => {
                     const propertyMap = {
@@ -1270,8 +1289,7 @@ use Illuminate\Support\Facades\Storage;
                 @this.set('locations', data);
             });
         });
-        
+
     });
-    
 </script>
 </div>

@@ -21,7 +21,7 @@ class PublicUserList extends Component
     public $teamId;
     public $locationId;
     public $activeTab = 'active'; // 'active' or 'inactive'
-    
+
     // Search filters
     public $searchNric = '';
     public $searchMobile = '';
@@ -69,7 +69,7 @@ class PublicUserList extends Component
         try {
             $member = Member::where('team_id', $this->teamId)
                 ->findOrFail($memberId);
-            
+
             if (!$member->email) {
                 session()->flash('error', 'Member does not have an email address.');
                 return;
@@ -77,14 +77,14 @@ class PublicUserList extends Component
 
             // Generate new password
             $newPassword = $this->generateRandomPassword();
-            
+
             // Update member password
             $member->password = $newPassword;
             $member->save();
 
             // Get company information
             $company = Company::find($member->company_id);
-            
+
             // Prepare email data
             $emailData = [
                 'to_mail' => $member->email,
@@ -98,7 +98,7 @@ class PublicUserList extends Component
 
             // Send email using the trait
             $this->sendEmail($emailData, 'Your Account Credentials', 'member-info', $this->teamId);
-            
+
             session()->flash('message', 'New credentials sent successfully to ' . $member->email);
         } catch (\Exception $e) {
             // Log error
@@ -119,20 +119,20 @@ class PublicUserList extends Component
         $lowercase = 'abcdefghijklmnopqrstuvwxyz';
         $numbers = '0123456789';
         $special = '!@#$%&*';
-        
+
         // Ensure at least one character from each set
         $password = '';
         $password .= $uppercase[random_int(0, strlen($uppercase) - 1)];
         $password .= $lowercase[random_int(0, strlen($lowercase) - 1)];
         $password .= $numbers[random_int(0, strlen($numbers) - 1)];
         $password .= $special[random_int(0, strlen($special) - 1)];
-        
+
         // Fill the rest randomly
         $allCharacters = $uppercase . $lowercase . $numbers . $special;
         for ($i = 4; $i < $length; $i++) {
             $password .= $allCharacters[random_int(0, strlen($allCharacters) - 1)];
         }
-        
+
         // Shuffle the password to randomize character positions
         return str_shuffle($password);
     }
@@ -140,10 +140,10 @@ class PublicUserList extends Component
     public function render()
     {
         $query = Member::where('team_id', $this->teamId);
-        
-        if ($this->locationId) {
-            $query->where('location_id', $this->locationId);
-        }
+
+        // if ($this->locationId) {
+        //     $query->where('location_id', $this->locationId);
+        // }
 
         // Apply tab filter
         if ($this->activeTab === 'active') {
@@ -170,16 +170,16 @@ class PublicUserList extends Component
         }
 
         if (!empty($this->searchCompany)) {
-            $query->whereHas('company', function($q) {
+            $query->whereHas('company', function ($q) {
                 $q->where('company_name', 'like', '%' . $this->searchCompany . '%');
             });
         }
 
-        $members = $query->with('company')->orderBy('created_at', 'desc')->paginate($this->perPage);
+        $members = $query->with('company')->orderBy('created_at', 'desc')
+            ->paginate($this->perPage);
 
         return view('livewire.public-user-list', [
             'members' => $members,
         ]);
     }
 }
-

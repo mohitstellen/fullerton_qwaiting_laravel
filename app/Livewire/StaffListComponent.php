@@ -86,7 +86,7 @@ class StaffListComponent extends Component
     {
         if ($this->selectedStaff) {
             $this->selectedStaff->delete();
-            $this->selectedStaff=null;
+            $this->selectedStaff = null;
             // session()->flash('message', 'Staff deleted successfully.');
             $this->dispatch('deleted');
         }
@@ -106,7 +106,7 @@ class StaffListComponent extends Component
         $this->dispatch('confirm-multiple-delete');
     }
 
-#[On('confirmed-multiple-delete')]
+    #[On('confirmed-multiple-delete')]
     public function bulkDeleteStaff()
     {
 
@@ -124,20 +124,14 @@ class StaffListComponent extends Component
         $this->resetPage(); // Reset pagination when search is updated
     }
 
-    public function render()
+    public function exportCSV()
     {
-        $staffs = User::where('team_id', $this->teamId)
-            //  ->where(function ($query) {
-            //     $query->whereJsonContains('locations', "$this->locationId")
-            //         ->orWhereRaw("JSON_LENGTH(locations) = 0")
-            //         ->orWhereNull('locations'); // strict empty []
-            // })
+        $query = User::where('team_id', $this->teamId)
             ->when(auth()->user()->is_admin != 1, function ($query) {
-            // Apply location filter only for non-admin users
                 $query->where(function ($q) {
                     $q->whereJsonContains('locations', "$this->locationId")
-                    ->orWhereRaw("JSON_LENGTH(locations) = 0")
-                    ->orWhereNull('locations'); // strict empty []
+                        ->orWhereRaw("JSON_LENGTH(locations) = 0")
+                        ->orWhereNull('locations');
                 });
             })
             ->whereNot('id', auth()->user()->id)
@@ -147,8 +141,85 @@ class StaffListComponent extends Component
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('username', 'like', '%' . $this->search . '%')
-                      ->orWhere('email', 'like', '%' . $this->search . '%');
+                        ->orWhere('username', 'like', '%' . $this->search . '%')
+                        ->orWhere('email', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->when($this->closed_by, function ($query) {
+                $query->where('id', $this->closed_by);
+            });
+
+        $staffs = $query->with('roles')->get();
+
+        $csvData = [];
+
+        // Add header row
+        $csvData[] = [
+            '#',
+            'Name',
+            'Username',
+            'Email',
+            'Role',
+        ];
+
+        // Add data rows
+        foreach ($staffs as $staff) {
+            $csvData[] = [
+                $staff->id ?? '',
+                $staff->name ?? '',
+                $staff->username ?? '',
+                $staff->email ?? '',
+                $staff->roles->pluck('name')->implode(', ') ?? 'N/A',
+            ];
+        }
+
+        $filename = 'staff_export_' . now()->format('Ymd_His') . '.csv';
+        $handle = fopen('php://temp', 'r+');
+
+        // Add BOM for UTF-8 to ensure proper encoding in Excel
+        fwrite($handle, "\xEF\xBB\xBF");
+
+        foreach ($csvData as $line) {
+            fputcsv($handle, $line);
+        }
+
+        rewind($handle);
+        $csvContent = stream_get_contents($handle);
+        fclose($handle);
+
+        return \Illuminate\Support\Facades\Response::streamDownload(function () use ($csvContent) {
+            echo $csvContent;
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    public function render()
+    {
+        $staffs = User::where('team_id', $this->teamId)
+            //  ->where(function ($query) {
+            //     $query->whereJsonContains('locations', "$this->locationId")
+            //         ->orWhereRaw("JSON_LENGTH(locations) = 0")
+            //         ->orWhereNull('locations'); // strict empty []
+            // })
+            ->when(auth()->user()->is_admin != 1, function ($query) {
+                // Apply location filter only for non-admin users
+                $query->where(function ($q) {
+                    $q->whereJsonContains('locations', "$this->locationId")
+                        ->orWhereRaw("JSON_LENGTH(locations) = 0")
+                        ->orWhereNull('locations'); // strict empty []
+                });
+            })
+            ->whereNot('id', auth()->user()->id)
+            ->whereDoesntHave('roles', function ($query) {
+                $query->where('name', 'superadmin');
+            })
+            ->when($this->search, function ($query) {
+                $query->where(function ($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%')
+                        ->orWhere('username', 'like', '%' . $this->search . '%')
+                        ->orWhere('email', 'like', '%' . $this->search . '%');
                 });
             })
             ->when($this->closed_by, function ($query) {
@@ -158,14 +229,14 @@ class StaffListComponent extends Component
             })
             ->paginate(10); // Pagination should be used here
 
-            $users = User::where(function ($query) {
-                $query->where('team_id', $this->teamId)
-                      ->where('id','!=',Auth::id());
-            })
+        $users = User::where(function ($query) {
+            $query->where('team_id', $this->teamId)
+                ->where('id', '!=', Auth::id());
+        })
             ->whereNotNull('locations')
             ->whereJsonContains('locations', "$this->locationId")
             ->pluck('name', 'id');
 
-        return view('livewire.staff-list-component', compact('staffs','users'));
+        return view('livewire.staff-list-component', compact('staffs', 'users'));
     }
 }

@@ -6,6 +6,10 @@ use App\Models\Voucher;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 
+
+use App\Models\Category;
+use Illuminate\Support\Facades\Auth;
+
 class EditVoucher extends Component
 {
     public Voucher $voucherModel;
@@ -27,6 +31,7 @@ class EditVoucher extends Component
 
     protected array $messages = [
         'voucher.voucher_name.required' => 'The voucher name field is required.',
+        'voucher.category_id.required' => 'The appointment type field is required.',
         'voucher.voucher_code.required' => 'The voucher code field is required.',
         'voucher.voucher_code.unique' => 'The voucher code has already been taken.',
         'voucher.valid_from.required' => 'The valid from field is required.',
@@ -41,6 +46,7 @@ class EditVoucher extends Component
     {
         return [
             'voucher.voucher_name' => ['required', 'string', 'max:255'],
+            'voucher.category_id' => ['nullable', 'exists:categories,id'],
             'voucher.voucher_code' => [
                 'required',
                 'string',
@@ -60,6 +66,7 @@ class EditVoucher extends Component
 
         $this->voucher = [
             'voucher_name' => $voucherRecord->voucher_name,
+            'category_id' => $voucherRecord->category_id,
             'voucher_code' => $voucherRecord->voucher_code,
             'valid_from' => $voucherRecord->valid_from ? $voucherRecord->valid_from->format('Y-m-d') : '',
             'valid_to' => $voucherRecord->valid_to ? $voucherRecord->valid_to->format('Y-m-d') : '',
@@ -123,11 +130,12 @@ class EditVoucher extends Component
 
         $this->voucherModel->update([
             'voucher_name' => $this->voucher['voucher_name'],
+            'category_id' => $this->voucher['category_id'] ?: null,
             'voucher_code' => $this->voucher['voucher_code'],
             'valid_from' => $this->voucher['valid_from'],
             'valid_to' => $this->voucher['valid_to'],
             'discount_percentage' => $this->voucher['discount_percentage'],
-            'no_of_redemption' => $this->voucher['no_of_redemption'] ?? null,
+            'no_of_redemption' => $this->voucher['no_of_redemption'] === '' ? null : $this->voucher['no_of_redemption'],
             // card_types is updated separately via addCardType/removeCardType methods
         ]);
 
@@ -138,6 +146,8 @@ class EditVoucher extends Component
 
     public function render()
     {
-        return view('livewire.voucher.edit-voucher');
+        $teamId = tenant('id') ?? (Auth::user()->team_id ?? null);
+        $categories = Category::where('team_id', $teamId)->get();
+        return view('livewire.voucher.edit-voucher', compact('categories'));
     }
 }

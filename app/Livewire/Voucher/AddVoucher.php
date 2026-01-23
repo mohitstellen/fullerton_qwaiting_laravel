@@ -7,10 +7,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Livewire\Component;
 
+use App\Models\Category;
+
 class AddVoucher extends Component
 {
     public array $voucher = [
         'voucher_name' => '',
+        'category_id' => '',
         'voucher_code' => '',
         'valid_from' => '',
         'valid_to' => '',
@@ -20,6 +23,7 @@ class AddVoucher extends Component
 
     protected array $messages = [
         'voucher.voucher_name.required' => 'The voucher name field is required.',
+        'voucher.category_id.required' => 'The appointment type field is required.',
         'voucher.voucher_code.required' => 'The voucher code field is required.',
         'voucher.voucher_code.unique' => 'The voucher code has already been taken.',
         'voucher.valid_from.required' => 'The valid from field is required.',
@@ -34,6 +38,7 @@ class AddVoucher extends Component
     {
         return [
             'voucher.voucher_name' => ['required', 'string', 'max:255'],
+            'voucher.category_id' => ['nullable', 'exists:categories,id'],
             'voucher.voucher_code' => ['required', 'string', 'max:255', 'unique:vouchers,voucher_code'],
             'voucher.valid_from' => ['required', 'date'],
             'voucher.valid_to' => ['required', 'date', 'after_or_equal:voucher.valid_from'],
@@ -51,11 +56,12 @@ class AddVoucher extends Component
         Voucher::create([
             'team_id' => $teamId,
             'voucher_name' => $this->voucher['voucher_name'],
+            'category_id' => $this->voucher['category_id'] ?: null,
             'voucher_code' => $this->voucher['voucher_code'],
             'valid_from' => $this->voucher['valid_from'],
             'valid_to' => $this->voucher['valid_to'],
             'discount_percentage' => $this->voucher['discount_percentage'],
-            'no_of_redemption' => $this->voucher['no_of_redemption'] ?? null,
+            'no_of_redemption' => $this->voucher['no_of_redemption'] === '' ? null : $this->voucher['no_of_redemption'],
         ]);
 
         session()->flash('message', 'Voucher created successfully.');
@@ -65,6 +71,8 @@ class AddVoucher extends Component
 
     public function render()
     {
-        return view('livewire.voucher.add-voucher');
+        $teamId = tenant('id') ?? (Auth::user()->team_id ?? null);
+        $categories = Category::where('team_id', $teamId)->where('level_id', 1)->get();
+        return view('livewire.voucher.add-voucher', compact('categories'));
     }
 }

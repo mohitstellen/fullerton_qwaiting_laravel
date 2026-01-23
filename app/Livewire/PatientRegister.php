@@ -41,8 +41,9 @@ class PatientRegister extends Component
     public $company_search = '';
     public $showCompanyDropdown = false;
     public $allCompanies = [];
-    
+
     // Consent checkboxes
+    public $terms_and_conditions = false;
     public $consent_data_collection = false;
     public $consent_marketing = false;
 
@@ -62,6 +63,7 @@ class PatientRegister extends Component
         'confirm_email.same' => 'Email addresses do not match.',
         'nationality.required' => 'Nationality is required.',
         'company_id.required' => 'Company is required. Please select from the dropdown list.',
+        'terms_and_conditions.required' => 'You must agree to the Terms and Conditions.',
         'consent_data_collection.required' => 'You must consent to data collection.',
         'nric_fin.unique' => 'This NRIC / FIN already exists.',
         'passport.unique' => 'This passport number already exists.',
@@ -88,6 +90,7 @@ class PatientRegister extends Component
             'confirm_email' => 'required|email|same:email',
             'nationality' => 'required|string',
             'company_id' => 'nullable|exists:companies,id',
+            'terms_and_conditions' => 'accepted',
             'consent_data_collection' => 'accepted',
             'consent_marketing' => 'nullable|boolean',
         ];
@@ -149,6 +152,14 @@ class PatientRegister extends Component
         }
     }
 
+    public function updatedSalutation($value)
+    {
+        // Automatically change gender to Female when Mrs is selected
+        if ($value === 'Mrs') {
+            $this->gender = 'Female';
+        }
+    }
+
     public function register()
     {
         $this->validate();
@@ -175,6 +186,9 @@ class PatientRegister extends Component
                 'password' => $password,
                 'status' => 'active', // New registrations are inactive until approved
                 'is_active' => 1, // Requires admin approval
+                'terms_and_conditions' => $this->terms_and_conditions,
+                'consent_data_collection' => $this->consent_data_collection,
+                'consent_marketing' => $this->consent_marketing,
             ];
 
             $member = Member::create($data);
@@ -186,17 +200,28 @@ class PatientRegister extends Component
 
             // Reset form
             $this->reset([
-                'identification_type', 'nric_fin', 'passport', 'salutation', 
-                'full_name', 'date_of_birth', 'gender', 'mobile_number', 
-                'email', 'confirm_email', 'nationality', 'company_id', 
-                'company_search', 'consent_data_collection', 'consent_marketing'
+                'identification_type',
+                'nric_fin',
+                'passport',
+                'salutation',
+                'full_name',
+                'date_of_birth',
+                'gender',
+                'mobile_number',
+                'email',
+                'confirm_email',
+                'nationality',
+                'company_id',
+                'company_search',
+                'terms_and_conditions',
+                'consent_data_collection',
+                'consent_marketing'
             ]);
             $this->identification_type = 'NRIC / FIN';
             $this->salutation = 'Mr';
             $this->gender = 'Male';
             $this->mobile_country_code = '65';
             $this->nationality = 'Singaporean';
-
         } catch (\Exception $e) {
             Log::error('Patient registration error: ' . $e->getMessage());
             session()->flash('error', 'Registration failed. Please try again or contact support.');
@@ -215,20 +240,20 @@ class PatientRegister extends Component
         $lowercase = 'abcdefghijklmnopqrstuvwxyz';
         $numbers = '0123456789';
         $special = '!@#$%&*';
-        
+
         // Ensure at least one character from each set
         $password = '';
         $password .= $uppercase[random_int(0, strlen($uppercase) - 1)];
         $password .= $lowercase[random_int(0, strlen($lowercase) - 1)];
         $password .= $numbers[random_int(0, strlen($numbers) - 1)];
         $password .= $special[random_int(0, strlen($special) - 1)];
-        
+
         // Fill the rest randomly
         $allCharacters = $uppercase . $lowercase . $numbers . $special;
         for ($i = 4; $i < $length; $i++) {
             $password .= $allCharacters[random_int(0, strlen($allCharacters) - 1)];
         }
-        
+
         // Shuffle the password to randomize character positions
         return str_shuffle($password);
     }
@@ -245,7 +270,7 @@ class PatientRegister extends Component
         try {
             // Get SMTP details for the team
             $smtpDetails = SmtpDetails::where('team_id', $this->teamId)->first();
-            
+
             if (!$smtpDetails || empty($smtpDetails->hostname)) {
                 Log::warning('SMTP details not configured for team: ' . $this->teamId);
                 return;
@@ -290,7 +315,6 @@ class PatientRegister extends Component
             });
 
             Log::info('Registration email sent successfully to: ' . $data['email']);
-
         } catch (\Exception $e) {
             Log::error('Failed to send registration email: ' . $e->getMessage());
             // Don't throw exception - registration should still succeed even if email fails
@@ -328,9 +352,9 @@ class PatientRegister extends Component
             ->where('status', 1)
             ->orderBy('id')
             ->first();
-        
+
         $locationId = $firstLocation ? $firstLocation->id : null;
-        
+
         // Get logo based on team id and first location
         $logo = SiteDetail::viewImage(SiteDetail::FIELD_BUSINESS_LOGO, $this->teamId ?? null, $locationId);
 

@@ -12,10 +12,12 @@
             background-color: white;
             cursor: pointer;
         }
+
         input[type="checkbox"]:checked {
             background-color: #2563eb;
             border-color: #2563eb;
         }
+
         input[type="checkbox"]:focus {
             outline: 2px solid #2563eb;
             outline-offset: 2px;
@@ -28,15 +30,15 @@
         </div>
 
         @if (session()->has('success'))
-            <div class="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-200">
-                {{ session('success') }}
-            </div>
+        <div class="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-200">
+            {{ session('success') }}
+        </div>
         @endif
 
         @if (session()->has('error'))
-            <div class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
-                {{ session('error') }}
-            </div>
+        <div class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
+            {{ session('error') }}
+        </div>
         @endif
 
         <!-- Sign Up Form -->
@@ -62,23 +64,23 @@
                     <!-- NRIC / FIN or Passport -->
                     <div>
                         @if($identification_type === 'NRIC / FIN')
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                                NRIC / FIN <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" wire:model="nric_fin" placeholder="NRIC / FIN"
-                                class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
-                            @error('nric_fin')
-                            <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
-                            @enderror
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                            NRIC / FIN <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" wire:model="nric_fin" placeholder="NRIC / FIN"
+                            class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
+                        @error('nric_fin')
+                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                        @enderror
                         @elseif($identification_type === 'Passport')
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                                Passport <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" wire:model="passport" placeholder="Passport"
-                                class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
-                            @error('passport')
-                            <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
-                            @enderror
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                            Passport <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" wire:model="passport" placeholder="Passport"
+                            class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
+                        @error('passport')
+                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                        @enderror
                         @endif
                     </div>
 
@@ -88,7 +90,7 @@
                             Full Name <span class="text-red-500">*</span>
                         </label>
                         <div class="flex gap-2">
-                            <select wire:model="salutation"
+                            <select wire:model.live="salutation"
                                 class="block w-28 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
                                 @foreach($salutations as $salutationOption)
                                 <option value="{{ $salutationOption }}">{{ $salutationOption }}</option>
@@ -189,9 +191,9 @@
                         <select wire:model="nationality"
                             class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
                             @if($nationalities)
-                                @foreach($nationalities as $nationalityOption)
-                                <option value="{{ $nationalityOption }}">{{ $nationalityOption }}</option>
-                                @endforeach
+                            @foreach($nationalities as $nationalityOption)
+                            <option value="{{ $nationalityOption }}">{{ $nationalityOption }}</option>
+                            @endforeach
                             @endif
                         </select>
                         @error('nationality')
@@ -256,6 +258,21 @@
 
                 <!-- Consent Checkboxes -->
                 <div class="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <!-- Terms and Conditions -->
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 mt-1">
+                            <input type="checkbox" wire:model="terms_and_conditions" id="terms_and_conditions"
+                                class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                                style="accent-color: #2563eb;">
+                        </div>
+                        <label for="terms_and_conditions" class="flex-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                            I agree to the <a href="#" class="text-blue-600 hover:underline">Terms and Conditions</a> <span class="text-red-500">*</span>
+                        </label>
+                    </div>
+                    @error('terms_and_conditions')
+                    <span class="text-red-500 text-xs mt-1 block ml-8">{{ $message }}</span>
+                    @enderror
+
                     <!-- First Consent -->
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0 mt-1">

@@ -88,4 +88,25 @@ class PlatoAPIService
 
         return $response;
     }
+
+    /**
+     * Fetch corporate data from Plato API
+     *
+     * @param int $skip
+     * @param int $currentPage
+     * @return \Illuminate\Http\Client\Response
+     */
+    public function fetchCorporateFromPlato($skip = 0, $currentPage = 1)
+    {
+        $response = Http::timeout(30) // 30 seconds timeout
+            ->withHeaders([
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $this->token,
+            ])->get($this->baseUrl . '/' . $this->clinic . '/corporate', [
+                'skip' => $skip,
+                'current_page' => $currentPage
+            ]);
+
+        return $response;
+    }
 }

@@ -67,7 +67,7 @@ class EditCompany extends Component
     protected array $messages = [
         'company.company_name.required' => 'The company name field is required.',
         'company.address.required' => 'The address field is required.',
-        'company.billing_address.required' => 'The billing address field is required.',
+        'company.billing_code.required' => 'The billing code field is required.',
         'company.ehs_appointments_per_year.required' => 'The EHS appointments per year field is required.',
         'company.ehs_appointments_per_year.min' => 'The EHS appointments per year must be at least 1.',
         'company.contact_person1_name.required' => 'The primary contact name field is required.',
@@ -85,7 +85,7 @@ class EditCompany extends Component
             'company.company_name' => ['required', 'string', 'max:255'],
             'company.ehs_appointments_per_year' => ['required', 'integer', 'min:1'],
             'company.address' => ['required', 'string'],
-            'company.billing_address' => ['required', 'string'],
+            'company.billing_code' => ['required', 'string', 'max:100'],
             'company.contact_person1_name' => ['required', 'string', 'max:255'],
             'company.contact_person1_phone' => ['nullable', 'string', 'max:30'],
             'company.contact_person1_email' => ['nullable', 'email', 'max:255'],
@@ -99,8 +99,7 @@ class EditCompany extends Component
         $this->company = $companyRecord->only([
             'company_name',
             'address',
-            'billing_address',
-            'is_billing_same_as_company',
+            'billing_code',
             'remarks',
             'status',
             'ehs_appointments_per_year',
@@ -108,9 +107,6 @@ class EditCompany extends Component
             'contact_person1_name',
             'contact_person1_phone',
             'contact_person1_email',
-            'contact_person2_name',
-            'contact_person2_phone',
-            'contact_person2_email',
         ]);
 
         // Load account manager name if exists
@@ -128,44 +124,17 @@ class EditCompany extends Component
         $this->loadAccountManagers();
     }
 
-    public function updatedMappingFormAppointmentTypeId($value): void
+    public function updatedMappingFormAppointmentTypeIds($value): void
     {
-        // Cast to int to ensure proper type matching
-        $appointmentTypeId = !empty($value) ? (int) $value : null;
-        
-        Log::info('Appointment Type Selected', [
-            'raw_value' => $value,
-            'appointment_type_id' => $appointmentTypeId,
-        ]);
-        
-        $this->loadPackageOptions($appointmentTypeId);
-        
-        Log::info('Package Options Loaded', [
-            'count' => count($this->packageOptions),
-            'options' => $this->packageOptions,
-        ]);
-
-        $packageIds = array_column($this->packageOptions, 'id');
-        if (! empty($this->mappingForm['package_ids']) && is_array($this->mappingForm['package_ids'])) {
-            // Convert package IDs to strings for consistency with wire:model checkboxes
-            $packageIdsStrings = array_map(fn($id) => (string) $id, $packageIds);
-            
-            // Filter to keep only valid package IDs, preserving string format
-            $this->mappingForm['package_ids'] = array_values(array_filter(
-                $this->mappingForm['package_ids'],
-                fn($id) => in_array((string) $id, $packageIdsStrings, true)
-            ));
-        } else {
-            $this->mappingForm['package_ids'] = [];
-        }
-
+        // Load all packages since we removed appointment type dependency
+        $this->loadPackageOptions();
         $this->dispatchSelectInitializers();
     }
 
     public function createMapping(): void
     {
         $this->mappingForm = $this->emptyMappingForm();
-        $this->packageOptions = [];
+        $this->loadPackageOptions(); // Load all packages
         $this->packageAppointmentTypeSearch = '';
         $this->showPackageAppointmentTypeDropdown = false;
         $this->showForm = true;
@@ -176,46 +145,44 @@ class EditCompany extends Component
     {
         $mapping = CompanyPackage::where('company_id', $this->companyModel->id)->findOrFail($mappingId);
 
-        $selectedType = collect($this->appointmentTypes)->firstWhere('id', $mapping->appointment_type_id);
+        // Get all mappings with the same package to find all associated appointment types
+        $relatedMappings = CompanyPackage::where('company_id', $this->companyModel->id)
+            ->where('package_id', $mapping->package_id)
+            ->pluck('appointment_type_id')
+            ->map(fn($id) => (string) $id)
+            ->toArray();
 
         $this->mappingForm = [
             'id' => $mapping->id,
-            'appointment_type_id' => (string) $mapping->appointment_type_id,
+            'appointment_type_ids' => $relatedMappings, // Multiple appointment types
             'package_ids' => [(string) $mapping->package_id],
             'modes_of_identification' => $mapping->modes_of_identification ?? [],
             'clinic_ids' => $mapping->clinic_ids ?? [],
             'remarks' => $mapping->remarks,
         ];
 
-        $this->packageAppointmentTypeSearch = $selectedType['name'] ?? '';
+        $this->packageAppointmentTypeSearch = '';
         $this->showPackageAppointmentTypeDropdown = false;
-        $this->loadPackageOptions($mapping->appointment_type_id);
+        $this->loadPackageOptions(); // Load all packages
         $this->showForm = true;
         $this->dispatchSelectInitializers();
     }
 
     public function selectPackageAppointmentType(int $appointmentTypeId, string $appointmentTypeName): void
     {
-        $this->mappingForm['appointment_type_id'] = (string) $appointmentTypeId;
-        $this->packageAppointmentTypeSearch = $appointmentTypeName;
-        $this->showPackageAppointmentTypeDropdown = false;
-        
-        // Load package options
-        $this->loadPackageOptions($appointmentTypeId);
-        
-        // Filter package IDs to keep only valid ones
-        $packageIds = array_column($this->packageOptions, 'id');
-        if (! empty($this->mappingForm['package_ids']) && is_array($this->mappingForm['package_ids'])) {
-            // Convert package IDs to strings for consistency with wire:model checkboxes
-            $packageIdsStrings = array_map(fn($id) => (string) $id, $packageIds);
-            
-            // Filter to keep only valid package IDs, preserving string format
-            $this->mappingForm['package_ids'] = array_values(array_filter(
-                $this->mappingForm['package_ids'],
-                fn($id) => in_array((string) $id, $packageIdsStrings, true)
+        // Toggle appointment type selection
+        $currentIds = $this->mappingForm['appointment_type_ids'] ?? [];
+        $appointmentTypeIdStr = (string) $appointmentTypeId;
+
+        if (in_array($appointmentTypeIdStr, $currentIds)) {
+            // Remove if already selected
+            $this->mappingForm['appointment_type_ids'] = array_values(array_filter(
+                $currentIds,
+                fn($id) => $id !== $appointmentTypeIdStr
             ));
         } else {
-            $this->mappingForm['package_ids'] = [];
+            // Add if not selected
+            $this->mappingForm['appointment_type_ids'][] = $appointmentTypeIdStr;
         }
 
         $this->dispatchSelectInitializers();
@@ -224,25 +191,12 @@ class EditCompany extends Component
     public function updatedPackageAppointmentTypeSearch(): void
     {
         $this->showPackageAppointmentTypeDropdown = !empty($this->packageAppointmentTypeSearch);
-        
-        // If search matches exactly with a selected type, keep it selected
-        if (!empty($this->mappingForm['appointment_type_id'])) {
-            $selectedType = collect($this->appointmentTypes)->firstWhere('id', (int) $this->mappingForm['appointment_type_id']);
-            if ($selectedType && strtolower($selectedType['name']) === strtolower($this->packageAppointmentTypeSearch)) {
-                return;
-            }
-        }
-        
-        // Clear selection if search doesn't match
-        $this->mappingForm['appointment_type_id'] = '';
-        $this->packageOptions = [];
-        $this->mappingForm['package_ids'] = [];
     }
 
     public function getFilteredPackageAppointmentTypesProperty(): array
     {
         $search = trim($this->packageAppointmentTypeSearch ?? '');
-        
+
         if (empty($search)) {
             return $this->appointmentTypes;
         }
@@ -256,14 +210,14 @@ class EditCompany extends Component
             // Check if search term is contained in the name
             return str_contains($name, $searchLower);
         });
-        
+
         return array_values($filtered);
     }
 
     public function saveMapping(): void
     {
         $this->validate($this->mappingRules(), [
-            'mappingForm.appointment_type_id.required' => 'Please select an appointment type.',
+            'mappingForm.appointment_type_ids.required' => 'Please select at least one appointment type.',
             'mappingForm.package_ids.required' => 'Please select at least one package.',
             'mappingForm.package_ids.min' => 'Please select at least one package.',
             'mappingForm.package_ids.*.required' => 'Invalid package selected.',
@@ -271,61 +225,42 @@ class EditCompany extends Component
         ]);
 
         $packageIds = $this->mappingForm['package_ids'] ?? [];
-        $appointmentTypeId = (int) $this->mappingForm['appointment_type_id'];
-        
-        $basePayload = [
-            'company_id' => $this->companyModel->id,
-            'appointment_type_id' => $appointmentTypeId,
-            'modes_of_identification' => $this->sanitizeMoiValues(),
-            'clinic_ids' => $this->sanitizeClinicValues(),
-            'remarks' => $this->mappingForm['remarks'] ?? null,
-        ];
+        $appointmentTypeIds = array_map('intval', $this->mappingForm['appointment_type_ids'] ?? []);
 
         if (! empty($this->mappingForm['id'])) {
-            // Editing existing: delete the old record and create new ones for each selected package
+            // Editing existing: delete all old mappings for this package and recreate
             $oldMapping = CompanyPackage::where('company_id', $this->companyModel->id)
                 ->findOrFail($this->mappingForm['id']);
-            
+
             $oldPackageId = $oldMapping->package_id;
-            
-            // Delete the old mapping
-            $oldMapping->delete();
-            
-            // Create new records for each selected package
+
+            // Delete all mappings for this package
+            CompanyPackage::where('company_id', $this->companyModel->id)
+                ->where('package_id', $oldPackageId)
+                ->delete();
+        }
+
+        // Create new records for each combination of appointment type and package
+        foreach ($appointmentTypeIds as $appointmentTypeId) {
             foreach ($packageIds as $packageId) {
                 $packageIdInt = (int) $packageId;
-                
-                // Skip if this is the same package as the old one (to avoid duplicate)
-                // But actually, we deleted it, so we should create it again
-                $payload = array_merge($basePayload, [
-                    'package_id' => $packageIdInt,
-                ]);
-                
-                // Check if this combination already exists (from other mappings)
-                $exists = CompanyPackage::where([
+
+                $payload = [
                     'company_id' => $this->companyModel->id,
                     'appointment_type_id' => $appointmentTypeId,
                     'package_id' => $packageIdInt,
-                ])->exists();
-                
-                if (!$exists) {
-                    CompanyPackage::create($payload);
-                }
-            }
-        } else {
-            // Creating new: create one record per selected package
-            foreach ($packageIds as $packageId) {
-                $payload = array_merge($basePayload, [
-                    'package_id' => (int) $packageId,
-                ]);
-                
+                    'modes_of_identification' => $this->sanitizeMoiValues(),
+                    'clinic_ids' => $this->sanitizeClinicValues(),
+                    'remarks' => $this->mappingForm['remarks'] ?? null,
+                ];
+
                 // Check if this combination already exists
                 $exists = CompanyPackage::where([
                     'company_id' => $this->companyModel->id,
                     'appointment_type_id' => $appointmentTypeId,
-                    'package_id' => (int) $packageId,
+                    'package_id' => $packageIdInt,
                 ])->exists();
-                
+
                 if (!$exists) {
                     CompanyPackage::create($payload);
                 }
@@ -363,13 +298,7 @@ class EditCompany extends Component
         $this->showForm = false;
     }
 
-    public function updatedCompanyIsBillingSameAsCompany($value): void
-    {
-        if ($value) {
-            // When checked, copy company address to billing address
-            $this->company['billing_address'] = $this->company['address'] ?? '';
-        }
-    }
+
 
     public function clear(): void
     {
@@ -377,8 +306,7 @@ class EditCompany extends Component
         $this->company = $this->companyModel->only([
             'company_name',
             'address',
-            'billing_address',
-            'is_billing_same_as_company',
+            'billing_code',
             'remarks',
             'status',
             'ehs_appointments_per_year',
@@ -386,9 +314,6 @@ class EditCompany extends Component
             'contact_person1_name',
             'contact_person1_phone',
             'contact_person1_email',
-            'contact_person2_name',
-            'contact_person2_phone',
-            'contact_person2_email',
         ]);
 
         // Reset account manager search
@@ -433,19 +358,19 @@ class EditCompany extends Component
     public function toggleSelectAllPackages(): void
     {
         $packageIds = array_column($this->packageOptions, 'id');
-        
+
         // Convert to strings to match wire:model behavior (checkboxes send string values)
         $packageIds = array_map(fn($id) => (string) $id, $packageIds);
-        
+
         // Get current selected values and normalize to strings
         $currentSelected = $this->mappingForm['package_ids'] ?? [];
         $currentSelected = array_map(fn($id) => (string) $id, $currentSelected);
-        
+
         // Check if all packages are selected
-        $allSelected = count($currentSelected) === count($packageIds) && 
-                       count($packageIds) > 0 && 
-                       empty(array_diff($packageIds, $currentSelected));
-        
+        $allSelected = count($currentSelected) === count($packageIds) &&
+            count($packageIds) > 0 &&
+            empty(array_diff($packageIds, $currentSelected));
+
         // Toggle: if all selected, deselect all; otherwise, select all
         $this->mappingForm['package_ids'] = $allSelected ? [] : $packageIds;
     }
@@ -455,13 +380,13 @@ class EditCompany extends Component
         if (empty($this->packageOptions)) {
             return false;
         }
-        
+
         $packageIds = array_map(fn($pkg) => (string) $pkg['id'], $this->packageOptions);
         $selectedIds = array_map(fn($id) => (string) $id, $this->mappingForm['package_ids'] ?? []);
-        
-        return count($selectedIds) === count($packageIds) && 
-               count($packageIds) > 0 && 
-               empty(array_diff($packageIds, $selectedIds));
+
+        return count($selectedIds) === count($packageIds) &&
+            count($packageIds) > 0 &&
+            empty(array_diff($packageIds, $selectedIds));
     }
 
     public function render()
@@ -477,22 +402,24 @@ class EditCompany extends Component
         $teamId = $this->companyModel->team_id;
 
         return [
-            'mappingForm.appointment_type_id' => [
+            'mappingForm.appointment_type_ids' => ['required', 'array', 'min:1'],
+            'mappingForm.appointment_type_ids.*' => [
                 'required',
-                Rule::exists('categories', 'id')->where(fn ($query) => $query->where('team_id', $teamId)),
+                'integer',
+                Rule::exists('categories', 'id')->where(fn($query) => $query->where('team_id', $teamId)),
             ],
             'mappingForm.package_ids' => ['required', 'array', 'min:1'],
             'mappingForm.package_ids.*' => [
                 'required',
                 'integer',
-                Rule::exists('categories', 'id')->where(fn ($query) => $query->where('team_id', $teamId)),
+                Rule::exists('categories', 'id')->where(fn($query) => $query->where('team_id', $teamId)),
             ],
             'mappingForm.modes_of_identification' => ['nullable', 'array'],
             'mappingForm.modes_of_identification.*' => ['nullable', 'string', 'max:255'],
             'mappingForm.clinic_ids' => ['nullable', 'array'],
             'mappingForm.clinic_ids.*' => [
                 'integer',
-                Rule::exists('locations', 'id')->where(fn ($query) => $query->where('team_id', $teamId)),
+                Rule::exists('locations', 'id')->where(fn($query) => $query->where('team_id', $teamId)),
             ],
             'mappingForm.remarks' => ['nullable', 'string', 'max:500'],
         ];
@@ -522,7 +449,7 @@ class EditCompany extends Component
             ->whereNull('parent_id')
             ->orderBy('name')
             ->get(['id', 'name'])
-            ->map(fn ($category) => [
+            ->map(fn($category) => [
                 'id' => (int) $category->id,
                 'name' => $category->name,
             ])
@@ -537,7 +464,7 @@ class EditCompany extends Component
             ->orderBy('location_name')
             ->get(['id', 'location_name']);
 
-        $this->locations = $locations->map(fn ($location) => [
+        $this->locations = $locations->map(fn($location) => [
             'id' => (int) $location->id,
             'name' => $location->location_name,
         ])->toArray();
@@ -562,23 +489,19 @@ class EditCompany extends Component
         // Filter appointment types to only include those in company packages
         $this->appointmentTypesForValidity = array_values(array_filter(
             $this->appointmentTypes,
-            fn ($type) => in_array($type['id'], $appointmentTypeIds)
+            fn($type) => in_array($type['id'], $appointmentTypeIds)
         ));
     }
 
-    protected function loadPackageOptions(?int $appointmentTypeId): void
+    protected function loadPackageOptions(?int $appointmentTypeId = null): void
     {
-        if (empty($appointmentTypeId)) {
-            $this->packageOptions = [];
-            return;
-        }
-
+        // Load ALL packages regardless of appointment type
         $this->packageOptions = Category::query()
             ->where('team_id', $this->companyModel->team_id)
-            ->where('parent_id', $appointmentTypeId)
+            ->whereNotNull('parent_id') // Only get packages (children), not appointment types
             ->orderBy('name')
             ->get(['id', 'name'])
-            ->map(fn ($category) => [
+            ->map(fn($category) => [
                 'id' => (int) $category->id,
                 'name' => $category->name,
             ])
@@ -589,7 +512,7 @@ class EditCompany extends Component
     {
         return [
             'id' => null,
-            'appointment_type_id' => '',
+            'appointment_type_ids' => [], // Changed to support multiple appointment types
             'package_ids' => [],
             'modes_of_identification' => [],
             'clinic_ids' => [],
@@ -600,17 +523,17 @@ class EditCompany extends Component
     protected function sanitizeMoiValues(?array $values = null): array
     {
         $values = $values ?? ($this->mappingForm['modes_of_identification'] ?? []);
-        $values = array_map(static fn ($value) => trim((string) $value), $values);
+        $values = array_map(static fn($value) => trim((string) $value), $values);
 
-        return array_values(array_filter($values, static fn ($value) => $value !== ''));
+        return array_values(array_filter($values, static fn($value) => $value !== ''));
     }
 
     protected function sanitizeClinicValues(?array $values = null): array
     {
         $values = $values ?? ($this->mappingForm['clinic_ids'] ?? []);
-        $values = array_map(static fn ($value) => (int) $value, $values);
+        $values = array_map(static fn($value) => (int) $value, $values);
 
-        return array_values(array_filter($values, static fn ($value) => $value > 0));
+        return array_values(array_filter($values, static fn($value) => $value > 0));
     }
 
     // ==================== Appointment Type Validity Methods ====================
@@ -653,7 +576,7 @@ class EditCompany extends Component
     public function updatedAppointmentTypeSearch(): void
     {
         $this->showAppointmentTypeDropdown = !empty($this->appointmentTypeSearch);
-        
+
         // If search matches exactly with a selected type, keep it selected
         if (!empty($this->appointmentTypeForm['appointment_type_id'])) {
             $selectedType = collect($this->appointmentTypesForValidity)->firstWhere('id', (int) $this->appointmentTypeForm['appointment_type_id']);
@@ -661,7 +584,7 @@ class EditCompany extends Component
                 return;
             }
         }
-        
+
         // Clear selection if search doesn't match
         $this->appointmentTypeForm['appointment_type_id'] = '';
     }
@@ -701,7 +624,7 @@ class EditCompany extends Component
             CompanyAppointmentType::where('company_id', $this->companyModel->id)
                 ->findOrFail($this->appointmentTypeForm['id'])
                 ->update($payload);
-            
+
             session()->flash('appointmentTypesMessage', 'Appointment type validity updated successfully.');
         } else {
             // Create new
@@ -742,7 +665,7 @@ class EditCompany extends Component
         return [
             'appointmentTypeForm.appointment_type_id' => [
                 'required',
-                Rule::exists('categories', 'id')->where(fn ($query) => $query->where('team_id', $teamId)),
+                Rule::exists('categories', 'id')->where(fn($query) => $query->where('team_id', $teamId)),
             ],
             'appointmentTypeForm.valid_from' => ['required', 'date'],
             'appointmentTypeForm.valid_to' => ['required', 'date', 'after_or_equal:appointmentTypeForm.valid_from'],
@@ -779,7 +702,7 @@ class EditCompany extends Component
     public function updatedAccountManagerSearch(): void
     {
         $this->showAccountManagerDropdown = !empty($this->accountManagerSearch);
-        
+
         // If search matches exactly with a selected manager, keep it selected
         if (!empty($this->company['account_manager_id'])) {
             $selectedManager = collect($this->accountManagers)->firstWhere('id', (int) $this->company['account_manager_id']);
@@ -787,7 +710,7 @@ class EditCompany extends Component
                 return;
             }
         }
-        
+
         // Clear selection if search doesn't match
         $this->company['account_manager_id'] = null;
     }
@@ -800,8 +723,8 @@ class EditCompany extends Component
 
         $search = strtolower($this->accountManagerSearch);
         return array_values(array_filter($this->accountManagers, function ($manager) use ($search) {
-            return str_contains(strtolower($manager['name']), $search) || 
-                   str_contains(strtolower($manager['email'] ?? ''), $search);
+            return str_contains(strtolower($manager['name']), $search) ||
+                str_contains(strtolower($manager['email'] ?? ''), $search);
         }));
     }
 
@@ -815,13 +738,13 @@ class EditCompany extends Component
             })
             ->where(function ($query) {
                 $query->where('is_admin', 1)
-                      ->orWhereHas('roles', function ($q) {
-                          $q->where('name', User::ROLE_ADMIN);
-                      });
+                    ->orWhereHas('roles', function ($q) {
+                        $q->where('name', User::ROLE_ADMIN);
+                    });
             })
             ->orderBy('name')
             ->get(['id', 'name', 'email', 'team_id'])
-            ->map(fn ($user) => [
+            ->map(fn($user) => [
                 'id' => (int) $user->id,
                 'name' => $user->name,
                 'email' => $user->email,

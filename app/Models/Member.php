@@ -37,6 +37,9 @@ class Member extends Model
         'approved_by',
         'approved_at',
         'is_active',
+        'terms_and_conditions',
+        'consent_data_collection',
+        'consent_marketing',
     ];
 
     protected $hidden = [
@@ -51,6 +54,9 @@ class Member extends Model
         'is_temporary_password' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'terms_and_conditions' => 'boolean',
+        'consent_data_collection' => 'boolean',
+        'consent_marketing' => 'boolean',
     ];
 
     // Relationships
@@ -90,9 +96,9 @@ class Member extends Model
 
     public function scopeInactive($query)
     {
-        return $query->where(function($q) {
+        return $query->where(function ($q) {
             $q->where('is_active', 0)
-              ->orWhere('status', 'inactive');
+                ->orWhere('status', 'inactive');
         });
     }
 
@@ -107,7 +113,7 @@ class Member extends Model
         if (!$this->nric_fin) {
             return null;
         }
-        
+
         // Mask the middle characters (e.g., T1234567A -> T******7A)
         $nric = $this->nric_fin;
         if (strlen($nric) > 4) {
@@ -115,11 +121,7 @@ class Member extends Model
             $last = substr($nric, -3);
             return $first . str_repeat('*', strlen($nric) - 4) . $last;
         }
-        
+
         return $nric;
     }
 }
-
-
-
-

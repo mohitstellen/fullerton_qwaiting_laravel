@@ -6,7 +6,7 @@ use Livewire\Component;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Session;
-use App\Models\{User, Role, Team, Category, Location, AccountSetting, Counter,Domain, SiteDetail};
+use App\Models\{User, Role, Team, Category, Location, AccountSetting, Counter, Domain, SiteDetail};
 use Auth;
 use Livewire\Attributes\Title;
 use App\Models\Translation;
@@ -21,14 +21,11 @@ class StaffManagementComponent extends Component
     public $locationId;
     public $name;
     public $email;
-    public $phone;
     public $username;
     public $password;
     public $password_confirmation;
     public $locations;
-    public $address;
     public $role;
-    public $unique_id;
     public $counter_id;
     public $enable_desktop_notification = false;
     public $show_next_button = true;
@@ -59,20 +56,20 @@ class StaffManagementComponent extends Component
         $this->teamId = tenant('id'); // Get the current tenant ID
         $this->locationId = Session::get('selectedLocation');
 
-        if(Auth::user()->is_admin == 1){
+        if (Auth::user()->is_admin == 1) {
             $this->allLocations = Location::where('team_id', tenant('id'))
-            ->where('status',1)
-            ->select('location_name', 'id')
-            ->get();
-        }else{
+                ->where('status', 1)
+                ->select('location_name', 'id')
+                ->get();
+        } else {
             $this->allLocations = Location::where('team_id', tenant('id'))
-            ->where('id', Auth::user()?->locations)
-            ->where('status',1)
-            ->select('location_name', 'id')
-            ->get();
+                ->where('id', Auth::user()?->locations)
+                ->where('status', 1)
+                ->select('location_name', 'id')
+                ->get();
         }
 
-        $domain = Domain::where('team_id',$this->teamId)->first();
+        $domain = Domain::where('team_id', $this->teamId)->first();
         $this->hold_queue_feature = $domain['hold_queue_feature'] == 1 ? true : false;
 
         $this->language = session('app_locale');
@@ -87,34 +84,35 @@ class StaffManagementComponent extends Component
 
         $this->level == 1;
 
-        $this->enablePriority = SiteDetail::where('team_id', $this->teamId)->where('location_id',$this->locationId)->value('use_staff_priority') ?? false;
-         $this->allCounters = Counter::where('team_id',$this->teamId)->whereJsonContains('counter_locations', "$this->locationId")->where('show_checkbox',1)->get();
-
+        $this->enablePriority = SiteDetail::where('team_id', $this->teamId)->where('location_id', $this->locationId)->value('use_staff_priority') ?? false;
+        $this->allCounters = Counter::where('team_id', $this->teamId)->whereJsonContains('counter_locations', "$this->locationId")->where('show_checkbox', 1)->get();
     }
 
 
-        public function updatedLevel($value){
-        $this->level =$value;
-        if($this->level == 2){
-          $this->staffList = User::where('team_id',$this->teamId)
-            ->where('level_id',1)
-            ->whereNotNull('locations')
-           ->where('locations', '!=', '')
-           ->whereRaw("JSON_VALID(locations)")
-           ->whereJsonContains('locations', (string) $this->locationId)
-           ->orWhereJsonContains('locations', (int) $this->locationId)
-           ->select('id','name')
-           ->get();
-        }if($this->level == 3){
-           $this->staffList = User::where('team_id',$this->teamId)
-            ->where('level_id',2)
-            ->whereNotNull('locations')
-           ->where('locations', '!=', '')
-           ->whereRaw("JSON_VALID(locations)")
-           ->whereJsonContains('locations', (string) $this->locationId)
-           ->orWhereJsonContains('locations', (int) $this->locationId)
-           ->select('id','name')
-           ->get();
+    public function updatedLevel($value)
+    {
+        $this->level = $value;
+        if ($this->level == 2) {
+            $this->staffList = User::where('team_id', $this->teamId)
+                ->where('level_id', 1)
+                ->whereNotNull('locations')
+                ->where('locations', '!=', '')
+                ->whereRaw("JSON_VALID(locations)")
+                ->whereJsonContains('locations', (string) $this->locationId)
+                ->orWhereJsonContains('locations', (int) $this->locationId)
+                ->select('id', 'name')
+                ->get();
+        }
+        if ($this->level == 3) {
+            $this->staffList = User::where('team_id', $this->teamId)
+                ->where('level_id', 2)
+                ->whereNotNull('locations')
+                ->where('locations', '!=', '')
+                ->whereRaw("JSON_VALID(locations)")
+                ->whereJsonContains('locations', (string) $this->locationId)
+                ->orWhereJsonContains('locations', (int) $this->locationId)
+                ->select('id', 'name')
+                ->get();
         }
     }
 
@@ -123,7 +121,7 @@ class StaffManagementComponent extends Component
     {
         return [
             // 'name' => ['required', 'regex:/^[a-zA-Z\s]+$/', 'max:255'],
-        'name' => ['required',  'regex:/^[\p{L}\p{M}\s]+$/u', 'max:255'],
+            'name' => ['required',  'regex:/^[\p{L}\p{M}\s]+$/u', 'max:255'],
 
             // 'email' => [
             //     'required',
@@ -146,9 +144,7 @@ class StaffManagementComponent extends Component
                 Rule::unique('users', 'email')->where('team_id', $this->teamId)->whereNull('deleted_at'),
             ],
 
-            'phone' => ['nullable', 'regex:/^[0-9]{7,15}$/'],
-
-           'username' => [
+            'username' => [
                 'required',
                 'string',
                 'max:255',
@@ -157,15 +153,13 @@ class StaffManagementComponent extends Component
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|exists:roles,id',
             'counter_id' => 'required|exists:counters,id',
-            'address' => 'nullable|string|max:500',
-            'unique_id' => 'nullable|string|max:50',
             'locations' => 'required|array',
             'categories' => 'nullable|array|exists:categories,id',
             'level' => ['nullable', 'integer', 'min:1'],
             'priority' => 'nullable|integer|min:0',
-             // Conditional rule: parent_id required if level > 1
+            // Conditional rule: parent_id required if level > 1
             'parent_id' => [
-                Rule::requiredIf(fn () => $this->level > 1),
+                Rule::requiredIf(fn() => $this->level > 1),
                 'nullable', // for level 1
                 'exists:users,id',
             ],
@@ -179,8 +173,6 @@ class StaffManagementComponent extends Component
         'name.max' => 'The name may not be greater than 255 characters.',
         'email.required' => 'The email field is required.',
         'email.unique' => 'The email has already been taken.',
-        'phone.required' => 'The phone number is required.',
-        'phone.regex' => 'The phone number must be between 7 to 15 digits and contain only numbers.',
         'username.required' => 'The username field is required.',
         'username.unique' => 'The username has already been taken.',
         'password.required' => 'The password field is required.',
@@ -214,11 +206,9 @@ class StaffManagementComponent extends Component
         $user = User::create([
             'name' => $this->name,
             'email' => $this->email,
-            'phone' => $this->phone,
             'username' => $this->username,
             'password' => Hash::make($this->password),
             'role_id' => $this->role,
-            'unique_id' => $this->unique_id,
             'counter_id' => $this->counter_id,
             'locations' => $this->locations ?? [],
             'assign_counters' => $this->selectedAssignCounters ?? [],
@@ -245,23 +235,23 @@ class StaffManagementComponent extends Component
 
         // Flash a success message
         session()->flash('message', 'Staff member added successfully.');
-         $this->dispatch('created', '/staff');
+        $this->dispatch('created', '/staff');
 
         // Reset the form fields
         $this->resetForm();
     }
 
     protected function isDuplicateUser($field, $value)
-{
-    return User::where($field, $value)
-        ->where('team_id', $this->teamId)
-        ->where(function ($q) {
-            foreach ($this->allLocations as $locationId) {
-                $q->orWhereJsonContains('locations', "$locationId");
-            }
-        })
-        ->exists();
-}
+    {
+        return User::where($field, $value)
+            ->where('team_id', $this->teamId)
+            ->where(function ($q) {
+                foreach ($this->allLocations as $locationId) {
+                    $q->orWhereJsonContains('locations', "$locationId");
+                }
+            })
+            ->exists();
+    }
 
     // Reset form fields
     public function resetForm()
@@ -269,14 +259,11 @@ class StaffManagementComponent extends Component
         $this->reset([
             'name',
             'email',
-            'phone',
             'username',
             'password',
             'password_confirmation',
             'role',
             'counter_id',
-            'address',
-            'unique_id',
             'enable_desktop_notification'
         ]);
     }
@@ -305,20 +292,20 @@ class StaffManagementComponent extends Component
     }
 
     public function updatedSelectedAssignCounters()
-{
-    $this->selectAllCounters = count($this->selectedAssignCounters) == $this->allCounters->count();
-}
-
-public function toggleSelectAllCounters()
-{
-    if ($this->selectAllCounters) {
-        // Select all counters
-        $this->selectedAssignCounters = $this->allCounters->pluck('id')->toArray();
-    } else {
-        // Deselect all counters
-        $this->selectedAssignCounters = [];
+    {
+        $this->selectAllCounters = count($this->selectedAssignCounters) == $this->allCounters->count();
     }
-}
+
+    public function toggleSelectAllCounters()
+    {
+        if ($this->selectAllCounters) {
+            // Select all counters
+            $this->selectedAssignCounters = $this->allCounters->pluck('id')->toArray();
+        } else {
+            // Deselect all counters
+            $this->selectedAssignCounters = [];
+        }
+    }
 
     // Render the Livewire view
     public function render()
@@ -327,11 +314,11 @@ public function toggleSelectAllCounters()
 
         $allRoles = Role::where(function ($query) {
             $query->where('team_id', $this->teamId)
-                  ->orWhere('id', 1);
+                ->orWhere('id', 1);
         })
-        ->where('location_id', $this->locationId)
-        ->select('name', 'id')
-        ->get();
+            ->where('location_id', $this->locationId)
+            ->select('name', 'id')
+            ->get();
         // $allCounters = Counter::where('team_id',$this->teamId)->whereJsonContains('counter_locations', "$this->locationId")->where('show_checkbox',1)->get();
         $categories = Category::where('team_id', $this->teamId)
             ->whereJsonContains('category_locations', "$this->locationId")
@@ -346,7 +333,5 @@ public function toggleSelectAllCounters()
             'allRoles' => $allRoles,
             'getcategories' => $structuredCategories,
         ]);
-
-
     }
 }
