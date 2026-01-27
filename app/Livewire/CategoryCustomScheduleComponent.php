@@ -11,6 +11,7 @@ use App\Models\SiteDetail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\Title;
+use Auth;
 
 class CategoryCustomScheduleComponent extends Component
 {
