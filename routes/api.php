@@ -6,6 +6,7 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Controllers\Api\CallScreenApiController;
 use App\Http\Controllers\Api\StaffController;
+use App\Http\Controllers\Api\FullertonController;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,8 +90,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('staff', [StaffController::class, 'index']);
     Route::get('getcountries', [ApiController::class, 'getCountries']);
 
-
-
+    /**
+     * Fullerton API
+     */
+    Route::get('/ABS_GetCompanyList', [FullertonController::class, 'getCompanyList']);
+    Route::get('/ABS_GetAppointmentList', [FullertonController::class, 'getAppointmentList']);
+    Route::get('/ABS_GetPackageList', [FullertonController::class, 'getPackageList']);
+    Route::get('/ABS_GetClinicList', [FullertonController::class, 'getClinicList']);
+    Route::get('/ABS_GetAvailableDates', [FullertonController::class, 'getAvailableDates']);
+    Route::get('/ABS_GetAvailableTimeslots', [FullertonController::class, 'getAvailableTimeslots']);
+    Route::post('/ABS_BookAppointment', [FullertonController::class, 'bookAppointment']);
 
 
 
