@@ -51,6 +51,7 @@ $langArr = [
   "Manage Form Fields" => "Manage Form Fields",
   "Locations" => "Locations",
   "Clinics" => "Clinics",
+  "Clinics Master" => "Clinics Master",
   "Language Settings" => "Language Settings",
   "Terms & Conditions" => "Terms & Conditions",
   "Display Settings" => "Display Settings",
@@ -64,6 +65,7 @@ $langArr = [
    "Country Master" => "Country Master",
    "Appointment Type" => "Appointment Type",
    "Appointment Booking" => "Appointment Booking",
+   "Schedule Settings" => "Schedule Settings",
 ];
 
 $result = array_map(function ($value) {

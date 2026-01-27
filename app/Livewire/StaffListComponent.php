@@ -55,6 +55,11 @@ class StaffListComponent extends Component
 
     public function updatePassword()
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Staff Password Change')) {
+            abort(403);
+        }
+        
         $this->validate([
             // 'oldPassword' => 'required',
             'newPassword' => 'required|min:6|different:oldPassword',
@@ -84,6 +89,11 @@ class StaffListComponent extends Component
     #[On('confirmed-delete')]
     public function confirmDelete()
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Staff Delete')) {
+            abort(403);
+        }
+        
         if ($this->selectedStaff) {
             $this->selectedStaff->delete();
             $this->selectedStaff = null;
@@ -109,6 +119,10 @@ class StaffListComponent extends Component
     #[On('confirmed-multiple-delete')]
     public function bulkDeleteStaff()
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Staff Delete')) {
+            abort(403);
+        }
 
         if (!empty($this->selectedMultipleStaff)) {
             User::whereIn('id', $this->selectedMultipleStaff)->delete();
@@ -155,21 +169,35 @@ class StaffListComponent extends Component
 
         // Add header row
         $csvData[] = [
-            '#',
             'Name',
             'Username',
+            'Contact',
             'Email',
             'Role',
+            'Location',
+            'Created at',
         ];
+
+        // Get datetime format
+        $datetimeFormat = AccountSetting::showDateTimeFormat();
 
         // Add data rows
         foreach ($staffs as $staff) {
+            // Format location
+            $locations = $staff->locations != '' ? Location::whereIn('id', $staff->locations)->pluck('location_name')->toArray() : [];
+            $locationString = !empty($locations) ? implode(',', $locations) : '';
+
+            // Format created at
+            $createdAt = $staff->created_at ? \Carbon\Carbon::parse($staff->created_at)->format($datetimeFormat) : '';
+
             $csvData[] = [
-                $staff->id ?? '',
                 $staff->name ?? '',
                 $staff->username ?? '',
+                $staff->phone ?? '',
                 $staff->email ?? '',
                 $staff->roles->pluck('name')->implode(', ') ?? 'N/A',
+                $locationString,
+                $createdAt,
             ];
         }
 

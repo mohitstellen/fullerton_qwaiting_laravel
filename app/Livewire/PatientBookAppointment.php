@@ -667,13 +667,14 @@ class PatientBookAppointment extends Component
             if ($storedToken) {
                 try {
                     $getAccessTokenRes = $daraApi->refreshToken($storedToken->refresh_token);
+                    $refreshTokenResponse = $getAccessTokenRes->json();
 
-                    if (isset($getAccessTokenRes['success']) && $getAccessTokenRes['success'] == 'true') {
-                        Log::info('Refresh Token API Run Successfully via DB token', ['getAccessTokenRes' => $getAccessTokenRes]);
-                        $getAccessToken = $getAccessTokenRes['data']['access_token'];
+                    if (isset($refreshTokenResponse['success']) && $refreshTokenResponse['success'] == 'true') {
+                        Log::info('Refresh Token API Run Successfully via DB token', ['getAccessTokenRes' => $refreshTokenResponse]);
+                        $getAccessToken = $refreshTokenResponse['data']['access_token'];
 
                         // Update token if refresh token is new provided or keep existing
-                        $newRefreshToken = $getAccessTokenRes['data']['refresh_token'] ?? $storedToken->refresh_token;
+                        $newRefreshToken = $refreshTokenResponse['data']['refresh_token'] ?? $storedToken->refresh_token;
 
                         $storedToken->update([
                             'refresh_token' => $newRefreshToken,
@@ -688,14 +689,15 @@ class PatientBookAppointment extends Component
             // If no access token yet, fetch new pair
             if (!$getAccessToken) {
                 $generateTokenPair = $daraApi->getTokenPair();
+                $tokenPairResponse = $generateTokenPair->json();
 
-                if (isset($generateTokenPair['success']) && $generateTokenPair['success'] == 'true') {
+                if (isset($tokenPairResponse['success']) && $tokenPairResponse['success'] == 'true') {
                     Log::info('Token Pair API Run Successfully', [
-                        'generateTokenPair' => $generateTokenPair,
+                        'generateTokenPair' => $tokenPairResponse,
                     ]);
 
-                    $getAccessToken = $generateTokenPair['data']['access_token'];
-                    $getRefreshToken = $generateTokenPair['data']['refresh_token'];
+                    $getAccessToken = $tokenPairResponse['data']['access_token'];
+                    $getRefreshToken = $tokenPairResponse['data']['refresh_token'];
 
                     IntegrationToken::updateOrCreate(
                         ['service_name' => 'dara'],
@@ -719,13 +721,36 @@ class PatientBookAppointment extends Component
                     ]
                 ];
 
-                $createAppointment = $daraApi->createAppointment($getAccessToken, $daraApiBooking);
+                Log::info('Calling Dara API createAppointment', [
+                    'access_token' => substr($getAccessToken, 0, 10) . '...',
+                    'booking_data' => $daraApiBooking
+                ]);
 
-                if (isset($createAppointment['success']) && $createAppointment['success'] == 'true') {
+                try {
+                    $createAppointment = $daraApi->createAppointment($getAccessToken, $daraApiBooking);
+                    
+                    // Log the raw response
+                    Log::info('Dara API createAppointment raw response', [
+                        'status' => $createAppointment->status(),
+                        'successful' => $createAppointment->successful(),
+                        'body' => $createAppointment->body(),
+                    ]);
+                    
+                    // Convert response to array if it's an HTTP response object
+                    $appointmentResponse = is_array($createAppointment) ? $createAppointment : $createAppointment->json();
+                    
+                    // Log the parsed response
+                    Log::info('Dara API createAppointment parsed response', [
+                        'response' => $appointmentResponse,
+                        'is_null' => is_null($appointmentResponse),
+                        'is_array' => is_array($appointmentResponse)
+                    ]);
+
+                    if (!empty($appointmentResponse) && isset($appointmentResponse['success']) && $appointmentResponse['success'] == 'true') {
 
                     Log::info('Patient Appointment Booking Successfully', [
                         'bookingData' => $bookingData,
-                        'createAppointment' => $createAppointment,
+                        'createAppointment' => $appointmentResponse,
                     ]);
 
                     $booking = Booking::create($bookingData);
@@ -749,7 +774,7 @@ class PatientBookAppointment extends Component
                         'updated_at' => now(),
                     ]);
 
-                    $url = "https://testquestionaire.s3-ap-southeast-1.amazonaws.com/fullerton-questionnaire/index.html?token=" . $createAppointment['data']['token'];
+                    $url = "https://testquestionaire.s3-ap-southeast-1.amazonaws.com/fullerton-questionnaire/index.html?token=" . $appointmentResponse['data']['token'];
 
                     try {
                         $siteDetail = SiteDetail::where('team_id', $this->teamId)
@@ -891,24 +916,86 @@ class PatientBookAppointment extends Component
                     }
 
                     DB::commit();
+                    
+                    $this->successMessage = 'Appointment booked successfully! Your order number is ' . $order->order_number;
+                    $this->step = 3;
+
+                    // Dispatch success event with order details
+                    $this->dispatch('booking-success', [
+                        'refID' => time(),
+                        'booking_id' => $booking->id,
+                        'order_number' => $order->order_number,
+                        'message' => $this->successMessage
+                    ]);
                 } else {
+                    Log::info('Dara API response indicates failure, checking error type', [
+                        'success_value' => $appointmentResponse['success'] ?? 'not_set',
+                        'success_type' => gettype($appointmentResponse['success'] ?? null),
+                        'message' => $appointmentResponse['message'] ?? 'not_set',
+                    ]);
+                    
+                    // Check if response is null or empty
+                    if (empty($appointmentResponse)) {
+                        Log::error('Dara API returned empty response', [
+                            'status' => $createAppointment->status(),
+                            'body' => $createAppointment->body(),
+                        ]);
+                        DB::rollBack();
+                        $this->addError('booking', 'Failed to book appointment. Please try again.');
+                        return;
+                    }
+                    
+                    // Check if the error is "Appointment already exists"
+                    $errorMessage = $appointmentResponse['message'] ?? '';
+                    $successValue = $appointmentResponse['success'] ?? null;
+                    
+                    Log::info('Checking for "Appointment already exists" error', [
+                        'success_value' => $successValue,
+                        'success_is_false' => ($successValue === false || $successValue === 'false'),
+                        'error_message' => $errorMessage,
+                        'message_contains_text' => (stripos($errorMessage, 'Appointment already exists') !== false),
+                    ]);
+                    
+                    if (
+                        isset($appointmentResponse['success']) && 
+                        ($appointmentResponse['success'] === false || $appointmentResponse['success'] === 'false') &&
+                        (stripos($errorMessage, 'Appointment already exists') !== false)
+                    ) {
+                        Log::info('"Appointment already exists" error detected - showing user message');
+                        DB::rollBack();
+                        $this->addError('booking', 'Booking already exists.');
+                        // Dispatch event for SweetAlert
+                        $this->dispatch('booking-already-exists');
+                        return;
+                    }
+                    
                     Log::error('Patient Book Appointment failed', [
                         'error' => 'API Error',
-                        'api_response' => $createAppointment ?? null,
+                        'api_response' => $appointmentResponse ?? null,
                     ]);
+                    DB::rollBack();
+                    $this->addError('booking', 'Failed to book appointment. Please try again.');
+                    return;
+                    }
+                } catch (\Exception $apiEx) {
+                    Log::error('Dara API createAppointment exception', [
+                        'error' => $apiEx->getMessage(),
+                        'trace' => $apiEx->getTraceAsString(),
+                        'booking_data' => $daraApiBooking
+                    ]);
+                    DB::rollBack();
+                    $this->addError('booking', 'Failed to book appointment. Please try again.');
+                    return;
                 }
+            } else {
+                Log::error('Dara API createAppointment not called - no access token available', [
+                    'has_stored_token' => !empty($storedToken),
+                    'get_access_token' => $getAccessToken
+                ]);
+                DB::rollBack();
+                $this->addError('booking', 'Failed to authenticate with booking service. Please try again.');
+                return;
             }
-
-            $this->successMessage = 'Appointment booked successfully! Your order number is ' . $order->order_number;
-            $this->step = 3;
-
-            // Dispatch success event with order details
-            $this->dispatch('booking-success', [
-                'refID' => time(),
-                'booking_id' => $booking->id,
-                'order_number' => $order->order_number,
-                'message' => $this->successMessage
-            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             $this->addError('booking', 'Failed to book appointment. Please try again.');

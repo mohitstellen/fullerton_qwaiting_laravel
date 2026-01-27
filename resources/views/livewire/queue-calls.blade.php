@@ -93,7 +93,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6h.01M12 12h.01M12 18h.01" />
                     </svg>
                 </span>
-                <div x-show="open"  @click.outside="open = false"  x-transition  class="absolute right-0 bg-white-900 border border-gray-200 rounded-lg shadow-lg md:shadow-none md:border-none z-50 flex-col lg:flex-row lg:relative lg:block flex md:nowrap gap-2 whitespace-nowrap lg:p-0 p-2 d-block dark:bg-gray-800">
+                <div x-show="open"  @click.outside="open = false"  x-transition  class="absolute right-0 bg-white-900 border border-gray-200 rounded-lg shadow-lg md:shadow-none md:border-none z-50 flex flex-col lg:flex-row lg:relative lg:flex md:nowrap gap-2 whitespace-nowrap lg:p-0 p-2 d-block dark:bg-gray-800">
                 @if ($siteDetail?->break == App\Models\SiteDetail::STATUS_YES)
                 <button type="button" id="breakButton"
                     class="px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 w-full md:w-auto">
@@ -114,11 +114,9 @@
                 @endif
                 @if ($siteDetail?->ticket_generation_link == App\Models\SiteDetail::STATUS_YES)
                 @can('Register Queue')
-                <div class="flex gap-8 items-center">
-
                     <a href="{{ url($registerqueue?->booking_system == App\Models\AccountSetting::STATUS_ACTIVE ? 'main' : 'queue') }}"
                         target="_blank"
-                        class="inline-flex items-center px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600">
+                        class="inline-flex items-center px-4 py-3 text-sm font-medium text-white rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 w-full md:w-auto">
 
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="w-4 h-4 mr-2">
@@ -126,8 +124,6 @@
                         </svg>
                         <span>{{ __('text.Register Queue') }}</span>
                     </a>
-
-                </div>
                 @endcan
                 @endif
 

@@ -183,6 +183,7 @@ use App\Livewire\ImportMemberDetails;
 use App\Livewire\PublicUserList;
 use App\Livewire\PublicUserForm;
 use App\Livewire\PatientRegister;
+use App\Livewire\CategoryCustomScheduleComponent;
 
 /*
 |--------------------------------------------------------------------------
@@ -368,6 +369,7 @@ Route::middleware([
         Route::get('/category/{level}/create', CategoryCreateComponent::class)->name('category.create');
         Route::get('/category/{level}/edit/{categoryId}', CategoryCreateComponent::class)->name('category.edit');
         Route::get('/category/{level}/setting/{categoryId}', CategorySettingComponent::class)->name('category.setting');
+        Route::get('/category-custom-schedule', CategoryCustomScheduleComponent::class)->name('category-custom-schedule');
         Route::get('/qr-code', QrCode::class)->name('qr-code');
         Route::get('/email-settings', EmailSettings::class)->name('email-settings');
         Route::get('/sms-api', SmsApi::class)->name('sms-api');

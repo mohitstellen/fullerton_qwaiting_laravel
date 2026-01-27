@@ -54,6 +54,11 @@ class Analytics extends Component
 
     public function mount()
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user->hasPermissionTo('Reports')) {
+            abort(403);
+        }
+        
         $this->teamId = tenant('id');
         $this->today = Carbon::today();
         $this->yesterday = Carbon::yesterday();

@@ -53,6 +53,10 @@ class CounterComponent extends Component
     #[On('confirmed-delete')]
     public function confirmDelete()
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Counter Delete')) {
+            abort(403);
+        }
     
         if($this->selectedId){
             Counter::where('id', $this->selectedId)->delete();
@@ -88,6 +92,10 @@ class CounterComponent extends Component
 #[On('confirmed-multiple-delete')]
     public function bulkDeleteStaff()
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Counter Delete')) {
+            abort(403);
+        }
 
         if (!empty($this->selectedMultiple)) {
             Counter::whereIn('id', $this->selectedMultiple)->delete();

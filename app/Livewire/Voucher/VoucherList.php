@@ -16,6 +16,14 @@ class VoucherList extends Component
     public string $search = '';
     public int $perPage = 25; // Number of records per page
 
+    public function mount()
+    {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Voucher')) {
+            abort(403);
+        }
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();
@@ -34,6 +42,11 @@ class VoucherList extends Component
     #[On('delete-voucher-confirmed')]
     public function deleteVoucher(int $voucherId): void
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Voucher')) {
+            abort(403);
+        }
+        
         Voucher::whereKey($voucherId)->delete();
         session()->flash('message', 'Voucher deleted successfully.');
     }

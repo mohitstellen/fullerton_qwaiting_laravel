@@ -62,6 +62,11 @@ class EditVoucher extends Component
 
     public function mount(Voucher $voucherRecord): void
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Voucher')) {
+            abort(403);
+        }
+        
         $this->voucherModel = $voucherRecord;
 
         $this->voucher = [

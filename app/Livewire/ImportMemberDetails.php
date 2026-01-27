@@ -46,6 +46,11 @@ class ImportMemberDetails extends Component
 
     public function mount()
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Import Member Details')) {
+            abort(403);
+        }
+        
         $this->teamId = tenant('id');
     }
 
@@ -100,10 +105,14 @@ class ImportMemberDetails extends Component
 
     public function import()
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Import Member Details')) {
+            abort(403);
+        }
+        
         $this->validate();
 
         try {
-            $user = Auth::user();
             $fileName = $this->file->getClientOriginalName();
             
             // Store the file in public storage

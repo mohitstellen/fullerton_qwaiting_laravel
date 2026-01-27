@@ -58,6 +58,9 @@ class PatientRegister extends Component
         'mobile_number.required' => 'Mobile Number is required.',
         'email.required' => 'Email Address is required.',
         'email.email' => 'Please enter a valid email address.',
+        'email.required' => 'Email Address is required.',
+        'confirm_email.email' => 'Please enter a valid email address.',
+        'confirm_email.required' => 'Please confirm your email address.',
         'email.unique' => 'This email already exists.',
         'confirm_email.required' => 'Please confirm your email address.',
         'confirm_email.same' => 'Email addresses do not match.',
@@ -86,7 +89,7 @@ class PatientRegister extends Component
             'gender' => 'required|in:Male,Female',
             'mobile_country_code' => 'required|string',
             'mobile_number' => 'required|string|unique:members,mobile_number,NULL,id,team_id,' . $this->teamId,
-            'email' => 'required|email|unique:members,email,NULL,id,team_id,' . $this->teamId,
+            'email' => ['required', 'regex:/^[^\s@]+@[^\s@]+\.[^\s@]+$/', 'unique:members,email,NULL,id,team_id,' . $this->teamId],
             'confirm_email' => 'required|email|same:email',
             'nationality' => 'required|string',
             'company_id' => 'nullable|exists:companies,id',
@@ -154,8 +157,10 @@ class PatientRegister extends Component
 
     public function updatedSalutation($value)
     {
-        // Automatically change gender to Female when Mrs is selected
-        if ($value === 'Mrs') {
+        // Automatically change gender based on salutation
+        if ($value === 'Mr') {
+            $this->gender = 'Male';
+        } elseif ($value === 'Ms' || $value === 'Mrs') {
             $this->gender = 'Female';
         }
     }
@@ -196,32 +201,8 @@ class PatientRegister extends Component
             // Send registration success email with password
             $this->sendRegistrationEmail($data, $password);
 
-            session()->flash('success', 'Registration successful! Your account is pending approval. An email with your login credentials has been sent to your email address.');
-
-            // Reset form
-            $this->reset([
-                'identification_type',
-                'nric_fin',
-                'passport',
-                'salutation',
-                'full_name',
-                'date_of_birth',
-                'gender',
-                'mobile_number',
-                'email',
-                'confirm_email',
-                'nationality',
-                'company_id',
-                'company_search',
-                'terms_and_conditions',
-                'consent_data_collection',
-                'consent_marketing'
-            ]);
-            $this->identification_type = 'NRIC / FIN';
-            $this->salutation = 'Mr';
-            $this->gender = 'Male';
-            $this->mobile_country_code = '65';
-            $this->nationality = 'Singaporean';
+            // Redirect to login page with success message
+            return redirect()->route('tenant.patient.login')->with('success', 'Registration successful! Your account is pending approval. An email with your login credentials has been sent to your email address.');
         } catch (\Exception $e) {
             Log::error('Patient registration error: ' . $e->getMessage());
             session()->flash('error', 'Registration failed. Please try again or contact support.');

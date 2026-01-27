@@ -21,6 +21,14 @@ class AddVoucher extends Component
         'no_of_redemption' => '',
     ];
 
+    public function mount()
+    {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Voucher')) {
+            abort(403);
+        }
+    }
+
     protected array $messages = [
         'voucher.voucher_name.required' => 'The voucher name field is required.',
         'voucher.category_id.required' => 'The appointment type field is required.',

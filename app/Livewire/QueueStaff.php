@@ -139,6 +139,13 @@ class QueueStaff extends Component
 
    public function mount(Request $request, $location_id = null)
     {
+        // Check permission if user is authenticated (staff access)
+        if (Auth::check()) {
+            $user = Auth::user();
+            if (!$user->hasPermissionTo('Generate Queue')) {
+                abort(403);
+            }
+        }
 
         $this->utm_source = $request->query('utm_source');
         $this->utm_medium = $request->query('utm_medium');

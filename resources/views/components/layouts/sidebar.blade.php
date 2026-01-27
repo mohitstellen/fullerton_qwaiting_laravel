@@ -169,6 +169,7 @@
                     </li>
                     @endcan
 
+                    @can('Company')
                     <li>
                         <a data-tooltip="Companies" href="{{ route('tenant.companies.index') }}" class="menu-item group"
                             :class=" (selected === 'Companies') || (page === 'companies') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
@@ -186,7 +187,9 @@
                             </span>
                         </a>
                     </li>
+                    @endcan
 
+                    @can('Voucher')
                     <li>
                         <a data-tooltip="Voucher" href="{{ route('tenant.vouchers.index') }}" class="menu-item group"
                             :class=" (selected === 'Voucher') || (page === 'vouchers') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
@@ -204,10 +207,11 @@
                             </span>
                         </a>
                     </li>
+                    @endcan
 
                     @can('Location')
                     <li>
-                        <a data-tooltip="Clinics" href="{{ route('tenant.locations') }}" class="menu-item group"
+                        <a data-tooltip="Clinics Master" href="{{ route('tenant.locations') }}" class="menu-item group"
                             :class=" (selected === 'Clinics') || (page === 'locations') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
                             <svg :class="(selected === 'Clinics') || (page === 'locations') ? 'menu-item-icon-active'  :'menu-item-icon-inactive'"
                                 width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -215,12 +219,13 @@
                                 <path fill-rule="evenodd" clip-rule="evenodd" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" fill=""></path>
                             </svg>
                             <span class="menu-item-text" :class="sidebarToggle ? 'lg:hidden' : ''">
-                                {{ __('sidebar.Clinics') }}
+                                {{ __('sidebar.Clinics Master') }}
                             </span>
                         </a>
                     </li>
                     @endcan
 
+                    @can('Country')
                     <li>
                         <a data-tooltip="Country Master" href="{{ route('tenant.country-manager') }}" class="menu-item group"
                             :class=" (selected === 'Country Master') || (page === 'country-manager') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
@@ -234,7 +239,9 @@
                             </span>
                         </a>
                     </li>
+                    @endcan
 
+                    @can('Patient Search')
                     <li>
                         <a data-tooltip="Patient Search" href="{{ route('tenant.public-user.index') }}" class="menu-item group"
                             :class=" (selected === 'PatientSearch') || (page === 'public-user') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300'">
@@ -252,7 +259,9 @@
                             </span>
                         </a>
                     </li>
+                    @endcan
 
+                    @can('Import Member Details')
                     <li>
                         <a data-tooltip="Import Member Details" href="{{ route('tenant.import-member-details') }}"
                             class="menu-item group {{ request()->routeIs('tenant.import-member-details') ? 'menu-item-active' : 'menu-item-inactive dark:text-gray-300' }}">
@@ -270,6 +279,7 @@
                             </span>
                         </a>
                     </li>
+                    @endcan
 
                     {{-- <li>
                         <a data-tooltip="break-reason" href="{{ route('tenant.break-reason') }}" class="menu-item group"
@@ -372,6 +382,7 @@
                     </li>
                     @endcan
 
+                    @can('Book/View Appointment')
                     <li>
                         <a
                           href="{{ route('appointment-booking-module') }}"
@@ -385,6 +396,7 @@
                           </span>
                         </a>
                     </li>
+                    @endcan
 
                     @if(App\Models\AccountSetting::where('team_id',tenant('id'))
                     ->where('location_id', Session::get('selectedLocation'))
@@ -913,6 +925,15 @@
                                 {{ __('sidebar.Language Settings') }}
                             </a>
                         </li>
+
+                        @can('Schedule Settings')
+                        <li>
+                            <a href="{{ route('tenant.category-custom-schedule') }}"
+                                class="menu-dropdown-item group {{ request()->routeIs('tenant.category-custom-schedule') ? 'menu-dropdown-item-active' : 'menu-dropdown-item-inactive dark:text-gray-300' }}">
+                                {{ __('sidebar.Schedule Settings') }}
+                            </a>
+                        </li>
+                        @endcan
 
 
                         @can('Term and Condition')

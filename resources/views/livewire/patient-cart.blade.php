@@ -679,6 +679,42 @@
     if (window.Livewire && document.readyState === 'complete') {
         setupPaymentSuccessListener();
     }
+
+    // Listen for "Booking already exists" event
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('booking-already-exists', () => {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Booking Already Exists',
+                    text: 'One or more bookings already exist. Please select different dates or times.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3085d6'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.reload();
+                    }
+                });
+            }
+        });
+    });
+
+    // Check for session flash messages on page load (for other checkout errors)
+    document.addEventListener('DOMContentLoaded', () => {
+        @if(session()->has('checkout_error'))
+            const errorMessage = '{{ session('checkout_error') }}';
+            // Only show if it's not the "Booking already exists" message (that's handled by the event)
+            if (typeof Swal !== 'undefined' && !errorMessage.includes('Booking already exists') && !errorMessage.includes('booking already exists')) {
+                Swal.fire({
+                    title: 'Checkout Error',
+                    text: errorMessage,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3085d6'
+                });
+            }
+        @endif
+    });
 </script>
 <script src="{{ asset('js/cdn/sweetalert2.js') }}"></script>
 @endpush

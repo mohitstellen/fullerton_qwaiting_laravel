@@ -34,6 +34,11 @@ class CreateScreenTemplate extends Component
 
     public function mount()
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Screen Templates Setting')) {
+            abort(403);
+        }
+        
         $this->teamId = tenant('id');
         $this->locationId = Session::get('selectedLocation');
         $this->userAuth = Auth::user();

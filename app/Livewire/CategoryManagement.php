@@ -116,6 +116,11 @@ class CategoryManagement extends Component
     #[On('confirmed-delete')]
     public function confirmDelete()
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Service Delete')) {
+            abort(403);
+        }
+        
         if ($this->selectedCategory) {
             DB::table('category_user')->where('category_id', $this->selectedCategory)->delete();
             AccountSetting::where('category_id', $this->selectedCategory)->delete();

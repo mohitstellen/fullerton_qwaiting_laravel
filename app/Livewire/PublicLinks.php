@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\Attributes\On;
+use Illuminate\Support\Facades\Auth;
 use App\Models\{
     GenerateQrCode,
     AccountSetting,
@@ -31,7 +32,10 @@ class PublicLinks extends Component
 
     public function mount()
     {   
-
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Public link')) {
+            abort(403);
+        }
 
         $this->showModal = false;
         
@@ -44,6 +48,11 @@ class PublicLinks extends Component
     #[On('openPublicLinks')]
     public function openModal()
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Public link')) {
+            abort(403);
+        }
+        
         $this->teamId = auth()->user()->team_id ?? tenant('id');
         $this->selectedLocation = session('selectedLocation');
         $this->loaddata();

@@ -35,6 +35,11 @@ class CountryManager extends Component
 
     public function mount()
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Country')) {
+            abort(403);
+        }
+        
         $this->teamId = tenant('id');
         $this->location = Session::get('selectedLocation');
         $this->allcountries = Country::orderBy('name')->get();
@@ -107,6 +112,11 @@ class CountryManager extends Component
 
     public function save(): void
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Country')) {
+            abort(403);
+        }
+        
         $this->validate([
             'countryName' => 'required|string|max:255',
             'countryCode' => 'required|string|max:10',
@@ -230,6 +240,11 @@ class CountryManager extends Component
     #[On('delete')]
     public function delete(): void
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Country')) {
+            abort(403);
+        }
+        
         $country = Country::find($this->countryId);
         
         if ($country) {

@@ -8,6 +8,7 @@ use App\Models\CompanyAppointmentType;
 use App\Models\CompanyPackage;
 use App\Models\Location;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -94,6 +95,11 @@ class EditCompany extends Component
 
     public function mount(Company $companyRecord): void
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Company')) {
+            abort(403);
+        }
+        
         $this->companyModel = $companyRecord;
 
         $this->company = $companyRecord->only([

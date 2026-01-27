@@ -34,6 +34,11 @@ class PublicUserList extends Component
 
     public function mount()
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Patient Search')) {
+            abort(403);
+        }
+        
         $this->teamId = tenant('id');
         $this->locationId = Session::get('selectedLocation');
     }

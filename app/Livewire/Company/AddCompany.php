@@ -44,6 +44,11 @@ class AddCompany extends Component
 
     public function mount(): void
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Company')) {
+            abort(403);
+        }
+        
         $this->loadAccountManagers();
     }
 

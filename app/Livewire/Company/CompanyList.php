@@ -7,6 +7,7 @@ use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Auth;
 
 class CompanyList extends Component
 {
@@ -14,6 +15,14 @@ class CompanyList extends Component
 
     public string $search = '';
     public $perPage = 25; // Number of records per page
+
+    public function mount()
+    {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Company')) {
+            abort(403);
+        }
+    }
 
     public function confirmDelete(int $companyId): void
     {
@@ -23,6 +32,11 @@ class CompanyList extends Component
     #[On('delete-company-confirmed')]
     public function deleteCompany(int $companyId): void
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Company')) {
+            abort(403);
+        }
+        
         Company::whereKey($companyId)->delete();
         session()->flash('message', 'Company deleted successfully.');
     }

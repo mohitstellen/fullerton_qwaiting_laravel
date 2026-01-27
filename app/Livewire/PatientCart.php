@@ -459,13 +459,14 @@ class PatientCart extends Component
             if ($storedToken) {
                 try {
                     $getAccessTokenRes = $daraApi->refreshToken($storedToken->refresh_token);
+                    $refreshTokenResponse = $getAccessTokenRes->json();
 
-                    if (isset($getAccessTokenRes['success']) && $getAccessTokenRes['success'] == 'true') {
+                    if (isset($refreshTokenResponse['success']) && $refreshTokenResponse['success'] == 'true') {
                         Log::info('Cart Checkout: Refresh Token API Run Successfully via DB token');
-                        $getAccessToken = $getAccessTokenRes['data']['access_token'];
+                        $getAccessToken = $refreshTokenResponse['data']['access_token'];
 
                         // Update token if refresh token is new provided or keep existing
-                        $newRefreshToken = $getAccessTokenRes['data']['refresh_token'] ?? $storedToken->refresh_token;
+                        $newRefreshToken = $refreshTokenResponse['data']['refresh_token'] ?? $storedToken->refresh_token;
 
                         $storedToken->update([
                             'refresh_token' => $newRefreshToken,
@@ -480,12 +481,13 @@ class PatientCart extends Component
             // If no access token yet, fetch new pair
             if (!$getAccessToken) {
                 $generateTokenPair = $daraApi->getTokenPair();
+                $tokenPairResponse = $generateTokenPair->json();
 
-                if (isset($generateTokenPair['success']) && $generateTokenPair['success'] == 'true') {
+                if (isset($tokenPairResponse['success']) && $tokenPairResponse['success'] == 'true') {
                     Log::info('Cart Checkout: Token Pair API Run Successfully');
 
-                    $getAccessToken = $generateTokenPair['data']['access_token'];
-                    $getRefreshToken = $generateTokenPair['data']['refresh_token'];
+                    $getAccessToken = $tokenPairResponse['data']['access_token'];
+                    $getRefreshToken = $tokenPairResponse['data']['refresh_token'];
 
                     IntegrationToken::updateOrCreate(
                         ['service_name' => 'dara'],
@@ -495,6 +497,13 @@ class PatientCart extends Component
                         ]
                     );
                 }
+            }
+
+            if (!$getAccessToken) {
+                Log::warning('Cart Checkout: Dara API createAppointment will not be called - no access token available', [
+                    'has_stored_token' => !empty($storedToken),
+                    'get_access_token' => $getAccessToken
+                ]);
             }
 
             $bookings = [];
@@ -554,18 +563,92 @@ class PatientCart extends Component
                         ]
                     ];
 
-                    $createAppointment = $daraApi->createAppointment($getAccessToken, $daraApiBooking);
+                    Log::info('Cart Checkout: Calling Dara API createAppointment', [
+                        'access_token' => substr($getAccessToken, 0, 10) . '...',
+                        'booking_data' => $daraApiBooking
+                    ]);
 
-                    if (isset($createAppointment['success']) && $createAppointment['success'] == 'true') {
-                        Log::info('Cart Checkout: Patient Appointment Booking Successfully via Dara API', [
-                            'createAppointment' => $createAppointment,
+                    try {
+                        $createAppointment = $daraApi->createAppointment($getAccessToken, $daraApiBooking);
+                        
+                        // Log the raw response
+                        Log::info('Cart Checkout: Dara API createAppointment raw response', [
+                            'status' => $createAppointment->status(),
+                            'successful' => $createAppointment->successful(),
+                            'body' => $createAppointment->body(),
                         ]);
-                        $daraTokenForQuestionnaire = $createAppointment['data']['token'] ?? null;
+                        
+                        // Convert response to array if it's an HTTP response object
+                        $appointmentResponse = is_array($createAppointment) ? $createAppointment : $createAppointment->json();
+                        
+                        // Log the parsed response
+                        Log::info('Cart Checkout: Dara API createAppointment parsed response', [
+                            'response' => $appointmentResponse,
+                            'is_null' => is_null($appointmentResponse),
+                            'is_array' => is_array($appointmentResponse)
+                        ]);
+
+                        if (!empty($appointmentResponse) && isset($appointmentResponse['success']) && $appointmentResponse['success'] == 'true') {
+                        Log::info('Cart Checkout: Patient Appointment Booking Successfully via Dara API', [
+                            'createAppointment' => $appointmentResponse,
+                        ]);
+                        $daraTokenForQuestionnaire = $appointmentResponse['data']['token'] ?? null;
                     } else {
-                        Log::error('Cart Checkout: Patient Book Appointment failed via Dara API', [
-                            'error' => 'API Error',
-                            'api_response' => $createAppointment ?? null,
-                            'payload' => $daraApiBooking
+                        Log::info('Cart Checkout: Dara API response indicates failure, checking error type', [
+                            'success_value' => $appointmentResponse['success'] ?? 'not_set',
+                            'success_type' => gettype($appointmentResponse['success'] ?? null),
+                            'message' => $appointmentResponse['message'] ?? 'not_set',
+                        ]);
+                        
+                        // Check if response is null or empty
+                        if (empty($appointmentResponse)) {
+                            Log::error('Cart Checkout: Dara API returned empty response', [
+                                'status' => $createAppointment->status(),
+                                'body' => $createAppointment->body(),
+                                'payload' => $daraApiBooking
+                            ]);
+                        } else {
+                            // Check if the error is "Appointment already exists"
+                            $errorMessage = $appointmentResponse['message'] ?? '';
+                            $successValue = $appointmentResponse['success'] ?? null;
+                            
+                            Log::info('Cart Checkout: Checking for "Appointment already exists" error', [
+                                'success_value' => $successValue,
+                                'success_is_false' => ($successValue === false || $successValue === 'false'),
+                                'error_message' => $errorMessage,
+                                'message_contains_text' => (stripos($errorMessage, 'Appointment already exists') !== false),
+                            ]);
+                            
+                            if (
+                                isset($appointmentResponse['success']) && 
+                                ($appointmentResponse['success'] === false || $appointmentResponse['success'] === 'false') &&
+                                (stripos($errorMessage, 'Appointment already exists') !== false)
+                            ) {
+                                Log::info('Cart Checkout: "Appointment already exists" error detected - showing user message');
+                                DB::rollBack();
+                                Session::forget('checkout_in_progress');
+                                session()->flash('checkout_error', 'Booking already exists.');
+                                // Dispatch event for SweetAlert
+                                $this->dispatch('booking-already-exists');
+                                Log::error('Cart Checkout: Appointment already exists', [
+                                    'api_response' => $appointmentResponse,
+                                    'payload' => $daraApiBooking
+                                ]);
+                                return;
+                            }
+                            
+                            Log::error('Cart Checkout: Patient Book Appointment failed via Dara API', [
+                                'error' => 'API Error',
+                                'api_response' => $appointmentResponse ?? null,
+                                'payload' => $daraApiBooking
+                            ]);
+                        }
+                    }
+                    } catch (\Exception $apiEx) {
+                        Log::error('Cart Checkout: Dara API createAppointment exception', [
+                            'error' => $apiEx->getMessage(),
+                            'trace' => $apiEx->getTraceAsString(),
+                            'booking_data' => $daraApiBooking
                         ]);
                     }
                 }

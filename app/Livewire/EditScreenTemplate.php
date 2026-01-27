@@ -32,6 +32,11 @@ class EditScreenTemplate extends Component
 
     public function mount($id)
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user->hasPermissionTo('Screen Templates Setting')) {
+            abort(403);
+        }
+        
         $this->teamId = tenant('id');
         $this->locationId = Session::get('selectedLocation');
         $screenTemplate = ScreenTemplate::findOrFail($id);

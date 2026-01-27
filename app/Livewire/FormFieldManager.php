@@ -80,6 +80,11 @@ class FormFieldManager extends Component
 
     public function delete($id)
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Form Field Delete')) {
+            abort(403);
+        }
+        
         FormField::findOrFail($id)->delete();
 
         // Show success message

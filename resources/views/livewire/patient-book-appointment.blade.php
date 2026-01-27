@@ -569,6 +569,7 @@
 </div>
 
 @push('scripts')
+<script src="{{ asset('js/cdn/sweetalert2.js') }}"></script>
 <script>
     document.addEventListener('livewire:init', () => {
         Livewire.on('booking-success', (data) => {
@@ -590,6 +591,23 @@
                     if (result.isConfirmed) {
                         // Redirect to My Appointments page
                         window.location.href = '{{ route("tenant.patient.appointments") }}';
+                    }
+                });
+            }
+        });
+
+        // Listen for "Booking already exists" event
+        Livewire.on('booking-already-exists', () => {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Booking Already Exists',
+                    text: 'This booking already exists. Please select a different date or time.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3085d6'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.reload();
                     }
                 });
             }

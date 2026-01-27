@@ -63,6 +63,11 @@ class EditScreenTemplateSettings extends Component
 
     public function mount($record)
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Screen Templates Setting')) {
+            abort(403);
+        }
+        
         $this->screenTemplate = ScreenTemplate::findOrFail($record);
         $this->teamId = tenant('id');
         $this->locationId = Session::get('selectedLocation');

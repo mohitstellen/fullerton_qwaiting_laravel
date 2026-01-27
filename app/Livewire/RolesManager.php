@@ -47,6 +47,11 @@ class RolesManager extends Component
     #[On('confirmed-delete')]
     public function delete()
     {
+        $user = Auth::user();
+        if (!$user->hasPermissionTo('Role Delete')) {
+            abort(403);
+        }
+        
         if ($this->selectedId) {
             Role::findOrFail($this->selectedId)->delete();
             $this->dispatch('deleted');
