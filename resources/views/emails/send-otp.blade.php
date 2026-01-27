@@ -76,7 +76,8 @@ use Illuminate\Support\Facades\Session;
         $url = request()->url();
         $headerPage = App\Models\SiteDetail::FIELD_BUSINESS_LOGO;
 
-        $teamId = auth()->user()->team_id;
+        // Get team_id from passed variable or from authenticated user (for backward compatibility)
+        $teamId = $teamId ?? (auth()->check() ? auth()->user()->team_id : null);
 
         $logo = App\Models\SiteDetail::viewImage($headerPage, $teamId);
     @endphp

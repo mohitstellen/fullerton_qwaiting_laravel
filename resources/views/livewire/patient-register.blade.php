@@ -140,31 +140,57 @@
                     </div>
 
                     <!-- Mobile Number (Login ID) -->
-                    <div>
+                    <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                             Mobile Number (Login ID) <span class="text-red-500">*</span>
                         </label>
-                        <div class="flex gap-2">
-                            <select wire:model="mobile_country_code"
+
+                        <!-- Country code + Mobile number + Country in one row -->
+                        <div class="flex gap-2 items-start">
+                            <select wire:model.live="mobile_country_code"
                                 class="block w-24 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-2 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
                                 @foreach($phoneCodeCountries as $country)
                                 <option value="{{ $country->phonecode }}">{{ $country->phonecode }}</option>
                                 @endforeach
                             </select>
-                            <input type="text" wire:model="mobile_number" placeholder="Mobile Number"
+
+                            <input type="text"
+                                wire:model.live.debounce.500ms="mobile_number"
+                                placeholder="Mobile Number"
                                 class="block flex-1 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
+
+                            @if($showCountryField)
+                            <div class="flex-1">
+                                <select wire:model.live="country_id"
+                                    class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+                                    <option value="">Select Country</option>
+                                    @foreach($allCountries as $country)
+                                    <option value="{{ $country->id }}">{{ $country->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('country_id')
+                                <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            @endif
                         </div>
+
+                        @error('mobile_country_code')
+                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                        @enderror
+
                         @error('mobile_number')
                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
+
 
                     <!-- Email Address -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                             Email Address <span class="text-red-500">*</span>
                         </label>
-                        <input type="email" wire:model="email" placeholder="Email Address"
+                        <input type="email" wire:model.live.debounce.500ms="email" placeholder="Email Address"
                             class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
                         @error('email')
                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
@@ -176,14 +202,47 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                             Confirm Email Address <span class="text-red-500">*</span>
                         </label>
-                        <input type="email" wire:model="confirm_email" placeholder="Confirm Email Address"
+                        <input type="email" wire:model.live="confirm_email" placeholder="Confirm Email Address"
                             class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
                         @error('confirm_email')
                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                         @enderror
+
+                        @if($email_otp_sent && !$email_otp_verified)
+                        <div class="mt-3 space-y-2" wire:poll.1s="updateCountdown">
+                            <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                <span>Verification code sent to your email.</span>
+                                @if($email_otp_countdown > 0)
+                                <span class="text-blue-600 dark:text-blue-400">
+                                    ({{ sprintf('%02d:%02d', floor($email_otp_countdown / 60), $email_otp_countdown % 60) }})
+                                </span>
+                                @endif
+                            </div>
+                            <div class="flex gap-2">
+                                <input type="text" wire:model="email_verification_code" placeholder="Verification Code" maxlength="6"
+                                    class="block w-40 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
+                                <button type="button" wire:click="verifyEmailCode"
+                                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    Verify
+                                </button>
+                            </div>
+                            @error('email_verification_code')
+                            <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                            @enderror
+                            <button type="button" wire:click="resendEmailVerificationCode"
+                                class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                                Resend OTP (valid for 5 mins)
+                            </button>
+                        </div>
+                        @elseif($email_otp_verified)
+                        <div class="mt-2 text-sm text-green-600 dark:text-green-400">
+                            ✓ Email verified successfully
+                        </div>
+                        @endif
                     </div>
 
                     <!-- Nationality -->
+                    @if($showNationalityField)
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                             Nationality <span class="text-red-500">*</span>
@@ -200,6 +259,7 @@
                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                         @enderror
                     </div>
+                    @endif
 
                     <!-- Company -->
                     <div>
@@ -247,9 +307,8 @@
                             </div>
                             @endif
                         </div>
-                        @if($company_search && !$company_id)
-                        <p class="text-red-500 text-xs mt-1">Free text not allowed in company. Please select from the drop down list.</p>
-                        @endif
+
+                        <p class="text-red-500 text-xs mt-1 block font-medium">Free text not allowed in company. Please select from the drop down list.</p>
                         @error('company_id')
                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                         @enderror
@@ -258,21 +317,6 @@
 
                 <!-- Consent Checkboxes -->
                 <div class="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <!-- Terms and Conditions -->
-                    <div class="flex items-start gap-3">
-                        <div class="flex-shrink-0 mt-1">
-                            <input type="checkbox" wire:model="terms_and_conditions" id="terms_and_conditions"
-                                class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
-                                style="accent-color: #2563eb;">
-                        </div>
-                        <label for="terms_and_conditions" class="flex-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                            I agree to the <a href="#" class="text-blue-600 hover:underline">Terms and Conditions</a> <span class="text-red-500">*</span>
-                        </label>
-                    </div>
-                    @error('terms_and_conditions')
-                    <span class="text-red-500 text-xs mt-1 block ml-8">{{ $message }}</span>
-                    @enderror
-
                     <!-- First Consent -->
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0 mt-1">
@@ -316,3 +360,31 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('livewire:init', function() {
+        // Listen for email already exists event
+        Livewire.on('swal:email-exists', () => {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Email Already Exists',
+                    text: 'This email address is already registered. Please use a different email address.',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+
+        // Listen for mobile number already exists event
+        Livewire.on('swal:mobile-exists', () => {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Mobile Number Already Exists',
+                    text: 'This mobile number is already registered. Please use a different mobile number.',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    });
+</script>
