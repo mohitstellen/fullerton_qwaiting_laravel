@@ -50,7 +50,6 @@ class CategoryManagement extends Component
         $this->teamId = tenant('id'); // Get the current tenant ID
         $this->locationId = Session::get('selectedLocation');
         $levels =  Level::where('team_id', $this->teamId)
-            ->where('location_id', $this->locationId)
             ->whereIn('level', [1, 2, 3])
             ->get()
             ->keyBy('level');
