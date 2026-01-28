@@ -55,7 +55,6 @@ class PatientRegister extends Component
     public $email_otp_countdown = 300; // 5 minutes in seconds
 
     // Consent checkboxes
-    public $terms_and_conditions = false;
     public $consent_data_collection = false;
     public $consent_marketing = false;
 
@@ -82,8 +81,8 @@ class PatientRegister extends Component
         'company_id.required' => 'Company is required. Please select from the dropdown list.',
         'email_verification_code.required' => 'Email verification code is required.',
         'email_verification_code.digits' => 'Verification code must be 6 digits.',
-        'terms_and_conditions.accepted' => 'You must accept the terms and conditions to proceed.',
         'consent_data_collection.required' => 'You must consent to data collection.',
+        'consent_data_collection.accepted' => 'You must consent to data collection.',
         'nric_fin.unique' => 'This NRIC / FIN already exists.',
         'passport.unique' => 'This passport number already exists.',
         'mobile_number.unique' => 'This mobile number already exists.',
@@ -97,18 +96,9 @@ class PatientRegister extends Component
         // Load all countries
         $this->allCountries = Country::orderBy('name')->get();
         
-        // Show country and nationality fields if country code is already set
-        if ($this->mobile_country_code) {
-            $this->showCountryField = true;
-            $this->showNationalityField = true;
-            
-            // Auto-select country based on phonecode
-            $country = Country::where('phonecode', $this->mobile_country_code)->first();
-            if ($country) {
-                $this->country_id = $country->id;
-                $this->updateNationalityFromCountry();
-            }
-        }
+        // Don't auto-show fields on mount - only show when user changes country code
+        $this->showCountryField = false;
+        $this->showNationalityField = false;
     }
 
     protected function rules()
@@ -123,10 +113,7 @@ class PatientRegister extends Component
             'mobile_number' => 'required|string|unique:members,mobile_number,NULL,id,team_id,' . $this->teamId,
             'email' => ['required', 'regex:/^[^\s@]+@[^\s@]+\.[^\s@]+$/', 'unique:members,email,NULL,id,team_id,' . $this->teamId],
             'confirm_email' => 'required|email|same:email',
-            'country_id' => 'required|exists:countries,id',
-            'nationality' => 'required|string',
             'company_id' => 'nullable|exists:companies,id',
-            'terms_and_conditions' => 'accepted',
             'consent_data_collection' => 'accepted',
             'consent_marketing' => 'nullable|boolean',
         ];
@@ -136,6 +123,20 @@ class PatientRegister extends Component
             $rules['nric_fin'] = 'required|string|unique:members,nric_fin,NULL,id,team_id,' . $this->teamId;
         } else {
             $rules['passport'] = 'required|string|unique:members,passport,NULL,id,team_id,' . $this->teamId;
+        }
+
+        // Only require country and nationality if fields are shown
+        if ($this->showCountryField) {
+            $rules['country_id'] = 'required|exists:countries,id';
+        }
+        
+        if ($this->showNationalityField) {
+            $rules['nationality'] = 'required|string';
+        }
+
+        // Require email verification code if OTP was sent but not verified
+        if ($this->email_otp_sent && !$this->email_otp_verified) {
+            $rules['email_verification_code'] = 'required|digits:6';
         }
 
         return $rules;
@@ -444,10 +445,23 @@ class PatientRegister extends Component
 
     public function register()
     {
-        // Validate email verification first
-        if (!$this->email_otp_verified) {
+        // If country field is not shown yet, show it and auto-select country based on phone code
+        if (!$this->showCountryField && $this->mobile_country_code) {
+            $this->showCountryField = true;
+            $this->showNationalityField = true;
+            
+            // Auto-select country based on phonecode
+            $country = Country::where('phonecode', $this->mobile_country_code)->first();
+            if ($country) {
+                $this->country_id = $country->id;
+                $this->updateNationalityFromCountry();
+            }
+        }
+
+        // Check if email OTP was sent but not verified yet
+        if ($this->email_otp_sent && !$this->email_otp_verified) {
             $this->addError('email_verification_code', 'Please verify your email address before submitting.');
-            $this->validateOnly('email_verification_code');
+            $this->validate(); // This will show all errors including the OTP error
             return;
         }
 
@@ -477,7 +491,6 @@ class PatientRegister extends Component
                 'password' => $password,
                 'status' => 'active', // New registrations are inactive until approved
                 'is_active' => 1, // Requires admin approval
-                'terms_and_conditions' => $this->terms_and_conditions,
                 'consent_data_collection' => $this->consent_data_collection,
                 'consent_marketing' => $this->consent_marketing,
             ];

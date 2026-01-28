@@ -43,6 +43,23 @@
 
         <!-- Sign Up Form -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-h-[80vh] overflow-y-auto">
+            <!-- Validation Errors Summary -->
+            @if ($errors->any())
+            <div class="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 dark:border-red-700 dark:bg-red-900/30">
+                <div class="flex items-center mb-2">
+                    <svg class="w-5 h-5 text-red-600 dark:text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Please correct the following errors:</h3>
+                </div>
+                <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300 space-y-1">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
             <form wire:submit.prevent="register" class="space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Identification Type -->
@@ -68,7 +85,7 @@
                             NRIC / FIN <span class="text-red-500">*</span>
                         </label>
                         <input type="text" wire:model="nric_fin" placeholder="NRIC / FIN"
-                            class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
+                            class="block w-full rounded-lg border @error('nric_fin') border-red-500 @else border-gray-300 @enderror shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
                         @error('nric_fin')
                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                         @enderror
@@ -77,7 +94,7 @@
                             Passport <span class="text-red-500">*</span>
                         </label>
                         <input type="text" wire:model="passport" placeholder="Passport"
-                            class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
+                            class="block w-full rounded-lg border @error('passport') border-red-500 @else border-gray-300 @enderror shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
                         @error('passport')
                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                         @enderror
@@ -97,7 +114,7 @@
                                 @endforeach
                             </select>
                             <input type="text" wire:model="full_name" placeholder="Full Name"
-                                class="block flex-1 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
+                                class="block flex-1 rounded-lg border @error('full_name') border-red-500 @else border-gray-300 @enderror shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
                         </div>
                         @error('salutation')
                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
@@ -114,7 +131,7 @@
                         </label>
                         <div class="relative">
                             <input type="date" wire:model="date_of_birth"
-                                class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+                                class="block w-full rounded-lg border @error('date_of_birth') border-red-500 @else border-gray-300 @enderror shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
                                 placeholder="DD/MM/YYYY" onclick="this.showPicker()">
                         </div>
                         @error('date_of_birth')
@@ -140,15 +157,15 @@
                     </div>
 
                     <!-- Mobile Number (Login ID) -->
-                    <div class="md:col-span-2">
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
                             Mobile Number (Login ID) <span class="text-red-500">*</span>
                         </label>
 
-                        <!-- Country code + Mobile number + Country in one row -->
+                        <!-- Country code + Mobile number in one row -->
                         <div class="flex gap-2 items-start">
                             <select wire:model.live="mobile_country_code"
-                                class="block w-24 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-2 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+                                class="block w-28 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-2 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
                                 @foreach($phoneCodeCountries as $country)
                                 <option value="{{ $country->phonecode }}">{{ $country->phonecode }}</option>
                                 @endforeach
@@ -157,22 +174,7 @@
                             <input type="text"
                                 wire:model.live.debounce.500ms="mobile_number"
                                 placeholder="Mobile Number"
-                                class="block flex-1 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
-
-                            @if($showCountryField)
-                            <div class="flex-1">
-                                <select wire:model.live="country_id"
-                                    class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
-                                    <option value="">Select Country</option>
-                                    @foreach($allCountries as $country)
-                                    <option value="{{ $country->id }}">{{ $country->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('country_id')
-                                <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            @endif
+                                class="block flex-1 rounded-lg border @error('mobile_number') border-red-500 @else border-gray-300 @enderror shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
                         </div>
 
                         @error('mobile_country_code')
@@ -184,6 +186,25 @@
                         @enderror
                     </div>
 
+                    <!-- Country field -->
+                    @if($showCountryField)
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                            Country <span class="text-red-500">*</span>
+                        </label>
+                        <select wire:model.live="country_id"
+                            class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+                            <option value="">Select Country</option>
+                            @foreach($allCountries as $country)
+                            <option value="{{ $country->id }}">{{ $country->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('country_id')
+                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    @endif
+
 
                     <!-- Email Address -->
                     <div>
@@ -191,7 +212,7 @@
                             Email Address <span class="text-red-500">*</span>
                         </label>
                         <input type="email" wire:model.live.debounce.500ms="email" placeholder="Email Address"
-                            class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
+                            class="block w-full rounded-lg border @error('email') border-red-500 @else border-gray-300 @enderror shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
                         @error('email')
                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                         @enderror
@@ -203,7 +224,7 @@
                             Confirm Email Address <span class="text-red-500">*</span>
                         </label>
                         <input type="email" wire:model.live="confirm_email" placeholder="Confirm Email Address"
-                            class="block w-full rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
+                            class="block w-full rounded-lg border @error('confirm_email') border-red-500 @else border-gray-300 @enderror shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
                         @error('confirm_email')
                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                         @enderror
@@ -211,24 +232,26 @@
                         @if($email_otp_sent && !$email_otp_verified)
                         <div class="mt-3 space-y-2" wire:poll.1s="updateCountdown">
                             <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                                <span>Verification code sent to your email.</span>
+                                <span>Verification code sent to your email. <span class="text-red-500">*</span></span>
                                 @if($email_otp_countdown > 0)
                                 <span class="text-blue-600 dark:text-blue-400">
                                     ({{ sprintf('%02d:%02d', floor($email_otp_countdown / 60), $email_otp_countdown % 60) }})
                                 </span>
                                 @endif
                             </div>
-                            <div class="flex gap-2">
-                                <input type="text" wire:model="email_verification_code" placeholder="Verification Code" maxlength="6"
-                                    class="block w-40 rounded-lg border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
+                            <div class="flex gap-2 items-start">
+                                <div class="flex-1">
+                                    <input type="text" wire:model="email_verification_code" placeholder="Enter 6-digit code *" maxlength="6"
+                                        class="block w-full rounded-lg border @error('email_verification_code') border-red-500 @else border-gray-300 @enderror shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
+                                    @error('email_verification_code')
+                                    <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                    @enderror
+                                </div>
                                 <button type="button" wire:click="verifyEmailCode"
-                                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap h-11">
                                     Verify
                                 </button>
                             </div>
-                            @error('email_verification_code')
-                            <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
-                            @enderror
                             <button type="button" wire:click="resendEmailVerificationCode"
                                 class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
                                 Resend OTP (valid for 5 mins)
@@ -315,26 +338,9 @@
                     </div>
                 </div>
 
-                <!-- Terms and Conditions -->
-                <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <div class="flex items-start gap-3">
-                        <div class="flex-shrink-0 mt-1">
-                            <input type="checkbox" wire:model="terms_and_conditions" id="terms_and_conditions"
-                                class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
-                                style="accent-color: #2563eb;">
-                        </div>
-                        <label for="terms_and_conditions" class="flex-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                            I agree to the <a href="#" target="_blank" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline">Terms and Conditions</a> <span class="text-red-500">*</span>
-                        </label>
-                    </div>
-                    @error('terms_and_conditions')
-                    <span class="text-red-500 text-xs mt-1 block ml-8">{{ $message }}</span>
-                    @enderror
-                </div>
-
                 <!-- Consent Checkboxes -->
                 <div class="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <!-- First Consent -->
+                    <!-- Data Collection Consent -->
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0 mt-1">
                             <input type="checkbox" wire:model="consent_data_collection" id="consent_data_collection"
@@ -342,14 +348,14 @@
                                 style="accent-color: #2563eb;">
                         </div>
                         <label for="consent_data_collection" class="flex-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                            I confirm the information provided above is accurate and hereby consent to Fullerton Health Group collecting, using and disclosing my personal data for the purpose of providing me with the services I have requested for and other related purposes. Please refer to Fullerton Health Group's Privacy Policy at (www.fullertonhealth.com/privacy-policy). We would like to keep you updated with our latest news, offers, and promotions. To do this, we need your consent to send you marketing communications.
+                            I confirm the information provided above is accurate and hereby consent to Fullerton Health Group collecting, using and disclosing my personal data for the purpose of providing me with the services I have requested for and other related purposes. Please refer to Fullerton Health Group's Privacy Policy at (www.fullertonhealth.com/privacy-policy). We would like to keep you updated with our latest news, offers, and promotions. To do this, we need your consent to send you marketing communications. <span class="text-red-500">*</span>
                         </label>
                     </div>
                     @error('consent_data_collection')
                     <span class="text-red-500 text-xs mt-1 block ml-8">{{ $message }}</span>
                     @enderror
 
-                    <!-- Second Consent -->
+                    <!-- Marketing Consent -->
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0 mt-1">
                             <input type="checkbox" wire:model="consent_marketing" id="consent_marketing"
@@ -368,9 +374,16 @@
                         class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
                         Close
                     </button>
-                    <button type="submit"
-                        class="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        Sign Up
+                    <button type="submit" wire:loading.attr="disabled" wire:target="register"
+                        class="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span wire:loading.remove wire:target="register">Sign Up</span>
+                        <span wire:loading wire:target="register" class="flex items-center gap-2">
+                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Processing...
+                        </span>
                     </button>
                 </div>
             </form>
@@ -403,5 +416,13 @@
                 });
             }
         });
+    });
+
+    // Scroll to top when validation errors occur
+    document.addEventListener('livewire:update', function() {
+        const errorSummary = document.querySelector('.border-red-200');
+        if (errorSummary) {
+            errorSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     });
 </script>
