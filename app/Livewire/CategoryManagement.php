@@ -50,6 +50,7 @@ class CategoryManagement extends Component
         $this->teamId = tenant('id'); // Get the current tenant ID
         $this->locationId = Session::get('selectedLocation');
         $levels =  Level::where('team_id', $this->teamId)
+            // ->where('location_id', $this->locationId)
             ->whereIn('level', [1, 2, 3])
             ->get()
             ->keyBy('level');
@@ -273,7 +274,7 @@ class CategoryManagement extends Component
             ->first();
         $query = Category::where('level_id', $this->tab)
             ->where('team_id', $this->teamId)
-            ->whereJsonContains('category_locations', (string) $this->locationId)
+            // ->whereJsonContains('category_locations', (string) $this->locationId)
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%');
             })
