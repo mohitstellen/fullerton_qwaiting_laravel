@@ -315,6 +315,23 @@
                     </div>
                 </div>
 
+                <!-- Terms and Conditions -->
+                <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 mt-1">
+                            <input type="checkbox" wire:model="terms_and_conditions" id="terms_and_conditions"
+                                class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                                style="accent-color: #2563eb;">
+                        </div>
+                        <label for="terms_and_conditions" class="flex-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                            I agree to the <a href="#" target="_blank" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline">Terms and Conditions</a> <span class="text-red-500">*</span>
+                        </label>
+                    </div>
+                    @error('terms_and_conditions')
+                    <span class="text-red-500 text-xs mt-1 block ml-8">{{ $message }}</span>
+                    @enderror
+                </div>
+
                 <!-- Consent Checkboxes -->
                 <div class="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <!-- First Consent -->

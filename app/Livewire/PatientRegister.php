@@ -82,6 +82,7 @@ class PatientRegister extends Component
         'company_id.required' => 'Company is required. Please select from the dropdown list.',
         'email_verification_code.required' => 'Email verification code is required.',
         'email_verification_code.digits' => 'Verification code must be 6 digits.',
+        'terms_and_conditions.accepted' => 'You must accept the terms and conditions to proceed.',
         'consent_data_collection.required' => 'You must consent to data collection.',
         'nric_fin.unique' => 'This NRIC / FIN already exists.',
         'passport.unique' => 'This passport number already exists.',
@@ -125,6 +126,7 @@ class PatientRegister extends Component
             'country_id' => 'required|exists:countries,id',
             'nationality' => 'required|string',
             'company_id' => 'nullable|exists:companies,id',
+            'terms_and_conditions' => 'accepted',
             'consent_data_collection' => 'accepted',
             'consent_marketing' => 'nullable|boolean',
         ];
@@ -304,8 +306,20 @@ class PatientRegister extends Component
         // Clear any existing OTP from session
         Session::forget(['email_verification_otp', 'email_verification_otp_expires', 'email_verification_email']);
         
-        // Only send OTP if emails match and email is valid
+        // Check if email already exists before sending OTP
         if ($value && $this->email && $value === $this->email && filter_var($value, FILTER_VALIDATE_EMAIL)) {
+            $existingMember = Member::where('team_id', $this->teamId)
+                ->where('email', $value)
+                ->first();
+            
+            if ($existingMember) {
+                $this->dispatch('swal:email-exists');
+                $this->addError('email', 'This email already exists.');
+                $this->addError('confirm_email', 'This email already exists.');
+                return;
+            }
+            
+            // Only send OTP if email doesn't exist
             $this->sendEmailVerificationCode();
         }
     }
@@ -320,6 +334,18 @@ class PatientRegister extends Component
         if (!filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
             $this->addError('email', 'Please enter a valid email address.');
             $this->addError('confirm_email', 'Please enter a valid email address.');
+            return;
+        }
+
+        // Check if email already exists - don't send verification code if it exists
+        $existingMember = Member::where('team_id', $this->teamId)
+            ->where('email', $this->email)
+            ->first();
+        
+        if ($existingMember) {
+            $this->dispatch('swal:email-exists');
+            $this->addError('email', 'This email already exists.');
+            $this->addError('confirm_email', 'This email already exists.');
             return;
         }
 
@@ -451,6 +477,7 @@ class PatientRegister extends Component
                 'password' => $password,
                 'status' => 'active', // New registrations are inactive until approved
                 'is_active' => 1, // Requires admin approval
+                'terms_and_conditions' => $this->terms_and_conditions,
                 'consent_data_collection' => $this->consent_data_collection,
                 'consent_marketing' => $this->consent_marketing,
             ];
