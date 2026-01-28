@@ -98,7 +98,14 @@ class PlatoAPIService
      */
     public function fetchCorporateFromPlato($skip = 0, $currentPage = 1)
     {
-        $response = Http::timeout(30) // 30 seconds timeout
+        $response = Http::timeout(60) // 60 seconds timeout
+            ->connectTimeout(30) // 30 seconds connection timeout
+            ->retry(3, 2000, function ($exception, $request) {
+                // Retry on timeout or connection errors
+                return $exception instanceof \Illuminate\Http\Client\ConnectionException ||
+                       str_contains($exception->getMessage(), 'timed out') ||
+                       str_contains($exception->getMessage(), 'cURL error 28');
+            })
             ->withHeaders([
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer ' . $this->token,

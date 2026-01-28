@@ -50,15 +50,13 @@ class ImportCorporateFromPlato extends Command
 
         $currentPage = 1;
         $skip = 0;
-        $perPage = 20; // Adjust based on API's per-page limit
         $totalProcessed = 0;
         $totalAdded = 0;
         $totalUpdated = 0;
         $totalSkipped = 0;
         $totalErrors = 0;
-        $emptyResponseCount = 0;
-        $maxEmptyResponses = 3; // Stop after 3 consecutive empty responses
-        $maxPages = 200; // Safety limit
+        $maxConsecutiveErrors = 3; // Stop after 3 consecutive errors
+        $consecutiveErrors = 0;
 
         while (true) {
             try {
@@ -69,83 +67,88 @@ class ImportCorporateFromPlato extends Command
                 if ($response->successful()) {
                     $data = $response->json();
 
-                    // Check if response has data
-                    if (empty($data) || !isset($data) || empty($data)) {
-                        $emptyResponseCount++;
-                        $this->warn("Page {$currentPage}: No records found (empty count: {$emptyResponseCount}/{$maxEmptyResponses})");
-
-                        if ($emptyResponseCount >= $maxEmptyResponses) {
-                            $this->info("✓ Stopping: Received {$maxEmptyResponses} consecutive empty responses");
-                            break;
-                        }
-                    } else {
-                        $emptyResponseCount = 0; // Reset counter when we get data
-                        $records = $data;
-                        $recordCount = count($records);
-
-                        $this->info("Page {$currentPage}: Processing {$recordCount} records...");
-
-                        // Process records
-                        foreach ($records as $corporate) {
-                            try {
-                                $result = $this->processCorporateRecord($corporate);
-
-                                if ($result === 'added') {
-                                    $totalAdded++;
-                                } elseif ($result === 'updated') {
-                                    $totalUpdated++;
-                                } else {
-                                    $totalSkipped++;
-                                }
-
-                                $totalProcessed++;
-                            } catch (\Exception $e) {
-                                $totalErrors++;
-                                $this->error("Error processing record: " . $e->getMessage());
-                                Log::error("Error processing corporate record", [
-                                    'corporate_id' => $corporate['_id'] ?? 'unknown',
-                                    'error' => $e->getMessage(),
-                                    'trace' => $e->getTraceAsString()
-                                ]);
-                            }
-                        }
-
-                        $this->info("✓ Page {$currentPage} completed: Added: {$totalAdded}, Updated: {$totalUpdated}, Skipped: {$totalSkipped}, Errors: {$totalErrors}");
-
-                        // If we got fewer records than expected, we might be at the end
-                        if ($recordCount < $perPage) {
-                            $this->info("✓ Stopping: Last page reached (received {$recordCount} records, expected {$perPage})");
-                            break;
-                        }
-                    }
-
-                    // Safety limit check
-                    if ($currentPage >= $maxPages) {
-                        $this->warn("✓ Stopping: Reached maximum page limit ({$maxPages})");
+                    // Check if response has data - API returns empty array [] when no more pages
+                    if (!is_array($data) || empty($data)) {
+                        $this->info("✓ Page {$currentPage}: Empty response received - no more data available");
+                        $this->info("✓ Stopping: Reached end of data");
                         break;
                     }
 
+                    $records = $data;
+                    $recordCount = count($records);
+
+                    $this->info("Page {$currentPage}: Processing {$recordCount} records...");
+
+                    // Process records
+                    foreach ($records as $corporate) {
+                        try {
+                            $result = $this->processCorporateRecord($corporate);
+
+                            if ($result === 'added') {
+                                $totalAdded++;
+                            } elseif ($result === 'updated') {
+                                $totalUpdated++;
+                            } else {
+                                $totalSkipped++;
+                            }
+
+                            $totalProcessed++;
+                        } catch (\Exception $e) {
+                            $totalErrors++;
+                            $this->error("Error processing record: " . $e->getMessage());
+                            Log::error("Error processing corporate record", [
+                                'corporate_id' => $corporate['_id'] ?? 'unknown',
+                                'error' => $e->getMessage(),
+                                'trace' => $e->getTraceAsString()
+                            ]);
+                        }
+                    }
+
+                    $this->info("✓ Page {$currentPage} completed: Added: {$totalAdded}, Updated: {$totalUpdated}, Skipped: {$totalSkipped}, Errors: {$totalErrors}");
+
+                    
                     $currentPage++;
+                    $consecutiveErrors = 0; // Reset consecutive errors on success
                 } else {
+                    $consecutiveErrors++;
+                    $totalErrors++;
                     $this->error("API Error on page {$currentPage}: Status " . $response->status());
                     $this->error("Response: " . $response->body());
                     Log::error("API Error on page {$currentPage}", [
                         'status' => $response->status(),
                         'body' => $response->body()
                     ]);
-                    break;
+
+                    if ($consecutiveErrors >= $maxConsecutiveErrors) {
+                        $this->error("✗ Stopping: {$maxConsecutiveErrors} consecutive API errors");
+                        break;
+                    }
+
+                    // Skip to next page on error
+                    $currentPage++;
+                    $this->warn("Continuing to next page after error...");
                 }
 
                 // Small delay to avoid rate limiting
                 usleep(2000000); // 2 seconds delay
 
             } catch (\Exception $e) {
+                $consecutiveErrors++;
+                $totalErrors++;
                 $this->error("Exception on page {$currentPage}: " . $e->getMessage());
                 Log::error("Exception on page {$currentPage}", [
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString()
                 ]);
-                break;
+
+                if ($consecutiveErrors >= $maxConsecutiveErrors) {
+                    $this->error("✗ Stopping: {$maxConsecutiveErrors} consecutive exceptions");
+                    break;
+                }
+
+                // Skip to next page on exception
+                $currentPage++;
+                $this->warn("Continuing to next page after exception...");
             }
         }
 
