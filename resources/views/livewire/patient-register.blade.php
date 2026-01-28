@@ -42,7 +42,7 @@
         @endif
 
         <!-- Sign Up Form -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-h-[80vh] overflow-y-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
             <!-- Validation Errors Summary -->
             @if ($errors->any())
             <div class="mb-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 dark:border-red-700 dark:bg-red-900/30">
@@ -61,7 +61,7 @@
             @endif
 
             <form wire:submit.prevent="register" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-6">
                     <!-- Identification Type -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
@@ -184,6 +184,40 @@
                         @error('mobile_number')
                         <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                         @enderror
+
+                        @if($mobile_otp_sent && !$mobile_otp_verified)
+                        <div class="mt-3 space-y-2" wire:poll.1s="updateCountdown">
+                            <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                <span>Verification code sent to your mobile. <span class="text-red-500">*</span></span>
+                                @if($mobile_otp_countdown > 0)
+                                <span class="text-blue-600 dark:text-blue-400">
+                                    ({{ sprintf('%02d:%02d', floor($mobile_otp_countdown / 60), $mobile_otp_countdown % 60) }})
+                                </span>
+                                @endif
+                            </div>
+                            <div class="flex gap-2 items-start">
+                                <div class="flex-1">
+                                    <input type="text" wire:model="mobile_verification_code" placeholder="Enter 6-digit code *" maxlength="6"
+                                        class="block w-full rounded-lg border @error('mobile_verification_code') border-red-500 @else border-gray-300 @enderror shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm h-11 px-3 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400">
+                                    @error('mobile_verification_code')
+                                    <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <button type="button" wire:click="verifyMobileCode"
+                                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap h-11">
+                                    Verify
+                                </button>
+                            </div>
+                            <button type="button" wire:click="resendMobileVerificationCode"
+                                class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                                Resend OTP (valid for 5 mins)
+                            </button>
+                        </div>
+                        @elseif($mobile_otp_verified)
+                        <div class="mt-2 text-sm text-green-600 dark:text-green-400">
+                            ✓ Mobile number verified successfully
+                        </div>
+                        @endif
                     </div>
 
                     <!-- Country field -->
@@ -348,7 +382,7 @@
                                 style="accent-color: #2563eb;">
                         </div>
                         <label for="consent_data_collection" class="flex-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                            I confirm the information provided above is accurate and hereby consent to Fullerton Health Group collecting, using and disclosing my personal data for the purpose of providing me with the services I have requested for and other related purposes. Please refer to Fullerton Health Group's Privacy Policy at (www.fullertonhealth.com/privacy-policy). We would like to keep you updated with our latest news, offers, and promotions. To do this, we need your consent to send you marketing communications. <span class="text-red-500">*</span>
+                            I confirm the information provided above is accurate and hereby consent to Fullerton Health Group collecting, using and disclosing my personal data for the purpose of providing me with the services I have requested for and other related purposes. Please refer to Fullerton Health Group's Privacy Policy at (<a href="https://www.fullertonhealth.com/privacy-policy" target="_blank" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline">www.fullertonhealth.com/privacy-policy</a>). We would like to keep you updated with our latest news, offers, and promotions. To do this, we need your consent to send you marketing communications. <span class="text-red-500">*</span>
                         </label>
                     </div>
                     @error('consent_data_collection')
@@ -363,7 +397,7 @@
                                 style="accent-color: #2563eb;">
                         </div>
                         <label for="consent_marketing" class="flex-1 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                            By ticking the box, you agree to receive marketing communications from Fullerton Healthcare Group and its affiliates. You can withdraw your consent at any time by clicking the unsubscribe link in any of our emails or by submitting your request in writing to comms@fullertonhealth.com.
+                            By ticking the box, you agree to receive marketing communications from Fullerton Healthcare Group and its affiliates. You can withdraw your consent at any time by clicking the unsubscribe link in any of our emails or by submitting your request in writing to <a href="mailto:comms@fullertonhealth.com" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline">comms@fullertonhealth.com</a>.
                         </label>
                     </div>
                 </div>

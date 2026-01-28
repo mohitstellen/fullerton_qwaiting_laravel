@@ -40,7 +40,7 @@ class SmsService
         }
 
         $smsApi = SmsAPI::where([
-            'location_id' => $this->location,
+            // 'location_id' => $this->location,
             'is_sms' => 1,
             'status' => 1
         ])->first();

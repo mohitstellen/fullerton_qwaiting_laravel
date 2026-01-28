@@ -8,6 +8,8 @@ use App\Models\Country;
 use App\Models\SiteDetail;
 use App\Models\SmtpDetails;
 use App\Models\Location;
+use App\Models\MessageDetail;
+use App\Models\SmsAPI;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -54,6 +56,13 @@ class PatientRegister extends Component
     public $email_otp_expires_at = null;
     public $email_otp_countdown = 300; // 5 minutes in seconds
 
+    // Mobile verification
+    public $mobile_verification_code = '';
+    public $mobile_otp_sent = false;
+    public $mobile_otp_verified = false;
+    public $mobile_otp_expires_at = null;
+    public $mobile_otp_countdown = 300; // 5 minutes in seconds
+
     // Consent checkboxes
     public $consent_data_collection = false;
     public $consent_marketing = false;
@@ -81,6 +90,8 @@ class PatientRegister extends Component
         'company_id.required' => 'Company is required. Please select from the dropdown list.',
         'email_verification_code.required' => 'Email verification code is required.',
         'email_verification_code.digits' => 'Verification code must be 6 digits.',
+        'mobile_verification_code.required' => 'Mobile verification code is required.',
+        'mobile_verification_code.digits' => 'Verification code must be 6 digits.',
         'consent_data_collection.required' => 'You must consent to data collection.',
         'consent_data_collection.accepted' => 'You must consent to data collection.',
         'nric_fin.unique' => 'This NRIC / FIN already exists.',
@@ -137,6 +148,11 @@ class PatientRegister extends Component
         // Require email verification code if OTP was sent but not verified
         if ($this->email_otp_sent && !$this->email_otp_verified) {
             $rules['email_verification_code'] = 'required|digits:6';
+        }
+
+        // Require mobile verification code if OTP was sent but not verified
+        if ($this->mobile_otp_sent && !$this->mobile_otp_verified) {
+            $rules['mobile_verification_code'] = 'required|digits:6';
         }
 
         return $rules;
@@ -201,6 +217,15 @@ class PatientRegister extends Component
 
     public function updatedMobileNumber($value)
     {
+        // Reset mobile verification when mobile number changes
+        $this->mobile_otp_sent = false;
+        $this->mobile_otp_verified = false;
+        $this->mobile_verification_code = '';
+        $this->mobile_otp_expires_at = null;
+        
+        // Clear any existing OTP from session
+        Session::forget(['mobile_verification_otp', 'mobile_verification_otp_expires', 'mobile_verification_number']);
+        
         // Check if mobile number already exists
         if ($value && $this->mobile_country_code) {
             $existingMember = Member::where('team_id', $this->teamId)
@@ -212,6 +237,11 @@ class PatientRegister extends Component
                 $this->dispatch('swal:mobile-exists');
                 $this->addError('mobile_number', 'This mobile number already exists.');
                 return;
+            }
+            
+            // If mobile number is valid (at least 8 digits), send OTP
+            if (strlen($value) >= 8) {
+                $this->sendMobileVerificationCode();
             }
         }
     }
@@ -406,6 +436,16 @@ class PatientRegister extends Component
                 $this->email_otp_sent = false;
             }
         }
+        
+        if ($this->mobile_otp_sent && $this->mobile_otp_expires_at) {
+            $remaining = now()->diffInSeconds($this->mobile_otp_expires_at);
+            if ($remaining > 0) {
+                $this->mobile_otp_countdown = $remaining;
+            } else {
+                $this->mobile_otp_countdown = 0;
+                $this->mobile_otp_sent = false;
+            }
+        }
     }
 
     public function verifyEmailCode()
@@ -443,6 +483,110 @@ class PatientRegister extends Component
         $this->sendEmailVerificationCode();
     }
 
+    public function sendMobileVerificationCode()
+    {
+        if (!$this->mobile_number || !$this->mobile_country_code) {
+            $this->addError('mobile_number', 'Please enter a valid mobile number.');
+            return;
+        }
+
+        // Check if mobile number already exists - don't send verification code if it exists
+        $existingMember = Member::where('team_id', $this->teamId)
+            ->where('mobile_country_code', $this->mobile_country_code)
+            ->where('mobile_number', $this->mobile_number)
+            ->first();
+        
+        if ($existingMember) {
+            $this->dispatch('swal:mobile-exists');
+            $this->addError('mobile_number', 'This mobile number already exists.');
+            return;
+        }
+
+        // Generate 6-digit OTP
+        $otp = rand(100000, 999999);
+        
+        // Store OTP in session with expiration (5 minutes)
+        Session::put('mobile_verification_otp', $otp);
+        Session::put('mobile_verification_otp_expires', now()->addMinutes(5));
+        Session::put('mobile_verification_number', $this->mobile_number);
+        
+        $this->mobile_otp_sent = true;
+        $this->mobile_otp_verified = false;
+        $this->mobile_otp_expires_at = now()->addMinutes(5);
+        $this->mobile_otp_countdown = 300; // 5 minutes in seconds
+        
+        // Send SMS with OTP
+        try {
+            $smsService = new SmsAPI();
+            $fullMobileNumber = $this->mobile_country_code . $this->mobile_number;
+            $message = "Your verification code is: {$otp}. Valid for 5 minutes.";
+
+            $data = [
+                'phone_code' => $this->mobile_country_code,
+                'phone' => $this->mobile_number,
+                'message' => $message,
+            ];
+
+            $logData = [
+                'team_id' => $this->teamId,
+                'contact' => $fullMobileNumber,
+                'type' => MessageDetail::TRIGGERED_TYPE,
+                'event_name' => 'OTP Verification',
+                'message' => $message,
+            ];
+
+
+            $result = SmsAPI::sendSms($this->teamId, $data, null, null, $logData, $message);
+            
+            if ($result) {
+                session()->flash('message', 'Verification code sent to your mobile number.');
+                // Clear any previous errors
+                $this->resetErrorBag('mobile_number');
+            } else {
+                Log::warning('Failed to send SMS OTP for team: ' . $this->teamId);
+                $this->addError('mobile_number', 'Unable to send verification code. Please check SMS configuration.');
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send mobile verification code: ' . $e->getMessage());
+            $this->addError('mobile_number', 'Failed to send verification code. Please try again.');
+        }
+    }
+
+    public function verifyMobileCode()
+    {
+        $this->validate([
+            'mobile_verification_code' => 'required|digits:6',
+        ]);
+
+        $storedOtp = Session::get('mobile_verification_otp');
+        $storedNumber = Session::get('mobile_verification_number');
+        $expiresAt = Session::get('mobile_verification_otp_expires');
+
+        if (!$storedOtp || $storedNumber !== $this->mobile_number) {
+            $this->addError('mobile_verification_code', 'Invalid verification code.');
+            return;
+        }
+
+        if (now()->greaterThan($expiresAt)) {
+            $this->addError('mobile_verification_code', 'Verification code has expired. Please request a new one.');
+            $this->mobile_otp_sent = false;
+            return;
+        }
+
+        if ($this->mobile_verification_code == $storedOtp) {
+            $this->mobile_otp_verified = true;
+            Session::forget(['mobile_verification_otp', 'mobile_verification_otp_expires', 'mobile_verification_number']);
+            session()->flash('message', 'Mobile number verified successfully.');
+        } else {
+            $this->addError('mobile_verification_code', 'Invalid verification code.');
+        }
+    }
+
+    public function resendMobileVerificationCode()
+    {
+        $this->sendMobileVerificationCode();
+    }
+
     public function register()
     {
         // If country field is not shown yet, show it and auto-select country based on phone code
@@ -461,6 +605,13 @@ class PatientRegister extends Component
         // Check if email OTP was sent but not verified yet
         if ($this->email_otp_sent && !$this->email_otp_verified) {
             $this->addError('email_verification_code', 'Please verify your email address before submitting.');
+            $this->validate(); // This will show all errors including the OTP error
+            return;
+        }
+
+        // Check if mobile OTP was sent but not verified yet
+        if ($this->mobile_otp_sent && !$this->mobile_otp_verified) {
+            $this->addError('mobile_verification_code', 'Please verify your mobile number before submitting.');
             $this->validate(); // This will show all errors including the OTP error
             return;
         }

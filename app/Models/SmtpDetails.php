@@ -13,7 +13,7 @@ use Auth;
 use App\Mail\SendNotificationMail;
 use App\Jobs\SendEmailJob;
 use App\Services\SlackService;
-
+use Illuminate\Support\Facades\Log;
 
 
 class SmtpDetails extends Model

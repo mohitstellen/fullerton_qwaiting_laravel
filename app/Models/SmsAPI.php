@@ -40,10 +40,13 @@ class SmsAPI extends Model
             ->where('status', 1)
             ->first();
     }
-     public static function sendSms($teamId, $data, $title, $type = null, $logData = [])
+     public static function sendSms($teamId, $data, $title, $type = null, $logData = [], $formattedMessage = null)
     {
 
+    
+
         Log::info("data: " . json_encode($data));
+
         $gettype = $type ?? $logData['type'] ?? 'queue';
         $locationId = $data['location_id'] ??  $data['locations_id'] ?? Session::get('selectedLocation');
 
@@ -113,9 +116,6 @@ class SmsAPI extends Model
 
             $receiverNumber = $data['phone_code'] . $data['phone'];
 
-            //   Log::info("receiverNumber: ".$receiverNumber);
-            //   Log::info("templateName: ".$templateName);
-
 
             // Skip if no valid template
             if (empty($template) && !empty($title)) {
@@ -125,8 +125,17 @@ class SmsAPI extends Model
             $finalTeamId = $teamId ?? tenant('id');
             $panelName = ucfirst(tenant('name'));
 
-            // Replace placeholders
-            $formattedMessage = SmtpDetails::replaceTemplatePlaceholders($template, $data, $finalTeamId);
+            if(!empty($formattedMessage)){
+            }else{
+                $formattedMessage = SmtpDetails::replaceTemplatePlaceholders($template, $data, $finalTeamId);   
+            }
+                
+            //  // Replace placeholders
+            //  $formattedMessage = SmtpDetails::replaceTemplatePlaceholders($template, $data, $finalTeamId);
+
+            
+
+
             if($title == 'reminder'){
                 $message_type =MessageDetail::AUTOMATIC_TYPE;
             }else{
@@ -134,9 +143,11 @@ class SmsAPI extends Model
 
             }
             $tenantname = tenant('name') ?? 'QWaiting test';
+
             try {
                 // Send via appropriate channel
                 if ($smsRecord->is_sms == 1) {
+                    
                     if($smsRecord->sms_api_url == 'https://dam-trust.api.petra-world.com/api/v1/utilities/mass_sms'){
                             $result = self::sendSmsPetraonline(
                             $receiverNumber,
@@ -193,11 +204,15 @@ class SmsAPI extends Model
                                 Log::info("template: " . json_encode($template));
                                 Log::info("templateName: " . json_encode($templateName));
                                 Log::info("is_template: " . $smsRecord->is_template);
+
+                                if(!empty($getTemplate)){
+
                                 if($getTemplate->enable_template_name == 1 && !empty($template) && !empty($templateName) &&  $smsRecord->is_template == 1){
 
                                     $templateId = $templateName;
                                     Log::info("templateId: " .$templateName);
                                 }
+                            }
 
                                 $response = $smsService->sendSms($receiverNumber, $formattedMessage, $finalTeamId,null,[],$templateId);
                                 $logData = [
@@ -216,6 +231,7 @@ class SmsAPI extends Model
                                     'response_status' => json_encode($response),
                                     'segment' => self::calculateSmsSegments($formattedMessage)
                                 ];
+
                     
                   }
 
