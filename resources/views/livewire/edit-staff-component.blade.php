@@ -79,6 +79,34 @@
 
                     <div class="w-full px-2.5 xl:w-1/2">
                         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                            {{ __('text.Gender') }}
+                        </label>
+                        <div x-data="{ isOptionSelected: false }" class="relative z-20 bg-transparent">
+                            <select wire:model="gender"
+                                class="dark:bg-dark-900 z-20 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
+                                :class="isOptionSelected && 'text-gray-500 dark:text-gray-400'"
+                                @change="isOptionSelected = true">
+                                <option value="" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
+                                    {{ __('text.Select Gender') }}
+                                </option>
+                                <option value="Male" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">Male</option>
+                                <option value="Female" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">Female</option>
+                                <option value="Other" class="text-gray-500 dark:bg-gray-900 dark:text-gray-400">Other</option>
+                            </select>
+                            <span
+                                class="absolute z-30 text-gray-500 -translate-y-1/2 right-4 top-1/2 dark:text-gray-400">
+                                <svg class="stroke-current" width="20" height="20" viewBox="0 0 20 20" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4.79175 7.396L10.0001 12.6043L15.2084 7.396" stroke="" stroke-width="1.5"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                        </div>
+                        @error('gender') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="w-full px-2.5 xl:w-1/2">
+                        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                             {{ __('text.Email') }}
                         </label>
                         <input type="text" wire:model="email" class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />

@@ -64,6 +64,12 @@ jobs:
 
             git pull origin main
 
+            # Run specific migrations
+            php artisan migrate --path=database/migrations/2026_01_30_000000_update_template_variables_rename_and_add.php --force
+            php artisan migrate --path=database/migrations/2026_01_30_000001_add_booking_name_template_variable.php --force
+            php artisan migrate --path=database/migrations/2026_01_30_000002_rename_service_2_to_package_template_variable.php --force
+            php artisan migrate --path=database/migrations/2026_01_30_000003_change_variable_names_to_single_braces.php --force
+
             # Clear all caches
             php artisan o:clear
 

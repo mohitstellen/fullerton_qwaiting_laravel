@@ -490,6 +490,7 @@ class PatientMyAppointments extends Component
                 $appointmentType = Category::find($booking->category_id);
 
                 // Prepare email data
+                $location = $booking->location;
                 $emailData = [
                     'to_mail' => $booking->email,
                     'name' => $booking->name,
@@ -500,6 +501,9 @@ class PatientMyAppointments extends Component
                     'category_name' => $appointmentType->name ?? '',
                     'service_name' => $appointmentType->name ?? '',
                     'locations_id' => $booking->location_id,
+                    'location' => $location?->location_name ?? '',
+                    'clinic' => $location?->location_name ?? '',
+                    'created_by' => $booking->createdBy?->name ?? '',
                 ];
 
                 // Send email
@@ -610,6 +614,7 @@ class PatientMyAppointments extends Component
             $startTime12h = trim($timeParts[0] ?? '');
 
             // Prepare email data
+            $location = $booking->location;
             $emailData = [
                 'to_mail' => $booking->email,
                 'name' => $booking->name,
@@ -620,6 +625,9 @@ class PatientMyAppointments extends Component
                 'category_name' => $appointmentType->name ?? '',
                 'service_name' => $appointmentType->name ?? '',
                 'locations_id' => $booking->location_id,
+                'location' => $location?->location_name ?? '',
+                'clinic' => $location?->location_name ?? '',
+                'created_by' => $booking->createdBy?->name ?? '',
             ];
 
             // Send email

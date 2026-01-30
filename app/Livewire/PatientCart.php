@@ -766,6 +766,7 @@ class PatientCart extends Component
 
                         if ($appointmentType) {
                             // Prepare email data
+                            $location = $booking->location;
                             $emailData = [
                                 'to_mail' => $this->member->email,
                                 'name' => $cartItem['name'] ?? ($this->member->salutation ? $this->member->salutation . ' ' : '') . $this->member->full_name,
@@ -776,6 +777,9 @@ class PatientCart extends Component
                                 'category_name' => $appointmentType->name ?? '',
                                 'service_name' => $appointmentType->name ?? '',
                                 'locations_id' => $booking->location_id,
+                                'location' => $location?->location_name ?? '',
+                                'clinic' => $location?->location_name ?? '',
+                                'created_by' => $booking->createdBy?->name ?? '',
                             ];
 
                             // Send email

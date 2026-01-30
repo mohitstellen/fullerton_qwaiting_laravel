@@ -73,7 +73,7 @@ class SlackTemplates extends Component
 
     public function loadVariables()
     {
-        $this->variables = TemplateVariable::pluck('description', 'variable_name')->toArray();
+        $this->variables = TemplateVariable::getVariablesForDropdown();
     }
 
     public function updatedSelectedTemplate($value)

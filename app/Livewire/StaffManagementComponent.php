@@ -20,6 +20,7 @@ class StaffManagementComponent extends Component
     public $teamId;
     public $locationId;
     public $name;
+    public $gender;
     public $email;
     public $username;
     public $password;
@@ -205,6 +206,7 @@ class StaffManagementComponent extends Component
         // Create a new user
         $user = User::create([
             'name' => $this->name,
+            'gender' => $this->gender,
             'email' => $this->email,
             'username' => $this->username,
             'password' => Hash::make($this->password),
@@ -258,6 +260,7 @@ class StaffManagementComponent extends Component
     {
         $this->reset([
             'name',
+            'gender',
             'email',
             'username',
             'password',

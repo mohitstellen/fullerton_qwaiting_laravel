@@ -402,9 +402,14 @@ class SmtpDetails extends Model
         $data['name'] = $data['name'] ?? '';
         $data['service_name'] = $data['category_name'] ?? '';
         $data['service_1'] = $data['category_name'] ?? '';
+        $data['appointmenttype'] = $data['category_name'] ?? '';
         $data['service_2'] = $data['secondC_name'] ?? '';
+        $data['Package'] = $data['secondC_name'] ?? '';
         $data['service_3'] = $data['thirdC_name'] ?? '';
         $data['queue_count'] = $data['pending_count'] ?? '';
+        $data['location'] = $data['location'] ?? ($data['location_name'] ?? '');
+        $data['clinic'] = $data['clinic'] ?? $data['location'];
+        $data['created_by'] = $data['created_by'] ?? ($data['booked_by_name'] ?? '');
         if (Auth::check()) {
             $data['staff_name'] = Auth::user()->name;
         } else {
@@ -412,8 +417,12 @@ class SmtpDetails extends Model
         }
 
         // Define placeholders and their corresponding replacements
+        // Include both legacy (customer_name, booking_date, service_1) and new (Name, BookingDate, Appointmenttype, Location, Clinic, CreatedBy)
+        // Support both single {Name} and double {{Name}} braces for appointment type templates
         $placeholders = [
             '{{customer_name}}',
+            '{{Name}}',
+            '{Name}',
             '{{service_name}}',
             '{{panel_name}}',
             '{{token}}',
@@ -424,9 +433,15 @@ class SmtpDetails extends Model
             '{{counter_name}}',
             '{{feedback_link}}',
             '{{service_1}}',
+            '{{Appointmenttype}}',
+            '{Appointmenttype}',
             '{{service_2}}',
+            '{{Package}}',
+            '{Package}',
             '{{service_3}}',
             '{{booking_date}}',
+            '{{BookingDate}}',
+            '{BookingDate}',
             '{{booking_time}}',
             '{{generate_queue_link}}',
             '{{booking_id}}',
@@ -435,11 +450,21 @@ class SmtpDetails extends Model
             '{{service_note}}',
             '{{staff_name}}',
             '{{meeting_link}}',
+            '{{Location}}',
+            '{Location}',
+            '{{Clinic}}',
+            '{Clinic}',
+            '{{CreatedBy}}',
+            '{CreatedBy}',
+            '{{BookingName}}',
+            '{BookingName}',
         ];
 
         $replacements = [
             $data['name'] ?? '',              // {{customer_name}}
-            $data['service_name'] ?? '',     // {{category_name}}
+            $data['name'] ?? '',              // {{Name}}
+            $data['name'] ?? '',              // {Name}
+            $data['service_name'] ?? '',      // {{service_name}}
             $data['panel_name'] ?? '',        // {{panel_name}}
             $data['token'] ?? '',             // {{token}}
             $data['waiting_time'] ?? '',      // {{waiting_time}}
@@ -448,18 +473,32 @@ class SmtpDetails extends Model
             $data['pax'] ?? '',               // {{pax}}
             $data['counter_name'] ?? '',      // {{counter_name}}
             $data['feedback_link'] ?? '',     // {{feedback_link}}
-            $data['service_1'] ?? '',        // {{service_1}}
-            $data['service_2'] ?? '',        // {{service_2}}
-            $data['service_3'] ?? '',        // {{category_3}}
+            $data['service_1'] ?? '',         // {{service_1}}
+            $data['appointmenttype'] ?? '',   // {{Appointmenttype}}
+            $data['appointmenttype'] ?? '',   // {Appointmenttype}
+            $data['service_2'] ?? '',         // {{service_2}}
+            $data['Package'] ?? '',           // {{Package}}
+            $data['Package'] ?? '',           // {Package}
+            $data['service_3'] ?? '',         // {{service_3}}
             $data['booking_date'] ?? '',      // {{booking_date}}
+            $data['booking_date'] ?? '',      // {{BookingDate}}
+            $data['booking_date'] ?? '',      // {BookingDate}
             $data['booking_time'] ?? '',      // {{booking_time}}
             $data['generate_queue_link'] ?? '', // {{generate_queue_link}}
-            $data['refID'] ?? '',        // {{booking_id}}
+            $data['refID'] ?? '',              // {{booking_id}}
             $data['booking_link'] ?? '',      // {{booking_link}}
             $data['service_time'] ?? '',
             $data['service_note'] ?? '',
             $data['staff_name'] ?? '',
             $data['meeting_link'] ?? '',
+            $data['location'] ?? '',          // {{Location}}
+            $data['location'] ?? '',          // {Location}
+            $data['clinic'] ?? '',            // {{Clinic}}
+            $data['clinic'] ?? '',            // {Clinic}
+            $data['created_by'] ?? '',        // {{CreatedBy}}
+            $data['created_by'] ?? '',        // {CreatedBy}
+            $data['name'] ?? '',              // {{BookingName}}
+            $data['name'] ?? '',              // {BookingName}
         ];
 
 

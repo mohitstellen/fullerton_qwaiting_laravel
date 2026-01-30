@@ -359,6 +359,8 @@ Route::middleware([
         Route::get('/staff/view/{id}', StaffManagementComponent::class)->name('staff.view');
         Route::get('/staff/edit/{staffId}', EditStaffComponent::class)->name('staff.edit');
         Route::get('/staff/{staffId}/setting', StaffSettingComponent::class)->name('staff.setting');
+        Route::get('/import-staff', [App\Http\Controllers\ImportStaffController::class, 'index'])->name('import.staff');
+        Route::post('/import-staff', [App\Http\Controllers\ImportStaffController::class, 'store'])->name('import.staff.store');
         Route::get('/profile', ProfileForm::class)->name('profile');
         Route::get('/color-settings', ColorSettings::class)->name('color-settings');
         Route::get('/message-templates', MessageTemplate::class)->name('message-templates');
@@ -671,21 +673,7 @@ Route::get('/bright-test', function () {
     return view('bright-sign');
 });
 
-
 Route::get('/heartbeat', fn() => response()->noContent());
-
-// Route::get('/salesforce/users', [SalesforceController::class, 'users']);
-// Route::get('/salesforce/authorize/{state?}', [SalesforceController::class, 'authorizeUser'])->name('salesforce.authorize');
-// Route::get('/saleforce/callback', [SalesforceController::class, 'callback'])->name('saleforce.callback');
-
-
-
-// Route::get('/download-adm', function () {
-//     // $filePath = public_path('test-zip-file.zip'); // Adjust the path
-//     $filePath = public_path('adminer.php'); // Adjust the path
-
-//     return response()->download($filePath);
-// });
 
 Route::get('/run-queue-until-empty', function () {
     $count = DB::table('jobs')->count();

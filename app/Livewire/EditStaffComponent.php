@@ -18,6 +18,7 @@ class EditStaffComponent extends Component
     public $teamId;
     public $locationId;
     public $name;
+    public $gender;
     public $email;
     public $username;
     public $password;
@@ -55,6 +56,7 @@ class EditStaffComponent extends Component
         $this->teamId = $staff->team_id ?? tenant('id');
         $this->locationId = Session::get('selectedLocation');
         $this->name = $staff->name;
+        $this->gender = $staff->gender ?? '';
         $this->email = $staff->email;
         $this->username = $staff->username;
         $this->role = $staff->role_id;
@@ -209,6 +211,7 @@ class EditStaffComponent extends Component
 
         $staff->update([
             'name' => $this->name,
+            'gender' => $this->gender,
             'email' => $this->email,
             'username' => $this->username,
             'role_id' => $this->role,

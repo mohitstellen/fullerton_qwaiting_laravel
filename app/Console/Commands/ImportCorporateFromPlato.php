@@ -204,6 +204,7 @@ class ImportCorporateFromPlato extends Command
         // Prepare company data - adjust these fields according to your database schema and API response
         $companyData = [
             'team_id' => 3,
+            'billing_code' => $corporate['given_id'] ?? null,
             'location_id' => 101,
             'company_name' => $corporate['name'] ?? null,
             'email' => $corporate['email'] ?? null,

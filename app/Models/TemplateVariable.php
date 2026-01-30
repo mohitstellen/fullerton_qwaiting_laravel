@@ -22,6 +22,17 @@ class TemplateVariable extends Model
         return self::get()->pluck('variable_name', 'description')->toArray();
     }
 
+    /**
+     * Get variables for dropdown, ordered alphabetically by description (label).
+     * Returns [ variable_name => description ] for use in Select variable dropdowns.
+     */
+    public static function getVariablesForDropdown(): array
+    {
+        return self::query()
+            ->orderBy('description')
+            ->pluck('description', 'variable_name')
+            ->toArray();
+    }
 
     public static function viewVariable($value){
         return self::where(['variable_name'=>$value])->first()?->variable_name;

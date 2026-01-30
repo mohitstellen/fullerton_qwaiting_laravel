@@ -702,15 +702,24 @@ class SmsAPI extends Model
         $data['service_1'] = (string)($data['category_name'] ?? 'Test');
         $data['service_2'] = (string)($data['secondC_name'] ?? 'Test');
         $data['service_3'] = (string)($data['thirdC_name'] ?? 'Test');
+        $data['Appointmenttype'] = (string)($data['category_name'] ?? 'Test');
+        $data['Package'] = (string)($data['secondC_name'] ?? 'Test');
         $data['queue_count'] = (string)($data['pending_count'] ?? '0');
         $data['booking_id'] = (string)($data['refID'] ?? ($data['booking_id'] ?? 'Test'));
         $data['customer_name'] = (string)($data['name'] ?? 'Test');
+        $data['Name'] = (string)($data['name'] ?? 'Test');
+        $data['BookingDate'] = (string)($data['booking_date'] ?? 'Test');
+        $data['Location'] = (string)($data['location'] ?? ($data['location_name'] ?? 'Test'));
+        $data['Clinic'] = (string)($data['clinic'] ?? ($data['location'] ?? 'Test'));
+        $data['CreatedBy'] = (string)($data['created_by'] ?? ($data['booked_by_name'] ?? 'Test'));
+        $data['BookingName'] = (string)($data['name'] ?? 'Test');
         $data['waiting_time'] = (string)($data['waiting_time'] ?? 0);
 
         $values = [];
 
         foreach ($placeholders as $placeholder) {
-            preg_match('/{{(.*?)}}/', $placeholder, $match);
+            // Support both {{key}} and {key} patterns for appointment type templates
+            preg_match('/\{\{?(.*?)\}\}?/', $placeholder, $match);
             $key = $match[1] ?? null;
             $values[] = $key ? trim((string)($data[$key] ?? 'Test')) : 'Test';
         }
